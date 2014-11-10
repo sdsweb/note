@@ -1,0 +1,57 @@
+/**
+ * TinyMCE Core CSS - /assets/css/tinymce-core.css
+ * License: GPLv2 or later
+ * Copyright: Janneke Van Dorpe (avryl),http://jannekevandorpe.com/
+ *
+ * @see https://github.com/avryl/wp-front-end-editor/
+ * @see https://github.com/avryl/wp-front-end-editor/blob/master/css/tinymce.core.css
+ * @see https://wordpress.org/plugins/wp-front-end-editor/
+ */
+
+/**
+ * Note CSS - /assets/css/note.css
+ * License: GPLv2 or later
+ * Copyright: Janneke Van Dorpe (avryl),http://jannekevandorpe.com/
+ *
+ * @see https://github.com/avryl/wp-front-end-editor/
+ * @see https://github.com/avryl/wp-front-end-editor/blob/master/css/fee.css
+ * @see https://wordpress.org/plugins/wp-front-end-editor/
+ *
+ * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
+ */
+
+/**
+ * WordPress Core UI CSS - /assets/css/wp-core-ui.css
+ * License: GPLv2 or later
+ * Copyright: Janneke Van Dorpe (avryl),http://jannekevandorpe.com/
+ *
+ * @see https://github.com/avryl/wp-front-end-editor/
+ * @see https://github.com/avryl/wp-front-end-editor/blob/master/css/wp-core-ui.css
+ * @see https://wordpress.org/plugins/wp-front-end-editor/
+ *
+ * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
+ */
+
+/**
+ * WordPress Link Modal CSS - /assets/css/link-modal.css
+ * License: GPLv2 or later
+ * Copyright: Janneke Van Dorpe (avryl),http://jannekevandorpe.com/
+ *
+ * @see https://github.com/avryl/wp-front-end-editor/
+ * @see https://github.com/avryl/wp-front-end-editor/blob/master/css/link-modal.css
+ * @see https://wordpress.org/plugins/wp-front-end-editor/
+ *
+ * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
+ */
+
+/**
+ * Note TinyMCE Theme - /assets/js/note-tinymce-theme.js
+ * License: GPLv2 or later
+ * Copyright: Janneke Van Dorpe (avryl),http://jannekevandorpe.com/
+ *
+ * @see https://github.com/avryl/wp-front-end-editor/
+ * @see https://github.com/avryl/wp-front-end-editor/blob/master/js/tinymce.theme.js
+ * @see https://wordpress.org/plugins/wp-front-end-editor/
+ *
+ * We've used Janneke Van Dorpe's TinyMCE theme as a base and modified it to suit our needs.
+ */

@@ -1,0 +1,248 @@
+/**
+ * Note CSS - /assets/css/note.css
+ * License: GPLv2 or later
+ * Copyright: Janneke Van Dorpe (avryl),http://jannekevandorpe.com/
+ *
+ * @see https://github.com/avryl/wp-front-end-editor/
+ * @see https://github.com/avryl/wp-front-end-editor/blob/master/css/fee.css
+ * @see https://wordpress.org/plugins/wp-front-end-editor/
+ *
+ * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
+ */
+
+.mce-placeholder {
+	opacity: 0.5;
+}
+
+.dashicons,
+.dashicons-before:before {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	font-size: 20px;
+	line-height: 1;
+	font-family: "dashicons";
+	text-decoration: inherit;
+	font-weight: normal;
+	font-style: normal;
+	vertical-align: top;
+	text-align: center;
+	color: inherit;
+	-webkit-transition: color .1s ease-in 0;
+	transition: color .1s ease-in 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.button-large .dashicons,
+.button-large .dashicons-before:before {
+	height: 26px;
+	line-height: 26px;
+}
+
+/* Content */
+.notification-dialog {
+	position: fixed;
+	top: 30%;
+	left: 50%;
+	width: 450px;
+	margin-left: -225px;
+	background: #fff;
+	line-height: 1.5;
+	z-index: 1000005;
+}
+
+.notification-dialog-background {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: #000;
+	opacity: 0.5;
+	filter: alpha(opacity=50);
+	z-index: 1000000;
+}
+
+.hidden {
+	display: none;
+}
+
+.wp-core-ui div.updated,
+.wp-core-ui div.error {
+	padding: 0 20px 0 0.6em;
+	margin: 5px 15px 2px;
+}
+
+.wp-core-ui .button,
+.wp-core-ui .button.button-large,
+.wp-core-ui .button.button-small {
+	vertical-align: top;
+}
+
+.mce-content-body hr[data-mce-selected] {
+	outline: none;
+}
+
+/* Reset */
+
+.wp-core-ui td,
+.wp-core-ui th {
+	vertical-align: inherit;
+	float: none;
+}
+
+.wp-core-ui label {
+	cursor: pointer;
+}
+
+.wp-core-ui p {
+	font-size: 14px;
+}
+
+div.mce-insert {
+	background: transparent;
+	position: absolute;
+	z-index: 9998;
+	top: 0;
+	left: 0;
+	font-size: 16px;
+	line-height: 20px;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	padding-left: 5px;
+	opacity: 0.5;
+	cursor: pointer;
+	-webkit-transition: opacity 0.1s ease-in 0;
+	-moz-transition: opacity 0.1s ease-in 0;
+	transition: opacity 0.1s ease-in 0;
+	outline: none;
+}
+
+div.mce-insert:hover {
+	opacity: 1;
+}
+
+div.mce-insert .dashicons {
+	font-family: 'dashicons';
+	font-size: 20px;
+	line-height: 20px;
+}
+
+div.mce-insert .dashicons {
+	margin-top: -1px;
+	-webkit-transition: all 0.2s;
+	transition: all 0.2s;
+}
+
+div.mce-insert.open .dashicons {
+	-webkit-transform: rotate( 45deg );
+	-ms-transform: rotate( 45deg );
+	transform: rotate( 45deg );
+	-webkit-transition: all 0.2s;
+	transition: all 0.2s;
+}
+
+div.mce-tinymce-inline {
+	position: absolute;
+	z-index: 9998;
+	background: #f5f5f5;
+	padding: 3px;
+	color: black;
+	margin-bottom: 8px;
+	box-shadow: 0 1px 1px rgba( 0, 0, 0, 0.04 );
+	border: 1px solid #dedede;
+	border-radius: 3px;
+	top: 0;
+	left: 0;
+	opacity: 0;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.mce-tinymce-inline {
+	padding: 1px;
+}
+
+.mce-tinymce-inline .mce-toolbar-grp {
+	background: #f5f5f5;
+}
+
+div.mce-tinymce-inline.mce-inline-toolbar-active {
+	transition:
+		top 0.1s ease-out,
+		left 0.1s ease-out,
+		opacity 0.1s ease-in-out;
+	opacity: 1;
+}
+
+div.mce-tinymce-inline:before,
+div.mce-tinymce-inline:after {
+	position: absolute;
+	left: 50%;
+	display: block;
+	width: 0;
+	height: 0;
+	border-style: solid;
+	border-color: transparent;
+	content: '';
+}
+
+div.mce-tinymce-inline.mce-arrow-up:before {
+	top: -18px;
+	border-bottom-color: #dedede;
+	border-width: 9px;
+	margin-left: -9px;
+}
+
+div.mce-tinymce-inline.mce-arrow-down:before {
+	bottom: -18px;
+	border-top-color: #dedede;
+	border-width: 9px;
+	margin-left: -9px;
+}
+
+div.mce-tinymce-inline.mce-arrow-up:after {
+	top: -16px;
+	border-bottom-color: #f5f5f5;
+	border-width: 8px;
+	margin-left: -8px;
+}
+
+div.mce-tinymce-inline.mce-arrow-down:after {
+	bottom: -16px;
+	border-top-color: #f5f5f5;
+	border-width: 8px;
+	margin-left: -8px;
+}
+
+div.mce-tinymce-inline.mce-arrow-left:before,
+div.mce-tinymce-inline.mce-arrow-left:after {
+	left: 20px;
+}
+
+div.mce-tinymce-inline.mce-arrow-right:before,
+div.mce-tinymce-inline.mce-arrow-right:after {
+	right: 11px;
+	left: auto;
+}
+
+div.mce-tinymce-inline.mce-arrow-full {
+	right: 0;
+}
+
+div.mce-tinymce-inline.mce-arrow-full > div {
+	width: 100%;
+	overflow-x: auto;
+}
+
+.mce-toolbar .mce-btn-group .mce-btn.mce-active:hover i.mce-ico {
+	color: #555;
+}

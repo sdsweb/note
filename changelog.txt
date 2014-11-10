@@ -1,0 +1,11 @@
+==========================================
+Plugin: Note
+Author: Slocum Design Studio
+Author URI: http://slocumstudio.com
+Current Version: 1.0.0
+==========================================
+
+
+1.0.0 // November 07 2014
+-------------------------
+- Initial Release

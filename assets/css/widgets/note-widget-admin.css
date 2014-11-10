@@ -1,0 +1,28 @@
+/**
+ * Note Widget Admin Stylesheet
+ */
+
+.note-widget-setting {
+	margin: 1em 0;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.note-select {
+	width: 100%;
+	max-width: 100%;
+}
+
+.note-hidden {
+	display: none;
+}
+
+.note-input {
+	width: 100%;
+	max-width: 100%;
+	padding: 5px;
+}
+
+.note-description {
+	padding: 0 0 15px !important;
+}
