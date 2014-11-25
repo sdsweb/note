@@ -23,6 +23,38 @@
 	padding: 5px;
 }
 
+.customize-control .note-widget-setting input[type="text"] {
+	width: 100%;
+}
+
 .note-description {
 	padding: 0 0 15px !important;
+}
+
+
+/* Widget Title */
+.note-widget-title, .note-widget-title-container {
+	position: relative;
+}
+
+.note-widget-title .note-input {
+	padding-right: 30px;
+}
+
+.note-widget-title .note-hide-widget-title {
+	position: absolute;
+	top: 6px;
+	right: 5px;
+}
+
+.note-widget-title .note-hide-widget-title input {
+	display: none;
+}
+
+.note-widget-title .note-hide-widget-title label {
+	color: #222;
+}
+
+.note-widget-title .note-hide-widget-title input:checked + label {
+	color: #ccc;
 }

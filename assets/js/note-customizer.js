@@ -2,20 +2,26 @@
  * Note Customizer
  */
 
+var note = note || {};
+
 ( function ( exports, $ ) {
 	"use strict";
 
-	// Bail if the customizer isn't initialized
-	if ( ! wp || ! wp.customize ) {
+	// Bail if the Customizer or Note isn't initialized
+	if ( ! wp || ! wp.customize || ! note ) {
 		return;
 	}
 
-	var api = wp.customize, OldPreviewer;
+	var api = wp.customize, OldPreviewer,
+		wp_major_version = parseInt( note.wp_major_version, 10 );
 
 	// Note Previewer
 	api.NotePreviewer = {
+		previewer: false,
 		// Initialization
 		init: function( previewer ) {
+			previewer = ( previewer === undefined ) ? this.previewer : previewer;
+
 			var self = this,
 				$body = $( 'body' ), // Body Element
 				$customize_sidebar_header = $body.find( '.wp-full-overlay-header' ), // Customizer Sidebar Header
@@ -29,7 +35,7 @@
 					$widget_root = form_control.container.find( '.widget:first' ),
 					$widget_content_container = $widget_root.find( '.widget-content:first' ),
 					$widget_content = $widget_content_container.find( '.note-content' ),
-					widget_content_data = $widget_content.data( 'note' ),// We need to store data instead of checking the textbox value due to the way that $.text() and $.val() function in jQuery
+					widget_content_data = $widget_content.data( 'note' ), // We need to store data instead of checking the textbox value due to the way that $.text() and $.val() function in jQuery
 					saved;
 
 				// Store the data on this widget
@@ -37,10 +43,14 @@
 
 				// Store the data on the widget content element if needed (usually on initial load)
 				if ( widget_content_data === undefined ) {
-					$widget_content.data( 'note', { content: data.widget.content } );
+					widget_content_data = {
+						content: data.widget.content,
+						updateCount: 0
+					};
 				}
+
 				// Compare the content to make sure it's actually changed
-				else if ( data.widget.content !== widget_content_data.content ) {
+				if ( widget_content_data.updateCount > 0 && data.widget.content !== widget_content_data.content ) {
 					// TODO: Might need to account for "processing" API state here?
 
 					// Set the content value
@@ -74,6 +84,12 @@
 						}
 					} );
 				}
+
+				// Increase widget update count
+				widget_content_data.updateCount++;
+
+				// Store this data on the widget content element
+				$widget_content.data( 'note', widget_content_data );
 			} );
 
 			// Listen for the "note-widget-edit" event from the Previewer
@@ -118,6 +134,27 @@
 					$widget_root = $el.parents( '.widget:first'),
 					data = $widget_root.data( 'note' );
 
+				// TODO: Widget data is empty on first iteration (new Note widget)
+
+				// If data is empty, populate it
+				if ( data === undefined ) {
+					// We only need partial widget data here, we'll get the sidebar data once the widget is updated
+					data = {
+						widget: {
+							number: $widget_root.find( '.widget_number' ).val(),
+							id: $widget_root.find( '.widget-id' ).val()
+						},
+						// This data will be populated upon the 'note-widget-update' event from the Previewer
+						sidebar: {
+							 name: '',
+							 id: ''
+						 }
+					};
+
+					// Store partial data on widget
+					$widget_root.data( 'note', data );
+				}
+
 				// Prevent Default
 				event.preventDefault();
 
@@ -149,10 +186,34 @@
 		}
 	};
 
+
+	// Below WordPress 4.0
+	if ( wp_major_version < 4 ) {
+		/**
+		 * Capture the instance of the Previewer since it is private
+		 */
+		OldPreviewer = api.Previewer;
+		api.Previewer = OldPreviewer.extend( {
+			initialize: function( params, options ) {
+				// Store reference to the Previewer
+				api.NotePreviewer.previewer = this;
+
+				// Initialize our Previewer
+				api.NotePreviewer.init();
+
+				// Initialize the old previewer
+				OldPreviewer.prototype.initialize.call( this, params, options );
+			}
+		} );
+	}
+
 	// When the API is "ready"
 	api.bind( 'ready', function() {
-		// Initialize our Previewer
-		api.NotePreviewer.init( api.previewer );
+		// 4.0 and above
+		if ( wp_major_version >= 4 ) {
+			// Initialize our Previewer
+			api.NotePreviewer.init( api.previewer );
+		}
 	} );
 
 	// Document Ready

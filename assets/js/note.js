@@ -64,8 +64,8 @@
 
 				// Listen for the "note-widget-edit" event from the Customizer
 				self.preview.bind( 'note-widget-edit', function( data ) {
-					var $widget = $( '.note-widget[data-widget-id='+ data.widget.id + ']' ),
-						editor;
+					// $widget = $( '.note-widget[data-widget-id='+ data.widget.id + ']' )
+					var editor;
 
 					// Find the correct editor
 					editor = _.find( self.editors, function( editor ) {
@@ -192,8 +192,8 @@
 								event.stopImmediatePropagation(); // prevent this event from bubbling up and firing other callbacks and event handlers
 							} );
 
-							// Content within the editor has changed
-							if ( editor.note.prev_content !== content ) {
+							// Content within the editor has changed or this is an initial Previewer load
+							if ( editor.note.prev_content === '' || editor.note.prev_content !== content ) {
 								// Deep copy
 								data = $.extend( true, editor.note.widget_data, { widget: { content: content } } );
 

@@ -4,7 +4,7 @@
  *
  * @class Note_Widget
  * @author Slocum Studio
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 
@@ -17,7 +17,7 @@ if( ! class_exists( 'Note_Widget' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.0.0';
+		public $version = '1.0.1';
 
 		/**
 		 * @var string
@@ -74,7 +74,12 @@ if( ! class_exists( 'Note_Widget' ) ) {
 			$this->control_options = apply_filters( 'note_widget_control_options', array( 'id_base' => $id_base ), $this );
 
 			// Defaults
-			$this->defaults = apply_filters( 'note_widget_defaults', array( 'title' => false, 'content' => false, 'css_class' => false ), $this ); // Set up the default widget settings
+			$this->defaults = apply_filters( 'note_widget_defaults', array(
+				'title' => false,
+				'hide_title' => true,
+				'content' => false,
+				'css_class' => false
+			), $this ); // Set up the default widget settings
 
 			// New WP_Widget
 			self::WP_Widget( $id_base, sprintf( __( '%1$s', 'note' ), $this->name ), $this->widget_options, $this->control_options );
@@ -105,10 +110,18 @@ if( ! class_exists( 'Note_Widget' ) ) {
 				<?php // Widget Title ?>
 				<label for="<?php echo $this->get_field_id( 'title' ) ; ?>"><strong><?php _e( 'Title', 'note' ); ?></strong></label>
 				<br />
-				<input type="text" class="note-input" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" value="<?php echo esc_attr( $instance['title'] ); ?>" />
-				<br />
-				<small class="description note-description"><?php _e( 'Use this field to label your Note Widgets.', 'note' ); ?></small>
+
+				<div class="note-widget-title-container">
+					<input type="text" class="note-input" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" value="<?php echo esc_attr( $instance['title'] ); ?>" />
+					<span class="note-hide-widget-title">
+						<?php // Hide Widget Title ?>
+						<input id="<?php echo $this->get_field_id( 'hide_title' ); ?>" name="<?php echo $this->get_field_name( 'hide_title' ); ?>" type="checkbox" <?php checked( $instance['hide_title'], true ); ?> />
+						<label for="<?php echo $this->get_field_id( 'hide_title' ) ; ?>"><span class="dashicons dashicons-visibility"></span></label>
+					</span>
+				</div>
+				<small class="description note-description"><?php _e( 'Click the eyeball to show/hide your Note widget title.', 'note' ); ?></small>
 			</div>
+
 
 			<?php // TODO: "Featured" Image/Images in widget content ?>
 
@@ -151,8 +164,11 @@ if( ! class_exists( 'Note_Widget' ) ) {
 		 * This function handles updating (saving) widget options
 		 */
 		public function update( $new_instance, $old_instance ) {
-			// Sanitize all input data
+			// Widget Title
 			$new_instance['title'] = ( ! empty( $new_instance['title'] ) ) ? sanitize_text_field( $new_instance['title'] ) : false; // Widget Title
+			$new_instance['hide_title'] = ( isset( $new_instance['hide_title'] ) ) ? true : false; // Hide Widget Title
+
+			// Widget Content
 			//$new_instance['content'] = ( ! empty( $new_instance['content'] ) ) ? stripslashes( wp_filter_post_kses( addslashes( $new_instance['content'] ) ) ) : false; // Widget Content - wp_filter_post_kses() expects slashed content
 			//$new_instance['content'] = ( ! empty( $new_instance['content'] ) ) ? format_to_edit( $new_instance['content'], true ) : false; // Widget Content - wp_filter_post_kses() expects slashed content
 			$new_instance['content'] = ( ! empty( $new_instance['content'] ) ) ? sanitize_post_field( 'post_content', $new_instance['content'], 0, 'db' ) : false; // Widget Content - Sanitize as post_content; Fake a Post ID
@@ -181,6 +197,7 @@ if( ! class_exists( 'Note_Widget' ) ) {
 		public function widget( $args, $instance ) {
 			// Instance filter
 			$instance = apply_filters( 'note_widget_instance', $instance, $args, $this );
+
 			extract( $args ); // $before_widget, $after_widget, $before_title, $after_title
 
 			// Start of widget output
@@ -190,7 +207,7 @@ if( ! class_exists( 'Note_Widget' ) ) {
 			?>
 
 			<div class="note-wrapper <?php echo esc_attr( $this->get_css_classes( $instance ) ); ?>">
-				<?php // $this->widget_title( $before_title, $after_title, $instance, $args ); // Widget Title ?>
+				<?php $this->widget_title( $before_title, $after_title, $instance, $args ); // Widget Title ?>
 
 				<?php $this->widget_content( $instance, $args ); // Widget Content ?>
 			</div>
@@ -208,7 +225,7 @@ if( ! class_exists( 'Note_Widget' ) ) {
 		public function admin_enqueue_scripts( $hook ) {
 			// Only on Widgets Admin Page
 			if ( $hook === 'widgets.php' )
-				wp_enqueue_style( 'note-widget-admin', Note::plugin_url() . '/assets/css/widgets/note-widget-admin.css' );
+				wp_enqueue_style( 'note-widget-admin', Note::plugin_url() . '/assets/css/widgets/note-widget-admin.css', array( 'dashicons' ) );
 		}
 
 		/**
@@ -236,6 +253,9 @@ if( ! class_exists( 'Note_Widget' ) ) {
 		 * This function outputs the widget title.
 		 */
 		public function widget_title( $before_title, $after_title, $instance, $args ) {
+			if ( ( ! isset( $instance['hide_title'] ) || empty( $instance['title'] ) ) || ( isset( $instance['hide_title'] ) && $instance['hide_title'] ) )
+				return;
+
 			do_action( 'note_widget_title_before', $instance, $args, $this );
 			echo $before_title . apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base, $this ) . $after_title;
 			do_action( 'note_widget_title_after', $instance, $args, $this );
@@ -246,9 +266,9 @@ if( ! class_exists( 'Note_Widget' ) ) {
 		 */
 		public function widget_content( $instance, $args ) {
 			do_action( 'note_widget_content_before', $instance, $args, $this );
-			?>
+		?>
 			<div class="widget-content"><?php echo isset( $instance['content'] ) ? $instance['content'] : false; ?></div>
-			<?php
+		<?php
 			do_action( 'note_widget_content_after', $instance, $args, $this );
 		}
 	}

@@ -2,8 +2,15 @@
 Plugin: Note
 Author: Slocum Design Studio
 Author URI: http://slocumstudio.com
-Current Version: 1.0.0
+Current Version: 1.0.1
 ==========================================
+
+1.0.1 // November 25 2014
+-------------------------
+- Output Note widget title on front end and added ability to show/hide title (hidden by default)
+- Fixed bug where "Edit Content" button on new Note widgets would not function due to lack of widget data
+- Fixed bug where first iteration of Note widget content would not sync in Customizer
+- Added backwards compatibility support for WordPress 3.9
 
 
 1.0.0 // November 07 2014

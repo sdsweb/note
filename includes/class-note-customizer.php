@@ -64,8 +64,16 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 		 * This function enqueues scripts within the Customizer.
 		 */
 		function customize_controls_enqueue_scripts() {
+			global $wp_version;
+
 			// Note Customizer
 			wp_enqueue_script( 'note-customizer', Note::plugin_url() . '/assets/js/note-customizer.js', array( 'customize-widgets' ), Note::$version, true );
+
+			// Localize the Note Customizer script information
+			wp_localize_script( 'note-customizer', 'note', apply_filters( 'note_customizer_localize', array(
+				'wp_version' => $wp_version,
+				'wp_major_version' => ( int ) substr( $wp_version, 0, 1 )
+			) ) );
 		}
 
 		/**
@@ -83,7 +91,7 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 		 */
 		// TODO: SCRIPT_DEBUG support
 		public function wp_enqueue_scripts() {
-			global $tinymce_version, $concatenate_scripts, $compress_scripts;
+			global $tinymce_version, $concatenate_scripts, $compress_scripts, $wp_version;
 
 			// Concatenate Scripts
 			if ( ! isset( $concatenate_scripts ) )
@@ -97,6 +105,16 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 				wp_enqueue_script( 'note-tinymce', includes_url( 'js/tinymce' ) . '/tinymce.min.js', false, $tinymce_version, true );
 				wp_enqueue_script( 'note-tinymce-compat3x', includes_url( 'js/tinymce' ) . '/plugins/compat3x/plugin.min.js', array( 'note-tinymce' ), $tinymce_version, true );
 			}
+
+			// Localize the Note TinyMCE script information
+			wp_localize_script( 'note-tinymce', 'note_tinymce', apply_filters( 'note_tinymce_localize', array(
+				'wp_version' => $wp_version,
+				'wp_major_version' => ( int ) substr( $wp_version, 0, 1 )
+			) ) );
+
+			// Load new version of 'wpview' plugin if
+			if ( version_compare( $wp_version, '4.0', '<' ) )
+				wp_enqueue_script( 'note-tinymce-wpview', Note::plugin_url() . '/assets/js/note-tinymce-view.js', array( 'note-tinymce' ), Note::$version, true );
 
 			// TinyMCE Theme
 			wp_enqueue_script( 'note-tinymce-theme', Note::plugin_url() . '/assets/js/note-tinymce-theme.js', array( 'note-tinymce' ), Note::$version, true );
