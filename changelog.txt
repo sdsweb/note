@@ -1,10 +1,13 @@
 ==========================================
 Plugin: Note
 Author: Slocum Design Studio
-Author URI: http://slocumstudio.com/
-Current Version: 1.1.0
+Author URI: https://slocumstudio.com/
+Current Version: 1.1.1
 ==========================================
 
+1.1.1 // March 02 2015
+----------------------
+- Added do_shortcode() wrapper around Note Widget output
 
 1.1.0 // February 27 2015
 -------------------------

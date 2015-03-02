@@ -267,7 +267,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 		public function widget_content( $instance, $args ) {
 			do_action( 'note_widget_content_before', $instance, $args, $this );
 		?>
-			<div class="widget-content"><?php echo isset( $instance['content'] ) ? $instance['content'] : false; ?></div>
+			<div class="widget-content"><?php echo isset( $instance['content'] ) ? do_shortcode( $instance['content'] ) : false; ?></div>
 		<?php
 			do_action( 'note_widget_content_after', $instance, $args, $this );
 		}

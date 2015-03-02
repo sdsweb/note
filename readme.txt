@@ -4,7 +4,7 @@ Donate link:
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
 Requires at least: 4.0
 Tested up to: 4.1.1
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,9 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 
 == Changelog ==
+
+= 1.1.1 // March 02 2015 =
+* Added do_shortcode() wrapper around Note Widget output
 
 = 1.1.0 // February 27 2015 =
 * Added is_customizer() function to Note Widget to determine if the current page was the Customizer
