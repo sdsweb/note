@@ -12,7 +12,7 @@
 if ( ! defined( 'ABSPATH' ) )
 	exit;
 
-if( ! class_exists( 'Note_Widget' ) ) {
+if ( ! class_exists( 'Note_Widget' ) ) {
 	final class Note_Widget extends WP_Widget {
 		/**
 		 * @var string
@@ -128,12 +128,12 @@ if( ! class_exists( 'Note_Widget' ) ) {
 			<div class="note-widget-setting note-widget-content">
 				<?php // Widget Content ?>
 
-				<?php if ( did_action( 'customize_controls_init' ) ) : // Customizer ?>
-					<a href="#" class="button button-primary note-button note-edit-content"><?php _e( 'Edit Content', 'note' ); ?></a>
+				<?php if ( $this->is_customizer() ) : // Customizer ?>
+					<a href="#" class="button button-primary note-button note-edit-content note-edit-content-customizer"><?php _e( 'Edit Content', 'note' ); ?></a>
 					<br />
 					<small class="description note-description"><?php _e( 'Click this button to start editing content for this widget.', 'note' ); ?></small>
 				<?php else: // Widget Admin (Appearance > Widgets) ?>
-					<a href="<?php echo esc_attr( wp_customize_url() ); ?>" class="button button-primary note-button note-edit-content"><?php _e( 'Edit Content', 'note' ); ?></a>
+					<a href="<?php echo esc_url( wp_customize_url() ); ?>" class="button button-primary note-button note-edit-content"><?php _e( 'Edit Content', 'note' ); ?></a>
 					<br />
 					<small class="description note-description"><?php _e( 'Click this button to open the Customizer and start editing content for this widget.', 'note' ); ?></small>
 				<?php endif; ?>
@@ -155,7 +155,7 @@ if( ! class_exists( 'Note_Widget' ) ) {
 			<div class="clear"></div>
 
 			<p class="note-widget-slug">
-				<?php printf( __( 'Content management brought to you by <a href="%1$s" target="_blank">Conductor</a>','note' ), esc_url( 'http://conductorplugin.com/?utm_source=note&utm_medium=link&utm_content=note-widget-branding&utm_campaign=note' ) ); ?>
+				<?php printf( __( 'Content management brought to you by <a href="%1$s" target="_blank">Conductor</a>','note' ), esc_url( 'https://conductorplugin.com/?utm_source=note&utm_medium=link&utm_content=note-widget-branding&utm_campaign=note' ) ); ?>
 			</p>
 		<?php
 		}
@@ -171,7 +171,7 @@ if( ! class_exists( 'Note_Widget' ) ) {
 			// Widget Content
 			//$new_instance['content'] = ( ! empty( $new_instance['content'] ) ) ? stripslashes( wp_filter_post_kses( addslashes( $new_instance['content'] ) ) ) : false; // Widget Content - wp_filter_post_kses() expects slashed content
 			//$new_instance['content'] = ( ! empty( $new_instance['content'] ) ) ? format_to_edit( $new_instance['content'], true ) : false; // Widget Content - wp_filter_post_kses() expects slashed content
-			$new_instance['content'] = ( ! empty( $new_instance['content'] ) ) ? sanitize_post_field( 'post_content', $new_instance['content'], 0, 'db' ) : false; // Widget Content - Sanitize as post_content; Fake a Post ID
+			$new_instance['content'] = ( ! empty( $new_instance['content'] ) ) ? wp_unslash( sanitize_post_field( 'post_content', $new_instance['content'], 0, 'db' ) ) : false; // Widget Content - Sanitize as post_content; Fake a Post ID
 
 			// CSS Class
 			if ( ! empty( $new_instance['css_class'] ) ) {
@@ -270,6 +270,13 @@ if( ! class_exists( 'Note_Widget' ) ) {
 			<div class="widget-content"><?php echo isset( $instance['content'] ) ? $instance['content'] : false; ?></div>
 		<?php
 			do_action( 'note_widget_content_after', $instance, $args, $this );
+		}
+
+		/**
+		 * This function determines if we're currently in the Customizer.
+		 */
+		function is_customizer() {
+			return did_action( 'customize_controls_init' );
 		}
 	}
 

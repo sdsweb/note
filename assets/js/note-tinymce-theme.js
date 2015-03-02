@@ -1,10 +1,10 @@
 /**
  * Note TinyMCE Theme - /assets/js/note-tinymce-theme.js
  * License: GPLv2 or later
- * Copyright: Janneke Van Dorpe (avryl),http://jannekevandorpe.com/
+ * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
  *
- * @see https://github.com/avryl/wp-front-end-editor/
- * @see https://github.com/avryl/wp-front-end-editor/blob/master/js/tinymce.theme.js
+ * @see https://github.com/iseulde/wp-front-end-editor/
+ * @see https://github.com/iseulde/wp-front-end-editor/blob/master/js/tinymce.theme.js
  * @see https://wordpress.org/plugins/wp-front-end-editor/
  *
  * We've used Janneke Van Dorpe's TinyMCE theme as a base and modified it to suit our needs.
@@ -241,6 +241,10 @@ tinymce.ThemeManager.add( 'note', function( editor ) {
 			editor.on( 'focus activate', function() {
 				if ( hasPlaceholder ) {
 					editor.setContent( '' );
+
+					// Make sure the cursor appears in editor
+					editor.selection.select( editor.getBody(), true );
+					editor.selection.collapse( false );
 				}
 			} );
 

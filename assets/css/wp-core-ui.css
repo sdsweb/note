@@ -1,10 +1,10 @@
 /**
  * WordPress Core UI CSS - /assets/css/wp-core-ui.css
  * License: GPLv2 or later
- * Copyright: Janneke Van Dorpe (avryl),http://jannekevandorpe.com/
+ * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
  *
- * @see https://github.com/avryl/wp-front-end-editor/
- * @see https://github.com/avryl/wp-front-end-editor/blob/master/css/wp-core-ui.css
+ * @see https://github.com/iseulde/wp-front-end-editor/
+ * @see https://github.com/iseulde/wp-front-end-editor/blob/master/css/wp-core-ui.css
  * @see https://wordpress.org/plugins/wp-front-end-editor/
  *
  * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
@@ -15,7 +15,6 @@
  * and prefixes them with .wp-core-ui.
  */
 
-.wp-core-ui:not(.conductor-ui),
 .wp-core-ui *,
 .mce-tooltip *,
 .mce-inline-toolbar-grp,

@@ -17,17 +17,45 @@ var note = note || {};
 
 	// Note Previewer
 	api.NotePreviewer = {
+		// Flag to determine if a Note widget is currently active (focused) in the Previewer
+		is_widget_focused: false,
+		// Flag to determine if a Note widget editor currently has a modal window active (open)
+		is_widget_modal_active: false,
+		// Flag to determine if the Previewer needs a refresh
+		needs_refresh: false,
+		// Reference to the Previewer
 		previewer: false,
+		// Reference to the current WordPress version (float; e.g. 4.1 or 4.0; does not contain minor version at this time)
+		wp_version: 0,
+		// Reference to the current major WordPress version (int, i.e. 4 or 5)
+		wp_major_version: 0,
+		// jQuery reference to the Customizer Sidebar header element
+		$customize_sidebar_header: false,
+		// jQuery reference to the Customizer Sidebar content element
+		$customize_sidebar_content: false,
+		// jQuery Reference to the Widgets Panel element
+		$widgets_panel: false,
 		// Initialization
 		init: function( previewer ) {
 			previewer = ( previewer === undefined ) ? this.previewer : previewer;
 
-			var self = this,
-				$body = $( 'body' ), // Body Element
-				$customize_sidebar_header = $body.find( '.wp-full-overlay-header' ), // Customizer Sidebar Header
-				$customize_sidebar_content = $body.find( '.wp-full-overlay-sidebar-content' ), // Customizer Sidebar Content
-				$customize_theme_controls = $customize_sidebar_content.find( '#customize-theme-controls' ), // Theme Controls
-				$widgets_panel = $customize_theme_controls.find( '#accordion-panel-widgets' ); // Widgets Panel
+			// Store a reference to "this"
+			var self = this;
+
+			// Store a reference to the current major WordPress version (major version number only)
+			self.wp_major_version = parseInt( note.wp_version, 10 );
+
+			// Store a reference to the current WordPress version (major and minor version numbers only)
+			self.wp_version = parseFloat( note.wp_version );
+
+			// Store a jQuery reference the Customizer Sidebar header element
+			self.$customize_sidebar_header = $( '.wp-full-overlay-header' );
+
+			// Store a jQuery the Customizer Sidebar content element
+			self.$customize_sidebar_content = $( '.wp-full-overlay-sidebar-content' );
+
+			// Store a jQuery reference to the Widgets Panel
+			self.$widgets_panel = $( '#accordion-panel-widgets' );
 
 			// Listen for the "note-widget-update" event from the Previewer
 			previewer.bind( 'note-widget-update', function( data ) {
@@ -50,14 +78,10 @@ var note = note || {};
 				}
 
 				// Compare the content to make sure it's actually changed
+				// TODO: Might need to account for "processing" API state here?
 				if ( widget_content_data.updateCount > 0 && data.widget.content !== widget_content_data.content ) {
-					// TODO: Might need to account for "processing" API state here?
-
 					// Set the content value
 					$widget_content.val( data.widget.content );
-
-					// TODO: Update the widget content data again
-					$widget_content.data( 'note', { content: data.widget.content } );
 
 					// Update the API saved state (content has been updated, API data is not saved)
 					api.state( 'saved' ).set( false );
@@ -92,40 +116,38 @@ var note = note || {};
 				$widget_content.data( 'note', widget_content_data );
 			} );
 
+			// Listen for the "note-widget-focus" event from the Previewer
+			previewer.bind( 'note-widget-focus', function( data ) {
+				// Set the focus flag
+				self.is_widget_focused = data;
+			} );
+
+			// Listen for the "note-widget-blur" event from the Previewer
+			previewer.bind( 'note-widget-blur', function( data ) {
+				// If a modal window is not currently active (open)
+				if ( ! self.is_widget_modal_active ) {
+					// Reset the focus flag
+					self.is_widget_focused = false;
+				}
+			} );
+
+			// Listen for the "note-widget-modal-active" event from the Previewer
+			previewer.bind( 'note-widget-modal-active', function( data ) {
+
+				// Set the active flag
+				self.is_widget_modal_active = data;
+			} );
+
+			// Listen for the "note-widget-modal-inactive" event from the Previewer
+			previewer.bind( 'note-widget-modal-inactive', function( data ) {
+				// Reset the active flag
+				self.is_widget_modal_active = false;
+			} );
+
 			// Listen for the "note-widget-edit" event from the Previewer
 			previewer.bind( 'note-widget-edit', function( data ) {
-				var $sidebar_panel = $widgets_panel.find( '.accordion-section[id$="' + data.sidebar.id + '"]' );
-
-				// Open the Customizer sidebar
-				self.openCustomizerSidebar( $body );
-
-				// Open the Widgets panel
-				self.openCustomizerWidgetsPanel( $widgets_panel );
-
-				// Sidebar Panel
-				if ( $sidebar_panel.length ) {
-					// Find the correct widget (first list item is the description of the widget area)
-					var $widget = $sidebar_panel.find( '.accordion-section-content .customize-control-widget_form[id$="' + data.widget.id + '"]' );
-
-					// If we have a widget
-					if ( $widget.length ) {
-						// Open the Sidebar Panel (if it's not already open)
-						if ( ! $sidebar_panel.hasClass( 'open' ) ) {
-							$sidebar_panel.find( '.accordion-section-title' ).trigger( 'click' );
-						}
-
-						// Open the widget for editing (if it's not already open)
-						if ( ! $widget.hasClass( 'expanded' ) ) {
-							$widget.find( '.widget-top' ).trigger( 'click' );
-						}
-
-						// Scroll to sidebar panel in Customizer sidebar (wait for other animations to finish)
-						self.scrollCustomizerSidebar( $customize_sidebar_content, $customize_sidebar_header, $sidebar_panel, self );
-
-						// Send the "note-widget-focus" event to the Previewer
-						previewer.send( 'note-widget-focus', data );
-					}
-				}
+				// Edit Note Widget
+				self.editNoteWidget( data );
 			} );
 
 			// When the "Edit Content" button is clicked
@@ -162,10 +184,103 @@ var note = note || {};
 				previewer.send( 'note-widget-edit', data );
 			} );
 		},
-		// Open the Customizer sidebar if it's not already open
-		openCustomizerSidebar: function( $body ) {
-			if ( $body.children( '.wp-full-overlay' ).hasClass( 'collapsed' ) ) {
+		// Open (edit) a Note widget in the Customizer Sidebar
+		editNoteWidget: function( data ) {
+			// Open the Customizer Sidebar first
+			this.openCustomizerSidebar();
+
+			// Open the Note Widget
+			this.openNoteWidgetSidebar( data.sidebar.id, data.widget.id );
+		},
+		// Open the Customizer Sidebar
+		openCustomizerSidebar: function() {
+			// If the "overlay" (Customizer Sidebar) is collapsed, open it
+			if ( $( '.wp-full-overlay' ).hasClass( 'collapsed' ) ) {
+				// Trigger a click event on the collapse sidebar element
 				$( '.collapse-sidebar' ).trigger( 'click' );
+			}
+		},
+		// Open the Customizer Widgets Panel and Sidebar Section
+		openNoteWidgetSidebar: function( sidebar_id, widget_id ) {
+			var self = this,
+				sidebar_section,
+				$sidebar_panel;
+
+			// WordPress 4.1 and above
+			if ( self.wp_version > 4 ) {
+				sidebar_section = api.section( 'sidebar-widgets-' + sidebar_id ); // Grab the sidebar from the collection of sections
+
+				// If the sidebar section is not currently open
+				if ( sidebar_section && ! sidebar_section.expanded() ) {
+					// Expanding the sidebar section will also open the Widgets Panel
+					sidebar_section.expand( {
+						duration: 0, // Open immediately (no animation)
+						// On completion
+						completeCallback: function() {
+							// Open the control
+							self.openNoteWidgetControl( sidebar_id, widget_id );
+						}
+					} );
+				}
+				// Otherwise attempt to open the Note Widget control
+				else {
+					// Open the control
+					self.openNoteWidgetControl( sidebar_id, widget_id );
+				}
+			}
+			// WordPress 4.0
+			else if ( self.wp_major_version === 4 ) {
+				$sidebar_panel = self.$widgets_panel.find( '.accordion-section[id$="' + sidebar_id + '"]' ); // Grab the sidebar element
+
+				// If we have a sidebar section
+				if ( $sidebar_panel.length ) {
+					// Open the Widgets panel
+					self.openCustomizerWidgetsPanel( self.$widgets_panel );
+
+					// Find the correct widget (first list item is the description of the widget area)
+					var $widget = $sidebar_panel.find( '.accordion-section-content #customize-control-widget_' + widget_id );
+
+					// If we have a widget
+					if ( $widget.length ) {
+						// Open the Sidebar Panel (if it's not already open)
+						if ( ! $sidebar_panel.hasClass( 'open' ) ) {
+							$sidebar_panel.find( '.accordion-section-title' ).trigger( 'click' );
+						}
+
+						// Open the widget for editing (if it's not already open)
+						if ( ! $widget.hasClass( 'expanded' ) ) {
+							$widget.find( '.widget-top' ).trigger( 'click' );
+						}
+
+						// Scroll to sidebar panel in Customizer sidebar (wait for other animations to finish)
+						self.scrollCustomizerSidebar( $sidebar_panel, self );
+					}
+				}
+			}
+		},
+		// Open a Note Widget Control
+		openNoteWidgetControl: function( sidebar_id, widget_id ) {
+			var form_control = api.Widgets.getWidgetFormControlForWidget( widget_id ); //  Grab the form control for the particular widget
+
+			// If we have a form control and it's not currently open
+			if ( form_control && ! form_control.expanded() ) {
+				// Expand the form control
+				form_control.expand( {
+					duration: 0, // Open immediately (no animation)
+					// On completion
+					completeCallback: function() {
+						// Set a timeout to ensure the input element can be focused properly after all expansion events
+						setTimeout( function() {
+							// Select the first input element (title)
+							form_control.container.find( 'input:first' ).focus();
+						}, 100 ); // 100ms delay
+					}
+				} );
+			}
+			// Otherwise just focus the first input element (title)
+			else {
+				// Select the first input element (title)
+				form_control.container.find( 'input:first' ).focus();
 			}
 		},
 		// Open the Customizer widgets panel if it's not already open
@@ -175,37 +290,54 @@ var note = note || {};
 			}
 		},
 		// Scroll to the sidebar panel in the Customizer sidebar (wait for other animations to finish)
-		scrollCustomizerSidebar: function( $customize_sidebar_content, $customize_sidebar_header, $sidebar_panel, self ) {
+		scrollCustomizerSidebar: function( $sidebar_panel, self ) {
 			setTimeout( function() {
-				$customize_sidebar_content.scrollTop( 0 );
+				self.$customize_sidebar_content.scrollTop( 0 );
 
-				$customize_sidebar_content.animate( {
-					scrollTop: $sidebar_panel.offset().top - $customize_sidebar_header.height()
+				self.$customize_sidebar_content.animate( {
+					scrollTop: $sidebar_panel.offset().top - self.$customize_sidebar_header.height()
 				}, 100 );
 			}, 400 ); // 400ms ensures that most (if not all) other animations have completed
 		}
 	};
 
 
-	// Below WordPress 4.0
-	if ( wp_major_version < 4 ) {
-		/**
-		 * Capture the instance of the Previewer since it is private
-		 */
-		OldPreviewer = api.Previewer;
-		api.Previewer = OldPreviewer.extend( {
-			initialize: function( params, options ) {
+
+	/**
+	 * Capture the instance of the Previewer
+	 */
+	OldPreviewer = api.Previewer;
+	api.Previewer = OldPreviewer.extend( {
+		// Init
+		initialize: function( params, options ) {
+			// Below WordPress 4.0
+			if ( wp_major_version < 4 ) {
 				// Store reference to the Previewer
 				api.NotePreviewer.previewer = this;
 
 				// Initialize our Previewer
 				api.NotePreviewer.init();
-
-				// Initialize the old previewer
-				OldPreviewer.prototype.initialize.call( this, params, options );
 			}
-		} );
-	}
+
+			// Initialize the old previewer
+			OldPreviewer.prototype.initialize.call( this, params, options );
+		},
+		// Refresh
+		refresh: function() {
+			// Refresh if a Note widget is not currently active (focused) in the Previewer
+			if ( ! api.NotePreviewer.is_widget_focused && ! api.NotePreviewer.is_widget_modal_active ) {
+				// Refresh the old previewer
+				OldPreviewer.prototype.refresh.call( this );
+
+				// Reset the refresh flag
+				api.NotePreviewer.needs_refresh = false;
+			}
+			// Set a flag that a refresh is needed once all Note widgets are not active
+			else {
+				api.NotePreviewer.needs_refresh = true;
+			}
+		}
+	} );
 
 	// When the API is "ready"
 	api.bind( 'ready', function() {
@@ -218,5 +350,5 @@ var note = note || {};
 
 	// Document Ready
 	// TODO
-	$( function() { } );
+	//$( function() { } );
 } )( wp, jQuery );

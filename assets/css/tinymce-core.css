@@ -1,11 +1,13 @@
 /**
  * TinyMCE Core CSS - /assets/css/tinymce-core.css
  * License: GPLv2 or later
- * Copyright: Janneke Van Dorpe (avryl),http://jannekevandorpe.com/
+ * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
  *
- * @see https://github.com/avryl/wp-front-end-editor/
- * @see https://github.com/avryl/wp-front-end-editor/blob/master/css/tinymce.core.css
+ * @see https://github.com/iseulde/wp-front-end-editor/
+ * @see https://github.com/iseulde/wp-front-end-editor/blob/master/css/tinymce.core.css
  * @see https://wordpress.org/plugins/wp-front-end-editor/
+ *
+ * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
  */
 
 /* TinyMCE core and core plugins UI, toolbars, inline styles. */
@@ -2060,6 +2062,14 @@ i.mce-i-backcolor {
 .mce-content-body:focus,
 .mce-edit-focus {
 	outline: none !important; /* TinyMCE adds inline styles for this. */
+}
+
+.mce-edit-focus-transition {
+	-moz-transition: all 0.4s;
+	-webkit-transition: all 0.4s;
+	-ms-transition: all 0.4s;
+	-o-transition: all 0.4s;
+	transition: all 0.4s;
 }
 
 /* Plugins */

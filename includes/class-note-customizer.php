@@ -93,6 +93,10 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 		public function wp_enqueue_scripts() {
 			global $tinymce_version, $concatenate_scripts, $compress_scripts, $wp_version;
 
+			// HTML5 support
+			$caption_html5_support = current_theme_supports( 'html5', 'caption' ); // Captions
+			$gallery_html5_support = current_theme_supports( 'html5', 'gallery' ); // Galleries
+
 			// Concatenate Scripts
 			if ( ! isset( $concatenate_scripts ) )
 				script_concat_settings();
@@ -112,15 +116,26 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 				'wp_major_version' => ( int ) substr( $wp_version, 0, 1 )
 			) ) );
 
-			// Load new version of 'wpview' plugin if
-			if ( version_compare( $wp_version, '4.0', '<' ) )
+			// If less than WordPress 4.0
+			if ( version_compare( $wp_version, '4.0', '<' ) ) {
+				// Load our version of 'wpview' plugin
 				wp_enqueue_script( 'note-tinymce-wpview', Note::plugin_url() . '/assets/js/note-tinymce-view.js', array( 'note-tinymce' ), Note::$version, true );
+
+				// Load backwards compatibility 'lists' plugin
+				wp_enqueue_script( 'note-tinymce-lists', Note::plugin_url() . '/assets/js/note-tinymce-lists.js', array( 'note-tinymce' ), Note::$version, true );
+			}
+
+			// TinyMCE Insert Plugin
+			wp_enqueue_script( 'note-tinymce-insert', Note::plugin_url() . '/assets/js/note-tinymce-insert.js', array( 'note-tinymce' ), Note::$version, true );
+
+			// TinyMCE Image Plugin
+			wp_enqueue_script( 'note-tinymce-image', Note::plugin_url() . '/assets/js/note-tinymce-image.js', array( 'note-tinymce' ), Note::$version, true );
 
 			// TinyMCE Theme
 			wp_enqueue_script( 'note-tinymce-theme', Note::plugin_url() . '/assets/js/note-tinymce-theme.js', array( 'note-tinymce' ), Note::$version, true );
 
 			// Note Core
-			wp_enqueue_script( 'note', Note::plugin_url() . '/assets/js/note.js', array( 'note-tinymce', 'wp-util', 'editor', 'wp-lists', 'customize-preview-widgets' ), Note::$version, true );
+			wp_enqueue_script( 'note', Note::plugin_url() . '/assets/js/note.js', array( 'note-tinymce', 'wp-util', 'editor', 'wp-lists', 'customize-preview-widgets', 'jquery-ui-core', 'underscore' ), Note::$version, true );
 			wp_localize_script( 'note', 'note', apply_filters( 'note_localize', array(
 				// TinyMCE Config Parameters
 				// TODO: https://github.com/WordPress/WordPress/blob/cd0ba24e9583a707b0ba055f0a3d9cd0f9b36549/wp-includes/class-wp-editor.php#L469
@@ -131,8 +146,16 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 						'wplink',
 						'wpview',
 						'paste',
-						'lists' // TODO
+						'lists',
+						'noteinsert',
+						'noteimage',
+						'hr'
 					) ) ) ),
+					// Block level elements
+					'blocks' => array(
+						'wp_image',
+						'note_edit'
+					),
 					// Custom TinyMCE theme expects separate "rows"
 					'toolbar' => apply_filters( 'note_tinymce_toolbar', array(
 						'formatselect',
@@ -140,6 +163,10 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 						'italic',
 						'link',
 						'unlink',
+						'bullist',
+						'numlist',
+						'outdent',
+						'indent',
 						'alignleft',
 						'aligncenter',
 						'alignright',
@@ -199,7 +226,76 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 					'convert_urls' => false,
 					'browser_spellcheck' => true,
 					'entity_encoding' => 'named',
-					'placeholder' => apply_filters( 'note_widget_content_placeholder', __( 'Start typing here&hellip;', 'note' ) )
+					'placeholder' => apply_filters( 'note_widget_content_placeholder', __( 'Start typing here&hellip;', 'note' ) ),
+					// HTML5 Support
+					'html5_support' => array(
+						// Captions
+						'caption' => $caption_html5_support,
+						// Galleries
+						'gallery' => $gallery_html5_support
+					),
+					// Caption HTML
+					'caption_html' => $caption_html5_support ? array(
+						'itemtag' => 'figure',
+						'icontag' =>'div',
+						'captiontag' => 'figcaption',
+					) : array(
+						'itemtag' => 'dl',
+						'icontag' => 'dt',
+						'captiontag' => 'dd',
+					),
+					// Gallery HTML
+					// TODO:
+					'gallery_html5_support' => array()
+				),
+				/*
+				 * TinyMCE Modal Commands (when/how to activate/deactivate our "modal" flag in Customizer).
+				 * We need to have this in place because different modal windows trigger different events.
+				 */
+				'modal_commands' => array(
+					// When should the modal flag be activated
+					'activate' => array(
+						// TinyMCE, events triggered in TinyMCE; editor.on()
+						'tinymce' => array(
+							// On the TinyMCE "BeforeExecCommand" command
+							'BeforeExecCommand' => 'WP_Link', // Command name that we should look for, WP_Link is triggered when the link modal is opened
+							// On the TinyMCE 'wpLoadImageForm' command
+							'wpLoadImageForm'
+						),
+						// Document, events triggered on the document( $( document ) ); jQuery( document ).on()
+						'document' => array(),
+						// wp.media.events, events triggered on the media frame
+						'wp.media.events' => array(
+							// On the wp.media editor:image-edit command, when an editor image is edited, bind the close event
+							'editor:image-edit'
+						)
+					),
+					// When should the modal flag be deactivated
+					'deactivate' => array(
+						// TinyMCE, events triggered in TinyMCE; editor.on()
+						'tinymce' => array(
+							// On the TinyMCE 'wpLoadImageData' command
+							'wpLoadImageData',
+							// On the TinyMCE 'wpLoadImageForm' command
+							'wpLoadImageForm' => array(
+								// wp.media.frame.modal, events triggered on the media frame
+								'wp.media.frame' => 'close' // Command name that we should look for, close is triggered when the modal is closed
+							)
+						),
+						// Document, events triggered on the document( $( document ) ); jQuery( document ).on()
+						'document' => array(
+							// On the document "wplink-close" event
+							'wplink-close'
+						),
+						// wp.media.events, events triggered on the media frame
+						'wp.media.events' => array(
+							// When the editor frame is created, bind the close event
+							'editor:frame-create' => array(
+								// frame, events triggered on this particular frame (frame is passed as argument to callback, we use "event" in our logic)
+								'event.frame' => 'close' // Command name that we should look for, close is triggered when the modal is closed
+							)
+						)
+					)
 				)
 			) ) );
 
@@ -214,10 +310,17 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 			// WordPress Core/Modal Styles
 			wp_enqueue_style( 'wp-core-ui', Note::plugin_url() . '/assets/css/wp-core-ui.css', false, Note::$version );
 			wp_enqueue_style( 'buttons' );
+			wp_enqueue_style( 'note-modal' , Note::plugin_url() . '/assets/css/modal.css', false, Note::$version );
 			wp_enqueue_style( 'note-link-modal' , Note::plugin_url() . '/assets/css/link-modal.css', false, Note::$version );
 
-			// TinyMce Core CSS
+			// WordPress Media (has to come after WordPress Core/Modal Styles)
+			wp_enqueue_media();
+
+			// TinyMCE Core CSS
 			wp_enqueue_style( 'tinymce-core' , Note::plugin_url() . '/assets/css/tinymce-core.css', false, Note::$version );
+
+			// TinyMCE View CSS
+			wp_enqueue_style( 'tinymce-view' , Note::plugin_url() . '/assets/css/tinymce-view.css', false, Note::$version );
 
 			// Note Theme CSS
 			wp_enqueue_style( 'note' , Note::plugin_url() . '/assets/css/note.css', false, Note::$version );

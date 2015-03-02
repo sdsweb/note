@@ -1,9 +1,26 @@
 ==========================================
 Plugin: Note
 Author: Slocum Design Studio
-Author URI: http://slocumstudio.com
-Current Version: 1.0.1
+Author URI: http://slocumstudio.com/
+Current Version: 1.1.0
 ==========================================
+
+
+1.1.0 // February 27 2015
+-------------------------
+- Added is_customizer() function to Note Widget to determine if the current page was the Customizer
+- Added logic to scroll Previewer window to focused Note Widget on "Edit Content" button click
+- Added CSS background color/transition to newly focused editors
+- Added ability to create number and bullet lists within content
+- Added ability to indent or outdent content
+- Added modal CSS styles to Previewer within Customizer
+- Added ability to insert images into Note Widgets
+- Added Toolbar above Note Widgets in Previewer within Customizer
+- Removed unused Customizer JavaScript logic
+- Fixed bug where Note Widgets output slashed data (I\'ve, I\'ll, etc...) on front-end while not in Customizer
+- Fixed bug where Previewer refresh was triggered while editing content inside of a Note Widget
+- Fixed bug where Note Widgets were not focused properly in Previewer
+- Fixed bug in where Note was not functioning due to JavaScript error in WordPress versions less than 4.0
 
 1.0.1 // November 25 2014
 -------------------------
@@ -11,7 +28,6 @@ Current Version: 1.0.1
 - Fixed bug where "Edit Content" button on new Note widgets would not function due to lack of widget data
 - Fixed bug where first iteration of Note widget content would not sync in Customizer
 - Added backwards compatibility support for WordPress 3.9
-
 
 1.0.0 // November 07 2014
 -------------------------

@@ -2,9 +2,9 @@
 Contributors: slocumstudio
 Donate link: 
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
-Requires at least: 3.9
-Tested up to: 4.0
-Stable tag: 1.0.1
+Requires at least: 4.0
+Tested up to: 4.1.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,7 +15,7 @@ Note is a simple and easy to use widget for editing bits of text, live, in your 
 
 Note is a simple and easy to use widget for editing bits of text, live, in your WordPress front-end Customizer. Add Notes into any sidebar to visualize how your copy will appear within the unique layout and design of your website. 
 
-With Note, there's no more painful back and froth from the WordPress dashboard to the front-end of your site to refresh. Simply add your Note widget into a sidebar and begin typing. It's that easy.
+With Note, there's no more painful back and forth from the WordPress dashboard to the front-end of your site to refresh. Simply add your Note widget into a sidebar and begin typing. It's that easy.
 
 Note is brought to you by the team at [Conductor Plugin](https://conductorplugin.com/). We're making content layout and display a cinch with [Conductor](https://conductorplugin.com/).
 
@@ -65,6 +65,21 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 == Changelog ==
 
+= 1.1.0 // February 27 2015 =
+* Added is_customizer() function to Note Widget to determine if the current page was the Customizer
+* Added logic to scroll Previewer window to focused Note Widget on "Edit Content" button click
+* Added CSS background color/transition to newly focused editors
+* Added ability to create number and bullet lists within content
+* Added ability to indent or outdent content
+* Added modal CSS styles to Previewer within Customizer
+* Added ability to insert images into Note Widgets
+* Added Toolbar above Note Widgets in Previewer within Customizer
+* Removed unused Customizer JavaScript logic
+* Fixed bug where Note Widgets output slashed data (I\'ve, I\'ll, etc...) on front-end while not in Customizer
+* Fixed bug where Previewer refresh was triggered while editing content inside of a Note Widget
+* Fixed bug where Note Widgets were not focused properly in Previewer
+* Fixed bug in where Note was not functioning due to JavaScript error in WordPress versions less than 4.0
+
 = 1.0.1 // November 25 2014 =
 * Output Note widget title on front end and added ability to show/hide title (hidden by default)
 * Fixed bug where "Edit Content" button on new Note widgets would not function due to lack of widget data
@@ -77,7 +92,7 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 == Upgrade Notice ==
 
-Version 1.0.1 adds backwards compatibility support for WordPress 3.9
+Version 1.1.0 adds image and list support to Note Widgets
 
 
 == Other Notes ==

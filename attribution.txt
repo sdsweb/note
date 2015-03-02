@@ -1,20 +1,22 @@
 /**
  * TinyMCE Core CSS - /assets/css/tinymce-core.css
  * License: GPLv2 or later
- * Copyright: Janneke Van Dorpe (avryl), http://jannekevandorpe.com/
+ * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
  *
- * @see https://github.com/avryl/wp-front-end-editor/
- * @see https://github.com/avryl/wp-front-end-editor/blob/master/css/tinymce.core.css
+ * @see https://github.com/iseulde/wp-front-end-editor/
+ * @see https://github.com/iseulde/wp-front-end-editor/blob/master/css/tinymce.core.css
  * @see https://wordpress.org/plugins/wp-front-end-editor/
+
+ * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
  */
 
 /**
  * Note CSS - /assets/css/note.css
  * License: GPLv2 or later
- * Copyright: Janneke Van Dorpe (avryl), http://jannekevandorpe.com/
+ * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
  *
- * @see https://github.com/avryl/wp-front-end-editor/
- * @see https://github.com/avryl/wp-front-end-editor/blob/master/css/fee.css
+ * @see https://github.com/iseulde/wp-front-end-editor/
+ * @see https://github.com/iseulde/wp-front-end-editor/blob/master/css/fee.css
  * @see https://wordpress.org/plugins/wp-front-end-editor/
  *
  * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
@@ -23,10 +25,22 @@
 /**
  * WordPress Core UI CSS - /assets/css/wp-core-ui.css
  * License: GPLv2 or later
- * Copyright: Janneke Van Dorpe (avryl), http://jannekevandorpe.com/
+ * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
  *
- * @see https://github.com/avryl/wp-front-end-editor/
- * @see https://github.com/avryl/wp-front-end-editor/blob/master/css/wp-core-ui.css
+ * @see https://github.com/iseulde/wp-front-end-editor/
+ * @see https://github.com/iseulde/wp-front-end-editor/blob/master/css/wp-core-ui.css
+ * @see https://wordpress.org/plugins/wp-front-end-editor/
+ *
+ * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
+ */
+
+/**
+ * WordPress Modal CSS - /assets/css/modal.css
+ * License: GPLv2 or later
+ * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
+ *
+ * @see https://github.com/iseulde/wp-front-end-editor/
+ * @see https://github.com/iseulde/wp-front-end-editor/blob/master/css/modal.css
  * @see https://wordpress.org/plugins/wp-front-end-editor/
  *
  * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
@@ -35,22 +49,50 @@
 /**
  * WordPress Link Modal CSS - /assets/css/link-modal.css
  * License: GPLv2 or later
- * Copyright: Janneke Van Dorpe (avryl), http://jannekevandorpe.com/
+ * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
  *
- * @see https://github.com/avryl/wp-front-end-editor/
- * @see https://github.com/avryl/wp-front-end-editor/blob/master/css/link-modal.css
+ * @see https://github.com/iseulde/wp-front-end-editor/
+ * @see https://github.com/iseulde/wp-front-end-editor/blob/master/css/link-modal.css
  * @see https://wordpress.org/plugins/wp-front-end-editor/
  *
  * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
  */
 
 /**
+ * Note TinyMCE Insert Plugin - /assets/js/note-tinymce-insert.js
+ * License: GPLv2 or later
+ * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
+ *
+ * @see https://github.com/iseulde/wp-front-end-editor/blob/master/js/tinymce.insert.js
+ *
+ * We've used Janneke Van Dorpe's TinyMCE Insert Plugin as a base and modified it to suit our needs.
+ */
+
+/**
+ * Note TinyMCE Image Plugin - /assets/js/note-tinymce-image.js
+ * License: GPLv2 or later
+ * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
+ *
+ * @see https://github.com/iseulde/wp-front-end-editor/blob/master/js/tinymce.image.js
+ *
+ * We've used Janneke Van Dorpe's TinyMCE Image Plugin as a base and modified it to suit our needs.
+ */
+
+/**
+ * Note TinyMCE Lists Plugin - /assets/js/note-tinymce-lists.js
+ * License: LGPL
+ * Copyright: Moxiecode Systems AB, http://www.moxiecode.com/
+ *
+ * @see https://github.com/WordPress/WordPress/blob/master/wp-includes/js/tinymce/plugins/lists/plugin.js
+ */
+
+/**
  * Note TinyMCE Theme - /assets/js/note-tinymce-theme.js
  * License: GPLv2 or later
- * Copyright: Janneke Van Dorpe (avryl), http://jannekevandorpe.com/
+ * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
  *
- * @see https://github.com/avryl/wp-front-end-editor/
- * @see https://github.com/avryl/wp-front-end-editor/blob/master/js/tinymce.theme.js
+ * @see https://github.com/iseulde/wp-front-end-editor/
+ * @see https://github.com/iseulde/wp-front-end-editor/blob/master/js/tinymce.theme.js
  * @see https://wordpress.org/plugins/wp-front-end-editor/
  *
  * We've used Janneke Van Dorpe's TinyMCE theme as a base and modified it to suit our needs.

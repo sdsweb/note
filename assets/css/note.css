@@ -1,10 +1,10 @@
 /**
  * Note CSS - /assets/css/note.css
  * License: GPLv2 or later
- * Copyright: Janneke Van Dorpe (avryl),http://jannekevandorpe.com/
+ * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
  *
- * @see https://github.com/avryl/wp-front-end-editor/
- * @see https://github.com/avryl/wp-front-end-editor/blob/master/css/fee.css
+ * @see https://github.com/iseulde/wp-front-end-editor/
+ * @see https://github.com/iseulde/wp-front-end-editor/blob/master/css/fee.css
  * @see https://wordpress.org/plugins/wp-front-end-editor/
  *
  * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
@@ -84,6 +84,10 @@
 	outline: none;
 }
 
+.media-frame .uploader-inline * {
+	text-align: center;
+}
+
 /* Reset */
 
 .wp-core-ui td,
@@ -97,6 +101,18 @@
 }
 
 .wp-core-ui p {
+	font-size: 14px;
+}
+
+/* TODO: Adjust line-height/padding */
+.media-frame input[type="text"],
+.media-frame input[type="password"],
+.media-frame input[type="number"],
+.media-frame input[type="search"],
+.media-frame input[type="email"],
+.media-frame input[type="url"],
+.media-frame textarea,
+.media-frame select {
 	font-size: 14px;
 }
 
@@ -145,7 +161,74 @@ div.mce-insert.open .dashicons {
 	transition: all 0.2s;
 }
 
-div.mce-tinymce-inline {
+div.mce-insert-panel .mce-ico {
+	width: 20px;
+	height: 20px;
+	font-size: 20px;
+	line-height: 20px;
+	text-align: center;
+	display: block;
+	text-shadow: none;
+	margin: 0 auto;
+}
+
+div.mce-insert-panel .mce-btn {
+	border: 1px solid transparent;
+	position: relative;
+	display: inline-block;
+	background: none;
+	border-radius: 2px;
+	box-shadow: none;
+	margin: 2px;
+	color: #777;
+	height: 24px;
+	line-height: 24px;
+}
+
+div.mce-insert-panel .mce-btn:hover,
+div.mce-insert-panel .mce-btn:focus {
+	color: #222;
+	background-color: #fafafa;
+	border-color: #999;
+	-webkit-box-shadow: inset 0 1px 0 #fff, 0 1px 0 rgba( 0, 0, 0, 0.08 );
+	box-shadow: inset 0 1px 0 #fff, 0 1px 0 rgba( 0, 0, 0, 0.08 );
+}
+
+
+div.mce-insert-panel .mce-btn.mce-active,
+div.mce-insert-panel .mce-btn:active {
+	background-color: #ebebeb;
+	border-color: #999;
+	-webkit-box-shadow: inset 0 2px 5px -3px rgba( 0, 0, 0, 0.3 );
+	box-shadow: inset 0 2px 5px -3px rgba( 0, 0, 0, 0.3 );
+}
+
+div.mce-insert-panel .mce-btn.mce-active:hover {
+	border-color: #555;
+}
+
+div.mce-insert-panel .mce-btn button {
+	padding: 2px 3px;
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 20px;
+	cursor: pointer;
+	color: #777;
+	text-align: center;
+	overflow: visible;
+	-webkit-appearance: none;
+	display: block;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+div.mce-insert-panel .mce-btn button i {
+	line-height: 20px;
+}
+
+div.mce-tinymce-inline,
+div.mce-insert-panel {
 	position: absolute;
 	z-index: 9998;
 	background: #f5f5f5;
@@ -167,6 +250,11 @@ div.mce-tinymce-inline {
 	box-sizing: border-box;
 }
 
+div.mce-insert-panel {
+	opacity: 1;
+	background: rgba(245, 245, 245, 0.85);
+}
+
 .mce-tinymce-inline {
 	padding: 1px;
 }
@@ -184,7 +272,9 @@ div.mce-tinymce-inline.mce-inline-toolbar-active {
 }
 
 div.mce-tinymce-inline:before,
-div.mce-tinymce-inline:after {
+div.mce-tinymce-inline:after,
+div.mce-insert-panel:before,
+div.mce-insert-panel:after {
 	position: absolute;
 	left: 50%;
 	display: block;
@@ -202,7 +292,8 @@ div.mce-tinymce-inline.mce-arrow-up:before {
 	margin-left: -9px;
 }
 
-div.mce-tinymce-inline.mce-arrow-down:before {
+div.mce-tinymce-inline.mce-arrow-down:before,
+div.mce-insert-panel:before {
 	bottom: -18px;
 	border-top-color: #dedede;
 	border-width: 9px;
@@ -216,11 +307,16 @@ div.mce-tinymce-inline.mce-arrow-up:after {
 	margin-left: -8px;
 }
 
-div.mce-tinymce-inline.mce-arrow-down:after {
+div.mce-tinymce-inline.mce-arrow-down:after,
+div.mce-insert-panel:after {
 	bottom: -16px;
 	border-top-color: #f5f5f5;
 	border-width: 8px;
 	margin-left: -8px;
+}
+
+div.mce-insert-panel:after {
+	border-top-color: rgba(245, 245, 245, 0.85);
 }
 
 div.mce-tinymce-inline.mce-arrow-left:before,
@@ -245,4 +341,9 @@ div.mce-tinymce-inline.mce-arrow-full > div {
 
 .mce-toolbar .mce-btn-group .mce-btn.mce-active:hover i.mce-ico {
 	color: #555;
+}
+
+/* Note */
+.mce-edit-focus.mce-note-edit-focus {
+	background: #ffa;
 }
