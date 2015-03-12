@@ -25,6 +25,10 @@
 			// Deactivate
 			deactivate: []
 		},
+		// Flag to determine if a Note widget is currently active (focused)
+		is_widget_focused: false,
+		// Flag to determine if a Note widget editor currently has a modal window active (open)
+		is_widget_modal_active: false,
 		$note_widgets: false,
 		$document: false,
 		transition_duration: 400, // CSS transition is 400ms
@@ -74,9 +78,9 @@
 				self.preview.bind( 'note-widget-edit', function( data ) {
 					// Find the correct editor
 					var editor = _.find( self.editors, function( editor ) {
+						// TODO: Check hasOwnProperty()
 						return editor.note.widget_data.widget.id === data.widget.id;
 					} );
-
 
 					// If we have an editor
 					if ( editor ) {
@@ -91,8 +95,8 @@
 						// Focus the editor first
 						editor.focus( false );
 
-						// Move cursor to end of existing content
-						editor.selection.select( editor.getBody(), true );
+						// Move cursor to end of existing content (in the last child element)
+						editor.selection.select( editor.getBody().lastChild, true );
 						editor.selection.collapse( false );
 
 						// Get the window scroll top and bottom
@@ -106,7 +110,7 @@
 						}
 
 						// Trigger our custom focus event
-						editor.fire( 'note-editor-focus' );
+						editor.fire( 'note-editor-focus', data );
 					}
 				} );
 
@@ -164,6 +168,12 @@
 									id: $note_widget.find( '.sidebar-id' ).val()
 								}
 							};
+
+							// Stop propagation to other callbacks on links to prevent Previewer refreshes
+							$note_widget.on( 'click.note-widget', function( event ) {
+								event.stopImmediatePropagation(); // prevent this event from bubbling up and firing other callbacks and event handlers
+								event.stopPropagation(); // prevent this event from bubbling up and firing other callbacks and event handlers
+							} );
 						} );
 
 						// TODO: Necessary?
@@ -179,12 +189,15 @@
 							var content = editor.getContent(),
 								data = $.extend( true, editor.note.widget_data, { widget: { content: content } } ); // Deep copy
 
+							// Set the active flag
+							self.is_widget_focused = true;
+
 							// Send data to the Customizer
 							self.preview.send( 'note-widget-focus', data );
 						} );
 
 						// Editor Note Widget focus
-						editor.on( 'note-editor-focus', function( event ) {
+						editor.on( 'note-editor-focus', function( data ) {
 							// Add transition and Note edit focus CSS classes
 							self.tinymce.DOM.addClass( editor.getBody(), 'mce-edit-focus-transition mce-note-edit-focus' );
 
@@ -204,6 +217,9 @@
 							var content = editor.getContent(),
 								data = $.extend( true, editor.note.widget_data, { widget: { content: content } } ); // Deep copy
 
+							// Set the active flag
+							self.is_widget_focused = false;
+
 							// Send data to the Customizer
 							self.preview.send( 'note-widget-blur', data );
 						} );
@@ -216,13 +232,13 @@
 
 							// Stop propagation to other callbacks on links to prevent Previewer refreshes
 							// TODO: Necessary?
-							$el.find( 'a' ).on( 'click.note-widget', function( event ) {
-								//event.stopImmediatePropagation(); // prevent this event from bubbling up and firing other callbacks and event handlers
-								//event.stopPropagation(); // prevent this event from bubbling up and firing other callbacks and event handlers
-							} );
+							/*$el.find( 'a' ).on( 'click.note-widget', function( event ) {
+								event.stopImmediatePropagation(); // prevent this event from bubbling up and firing other callbacks and event handlers
+								event.stopPropagation(); // prevent this event from bubbling up and firing other callbacks and event handlers
+							} );*/
 
 							// Content within the editor has changed or this is an initial Previewer load
-							if ( editor.note.prev_content === '' || editor.note.prev_content !== content ) {
+							if ( ( ! editor.note.hasOwnProperty( 'prevent_widget_update' ) || ! editor.note.prevent_widget_update ) && ( editor.note.prev_content === '' || editor.note.prev_content !== content ) ) {
 								// Deep copy
 								data = $.extend( true, editor.note.widget_data, { widget: { content: content } } );
 
@@ -471,10 +487,18 @@
 			switch ( type ) {
 				// Activate
 				case 'activate':
+					// Set the active flag
+					self.is_widget_modal_active = true;
+
+					// Send data to Customizer
 					self.preview.send( 'note-widget-modal-active', data );
 				break;
 				// Deactivate
 				case 'deactivate':
+					// Reset the active flag
+					self.is_widget_modal_active = false;
+
+					// Send data to Customizer
 					self.preview.send( 'note-widget-modal-inactive', true );
 				break;
 			}

@@ -4,7 +4,7 @@
  *
  * @class Note_Customizer
  * @author Slocum Studio
- * @version 1.0.0
+ * @version 1.1.2
  * @since 1.0.0
  */
 
@@ -12,12 +12,27 @@
 if ( ! defined( 'ABSPATH' ) )
 	exit;
 
-if( ! class_exists( 'Note_Customizer' ) ) {
+if ( ! class_exists( 'Note_Customizer' ) ) {
 	final class Note_Customizer {
 		/**
 		 * @var string
 		 */
-		public $version = '1.0.0';
+		public $version = '1.1.2';
+
+		/**
+		 * @var array
+		 */
+		public $note_customizer_localize = array();
+
+		/**
+		 * @var array
+		 */
+		public $note_localize = array();
+
+		/**
+		 * @var array
+		 */
+		public $note_tinymce_localize = array();
 
 		/**
 		 * @var Note_Customizer, Instance of the class
@@ -41,6 +56,7 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 		 */
 		function __construct( ) {
 			// Hooks
+			add_action( 'init', array( $this, 'init' ) ); // Init
 			add_action( 'customize_register', array( $this, 'customize_register' ), 0 ); // Customizer Register (before anything else)
 			add_action( 'customize_controls_enqueue_scripts', array( $this, 'customize_controls_enqueue_scripts' ) ); // Enqueue scripts in Customizer
 			add_action( 'customize_preview_init', array( $this, 'customize_preview_init' ) ); // Customizer Preview Initialization
@@ -53,90 +69,24 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 		}
 
 		/**
-		 * This function registers sections and settings for use in the Theme Customizer.
+		 * This function sets up properties on this class and allows other plugins and themes
+		 * to adjust those properties by filtering.
 		 */
-		public function customize_register( $wp_customize ) {
-			// Load required assets
-			$this->includes();
-		}
-
-		/**
-		 * This function enqueues scripts within the Customizer.
-		 */
-		function customize_controls_enqueue_scripts() {
+		public function init() {
 			global $wp_version;
 
-			// Note Customizer
-			wp_enqueue_script( 'note-customizer', Note::plugin_url() . '/assets/js/note-customizer.js', array( 'customize-widgets' ), Note::$version, true );
-
-			// Localize the Note Customizer script information
-			wp_localize_script( 'note-customizer', 'note', apply_filters( 'note_customizer_localize', array(
-				'wp_version' => $wp_version,
-				'wp_major_version' => ( int ) substr( $wp_version, 0, 1 )
-			) ) );
-		}
-
-		/**
-		 * This function fires on the initialization of the Customizer. We add actions that pertain to the
-		 * Customizer preview window here. The actions added here are fired only in the Customizer preview.
-		 */
-		public function customize_preview_init() {
-			add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) ); // Previewer Scripts/Styles
-			add_action( 'dynamic_sidebar_params', array( $this, 'dynamic_sidebar_params' ) ); // Filter Dynamic Sidebar Parameters (Note Widgets)
-			add_action( 'wp_footer', array( $this, 'wp_footer' ) ); // Output WordPress Link Dialog Template
-		}
-
-		/**
-		 * This function outputs scripts and styles in the the Customizer preview only.
-		 */
-		// TODO: SCRIPT_DEBUG support
-		public function wp_enqueue_scripts() {
-			global $tinymce_version, $concatenate_scripts, $compress_scripts, $wp_version;
-
-			// HTML5 support
+			// Determine HTML5 support
 			$caption_html5_support = current_theme_supports( 'html5', 'caption' ); // Captions
 			$gallery_html5_support = current_theme_supports( 'html5', 'gallery' ); // Galleries
 
-			// Concatenate Scripts
-			if ( ! isset( $concatenate_scripts ) )
-				script_concat_settings();
-
-			// TinyMCE Compressed
-			if ( $compress_scripts && $concatenate_scripts && isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && stripos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false )
-				wp_enqueue_script( 'note-tinymce', includes_url( 'js/tinymce' ) . '/wp-tinymce.php?c=1', false, $tinymce_version, true );
-			// TinyMCE Uncompressed
-			else {
-				wp_enqueue_script( 'note-tinymce', includes_url( 'js/tinymce' ) . '/tinymce.min.js', false, $tinymce_version, true );
-				wp_enqueue_script( 'note-tinymce-compat3x', includes_url( 'js/tinymce' ) . '/plugins/compat3x/plugin.min.js', array( 'note-tinymce' ), $tinymce_version, true );
-			}
-
-			// Localize the Note TinyMCE script information
-			wp_localize_script( 'note-tinymce', 'note_tinymce', apply_filters( 'note_tinymce_localize', array(
+			// Setup Customizer localization
+			$this->note_customizer_localize = apply_filters( 'note_customizer_localize', array(
 				'wp_version' => $wp_version,
 				'wp_major_version' => ( int ) substr( $wp_version, 0, 1 )
-			) ) );
+			), $this );
 
-			// If less than WordPress 4.0
-			if ( version_compare( $wp_version, '4.0', '<' ) ) {
-				// Load our version of 'wpview' plugin
-				wp_enqueue_script( 'note-tinymce-wpview', Note::plugin_url() . '/assets/js/note-tinymce-view.js', array( 'note-tinymce' ), Note::$version, true );
-
-				// Load backwards compatibility 'lists' plugin
-				wp_enqueue_script( 'note-tinymce-lists', Note::plugin_url() . '/assets/js/note-tinymce-lists.js', array( 'note-tinymce' ), Note::$version, true );
-			}
-
-			// TinyMCE Insert Plugin
-			wp_enqueue_script( 'note-tinymce-insert', Note::plugin_url() . '/assets/js/note-tinymce-insert.js', array( 'note-tinymce' ), Note::$version, true );
-
-			// TinyMCE Image Plugin
-			wp_enqueue_script( 'note-tinymce-image', Note::plugin_url() . '/assets/js/note-tinymce-image.js', array( 'note-tinymce' ), Note::$version, true );
-
-			// TinyMCE Theme
-			wp_enqueue_script( 'note-tinymce-theme', Note::plugin_url() . '/assets/js/note-tinymce-theme.js', array( 'note-tinymce' ), Note::$version, true );
-
-			// Note Core
-			wp_enqueue_script( 'note', Note::plugin_url() . '/assets/js/note.js', array( 'note-tinymce', 'wp-util', 'editor', 'wp-lists', 'customize-preview-widgets', 'jquery-ui-core', 'underscore' ), Note::$version, true );
-			wp_localize_script( 'note', 'note', apply_filters( 'note_localize', array(
+			// Setup Previewer localization
+			$this->note_localize = apply_filters( 'note_localize', array(
 				// TinyMCE Config Parameters
 				// TODO: https://github.com/WordPress/WordPress/blob/cd0ba24e9583a707b0ba055f0a3d9cd0f9b36549/wp-includes/class-wp-editor.php#L469
 				'tinymce' => array(
@@ -150,7 +100,7 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 						'noteinsert',
 						'noteimage',
 						'hr'
-					) ) ) ),
+					), $this ) ) ),
 					// Block level elements
 					'blocks' => array(
 						'wp_image',
@@ -171,7 +121,7 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 						'aligncenter',
 						'alignright',
 						'alignjustify'
-					) ),
+					), $this ),
 					// Alignment Formats
 					'formats' => array(
 						// Align Left
@@ -226,7 +176,7 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 					'convert_urls' => false,
 					'browser_spellcheck' => true,
 					'entity_encoding' => 'named',
-					'placeholder' => apply_filters( 'note_widget_content_placeholder', __( 'Start typing here&hellip;', 'note' ) ),
+					'placeholder' => apply_filters( 'note_widget_content_placeholder', __( 'Start typing here&hellip;', 'note' ), $this ),
 					// HTML5 Support
 					'html5_support' => array(
 						// Captions
@@ -297,7 +247,88 @@ if( ! class_exists( 'Note_Customizer' ) ) {
 						)
 					)
 				)
-			) ) );
+			) );
+
+			// Setup Previewer TinyMCE localization
+			$this->note_tinymce_localize = apply_filters( 'note_tinymce_localize', array(
+				'wp_version' => $wp_version,
+				'wp_major_version' => ( int ) substr( $wp_version, 0, 1 )
+			), $this );
+		}
+
+		/**
+		 * This function registers sections and settings for use in the Customizer.
+		 */
+		public function customize_register( $wp_customize ) {
+			// Load required assets
+			$this->includes();
+		}
+
+		/**
+		 * This function enqueues scripts within the Customizer.
+		 */
+		function customize_controls_enqueue_scripts() {
+			// Note Customizer
+			wp_enqueue_script( 'note-customizer', Note::plugin_url() . '/assets/js/note-customizer.js', array( 'customize-widgets' ), Note::$version, true );
+
+			// Localize the Note Customizer script information
+			wp_localize_script( 'note-customizer', 'note', $this->note_customizer_localize );
+		}
+
+		/**
+		 * This function fires on the initialization of the Customizer. We add actions that pertain to the
+		 * Customizer preview window here. The actions added here are fired only in the Customizer preview.
+		 */
+		public function customize_preview_init() {
+			add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) ); // Previewer Scripts/Styles
+			add_action( 'dynamic_sidebar_params', array( $this, 'dynamic_sidebar_params' ) ); // Filter Dynamic Sidebar Parameters (Note Widgets)
+			add_action( 'wp_footer', array( $this, 'wp_footer' ) ); // Output WordPress Link Dialog Template
+		}
+
+		/**
+		 * This function outputs scripts and styles in the the Customizer preview only.
+		 */
+		// TODO: SCRIPT_DEBUG support
+		public function wp_enqueue_scripts() {
+			global $tinymce_version, $concatenate_scripts, $compress_scripts, $wp_version;
+
+			// Concatenate Scripts
+			if ( ! isset( $concatenate_scripts ) )
+				script_concat_settings();
+
+			// TinyMCE Compressed
+			if ( $compress_scripts && $concatenate_scripts && isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && stripos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false )
+				wp_enqueue_script( 'note-tinymce', includes_url( 'js/tinymce' ) . '/wp-tinymce.php?c=1', false, $tinymce_version, true );
+			// TinyMCE Uncompressed
+			else {
+				wp_enqueue_script( 'note-tinymce', includes_url( 'js/tinymce' ) . '/tinymce.min.js', false, $tinymce_version, true );
+				wp_enqueue_script( 'note-tinymce-compat3x', includes_url( 'js/tinymce' ) . '/plugins/compat3x/plugin.min.js', array( 'note-tinymce' ), $tinymce_version, true );
+			}
+
+			// Localize the Note TinyMCE script information
+			wp_localize_script( 'note-tinymce', 'note_tinymce', $this->note_tinymce_localize );
+
+			// If less than WordPress 4.0
+			if ( version_compare( $wp_version, '4.0', '<' ) ) {
+				// Load our version of 'wpview' plugin
+				wp_enqueue_script( 'note-tinymce-wpview', Note::plugin_url() . '/assets/js/note-tinymce-view.js', array( 'note-tinymce' ), Note::$version, true );
+
+				// Load backwards compatibility 'lists' plugin
+				wp_enqueue_script( 'note-tinymce-lists', Note::plugin_url() . '/assets/js/note-tinymce-lists.js', array( 'note-tinymce' ), Note::$version, true );
+			}
+
+			// Note TinyMCE Insert Plugin
+			wp_enqueue_script( 'note-tinymce-insert', Note::plugin_url() . '/assets/js/note-tinymce-insert.js', array( 'note-tinymce' ), Note::$version, true );
+
+			// Note TinyMCE Image Plugin
+			wp_enqueue_script( 'note-tinymce-image', Note::plugin_url() . '/assets/js/note-tinymce-image.js', array( 'note-tinymce' ), Note::$version, true );
+
+			// Note TinyMCE Theme
+			wp_enqueue_script( 'note-tinymce-theme', Note::plugin_url() . '/assets/js/note-tinymce-theme.js', array( 'note-tinymce' ), Note::$version, true );
+
+			// Note Core
+			wp_enqueue_script( 'note', Note::plugin_url() . '/assets/js/note.js', array( 'note-tinymce', 'wp-util', 'editor', 'wp-lists', 'customize-preview-widgets', 'jquery-ui-core', 'underscore' ), Note::$version, true );
+			wp_localize_script( 'note', 'note', $this->note_localize );
 
 			// WordPress Lists
 			wp_enqueue_script( 'wp-lists' );

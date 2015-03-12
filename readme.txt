@@ -4,7 +4,7 @@ Donate link:
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
 Requires at least: 4.0
 Tested up to: 4.1.1
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,19 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 == Changelog ==
 
+= 1.1.2 // March 12 2015 =
+* Moved Note localize data to Note_Customizer PHP Class
+* Added ability to allow other plugins to use Note as a "transport" layer to send data to the Customizer from any TinyMCE Editor
+* Added ability to allow noteinsert plugin to be utilized on TinyMCE Editors outside of Note
+* Added hooks to Note Widget to allow settings and front-end output to be added/adjusted by themes and plugins
+* Added ability to prevent widget update event from being triggered (set prevent_widget_update to true on editor.note object to prevent updates)
+* Added logic to update jQuery widget data to ensure it wasn't one revision behind in the Customizer
+* Added local flags to Note Previewer script to reference when Note Widgets were focused or a modal window was open
+* Adjust Note media panel button CSS
+* Move cursor to the last child element/node of the body on note-widget-edit
+* Fixed issue where Customizer would set Previewer URL to anchor href when clicked inside of a TinyMCE Editor by stopping propagation
+* Fixed bug where Note Widget was focused in Previewer and re-ordering widgets did not trigger a refresh
+
 = 1.1.1 // March 02 2015 =
 * Added do_shortcode() wrapper around Note Widget output
 
@@ -95,10 +108,9 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 == Upgrade Notice ==
 
-Version 1.1.0 adds image and list support to Note Widgets
-
 
 == Other Notes ==
+
 
 = Features =
 

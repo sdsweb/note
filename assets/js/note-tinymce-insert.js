@@ -89,6 +89,11 @@ tinymce.PluginManager.add( 'noteinsert', function( editor ) {
 			panel.hide();
 		} );
 
+		// Set the widget selector (based on note data on the editor)
+		if ( editor.hasOwnProperty( 'note' ) && editor.note.hasOwnProperty( 'parent' ) ) {
+			$note_widget = $el.parents( editor.note.parent );
+		}
+
 		// Note Widgets only
 		if ( $note_widget.length ) {
 			// Mouse Enter (hover)
@@ -212,6 +217,8 @@ tinymce.PluginManager.add( 'noteinsert', function( editor ) {
 		onclick: function( event ) {
 			// Send data to the Customizer
 			wp.customize.NotePreview.preview.send( 'note-widget-edit', editor.note.widget_data );
+
+			// TODO: event.preventDefault()?
 		}
 	} );
 } );

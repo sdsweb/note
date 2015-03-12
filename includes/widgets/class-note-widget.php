@@ -4,7 +4,7 @@
  *
  * @class Note_Widget
  * @author Slocum Studio
- * @version 1.0.1
+ * @version 1.1.2
  * @since 1.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.0.1';
+		public $version = '1.1.2';
 
 		/**
 		 * @var string
@@ -87,6 +87,8 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 			// Hooks
 			if ( ! has_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) ) )
 				add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) ); // Enqueue admin scripts
+			if ( ! has_action( 'note_widget', array( get_class(), 'note_widget' ) ) )
+				add_action( 'note_widget', array( get_class(), 'note_widget' ), 10, 3 ); // Output standard Note Widget content
 		}
 
 		/**
@@ -103,8 +105,9 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 		public function form( $instance ) {
 			$instance = wp_parse_args( ( array ) $instance, $this->defaults ); // Parse any saved arguments into defaults
 		?>
-
 			<?php do_action( 'note_widget_settings_before', $instance, $this ); ?>
+
+			<?php do_action( 'note_widget_settings_title_before', $instance, $this ); ?>
 
 			<div class="note-widget-setting note-widget-title">
 				<?php // Widget Title ?>
@@ -122,8 +125,11 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 				<small class="description note-description"><?php _e( 'Click the eyeball to show/hide your Note widget title.', 'note' ); ?></small>
 			</div>
 
+			<?php do_action( 'note_widget_settings_title_after', $instance, $this ); ?>
 
 			<?php // TODO: "Featured" Image/Images in widget content ?>
+
+			<?php do_action( 'note_widget_settings_content_before', $instance, $this ); ?>
 
 			<div class="note-widget-setting note-widget-content">
 				<?php // Widget Content ?>
@@ -141,6 +147,10 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 				<textarea class="note-input note-hidden note-content" id="<?php echo $this->get_field_id( 'content' ); ?>" name="<?php echo $this->get_field_name( 'content' ); ?>" rows="16" cols="20"><?php echo $instance['content']; ?></textarea>
 			</div>
 
+			<?php do_action( 'note_widget_settings_content_after', $instance, $this ); ?>
+
+			<?php do_action( 'note_widget_settings_css_class_before', $instance, $this ); ?>
+
 			<div class="note-widget-setting note-css-class">
 				<?php // CSS Class ?>
 				<label for="<?php echo $this->get_field_id( 'css_class' ); ?>"><strong><?php _e( 'CSS Class(es)', 'note' ); ?></strong></label>
@@ -149,6 +159,8 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 				<br />
 				<small class="description note-description"><?php printf( __( 'Target this widget on the front-end (e.g. my-custom-note-widget). <a href="%1$s" target="_blank">Learn more about CSS</a>.', 'note' ), esc_url( 'http://codex.wordpress.org/CSS/' ) ); ?></small>
 			</div>
+
+			<?php do_action( 'note_widget_settings_css_class_after', $instance, $this ); ?>
 
 			<?php do_action( 'note_widget_settings_after', $instance, $this ); ?>
 
@@ -192,7 +204,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 		}
 
 		/**
-		 * This function controls the display of the widget on the website
+		 * This function controls the display of the widget on the website.
 		 */
 		public function widget( $args, $instance ) {
 			// Instance filter
@@ -204,15 +216,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 			echo $before_widget;
 
 			do_action( 'note_widget_before', $instance, $args, $this );
-			?>
-
-			<div class="note-wrapper <?php echo esc_attr( $this->get_css_classes( $instance ) ); ?>">
-				<?php $this->widget_title( $before_title, $after_title, $instance, $args ); // Widget Title ?>
-
-				<?php $this->widget_content( $instance, $args ); // Widget Content ?>
-			</div>
-
-			<?php
+			do_action( 'note_widget', $instance, $args, $this );
 			do_action( 'note_widget_after', $instance, $args, $this );
 
 			echo $after_widget;
@@ -277,6 +281,25 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 		 */
 		function is_customizer() {
 			return did_action( 'customize_controls_init' );
+		}
+
+
+		/**********
+		 * Output *
+		 **********/
+
+		/**
+		 * This function outputs standard Note Widget content.
+		 */
+		public static function note_widget( $instance, $args, $widget ) {
+			extract( $args ); // $before_widget, $after_widget, $before_title, $after_title
+		?>
+			<div class="note-wrapper <?php echo esc_attr( $widget->get_css_classes( $instance ) ); ?>">
+				<?php $widget->widget_title( $before_title, $after_title, $instance, $args ); // Widget Title ?>
+
+				<?php $widget->widget_content( $instance, $args ); // Widget Content ?>
+			</div>
+		<?php
 		}
 	}
 

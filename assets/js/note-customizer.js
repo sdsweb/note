@@ -59,15 +59,25 @@ var note = note || {};
 
 			// Listen for the "note-widget-update" event from the Previewer
 			previewer.bind( 'note-widget-update', function( data ) {
+				// Allow jQuery selectors to be overwritten if passed
+				var selectors = ( data.hasOwnProperty( 'selectors' ) ) ? data.selectors : {};
+
+				_.defaults( selectors, {
+					widget_root: '.widget:first', // Widget Root
+					widget_content_container: '.widget-content:first', // Widget Content Container
+					widget_content: '.note-content', // Widget Content
+					widget_content_data: 'note' // Widget Content Data Slug
+				} );
+
 				var form_control = api.Widgets.getWidgetFormControlForWidget( data.widget.id ),
-					$widget_root = form_control.container.find( '.widget:first' ),
-					$widget_content_container = $widget_root.find( '.widget-content:first' ),
-					$widget_content = $widget_content_container.find( '.note-content' ),
-					widget_content_data = $widget_content.data( 'note' ), // We need to store data instead of checking the textbox value due to the way that $.text() and $.val() function in jQuery
+					$widget_root = form_control.container.find( selectors.widget_root ),
+					$widget_content_container = $widget_root.find( selectors.widget_content_container ),
+					$widget_content = $widget_content_container.find( selectors.widget_content ),
+					widget_content_data = $widget_content.data( selectors.widget_content_data ), // We need to store data instead of checking the textarea value due to the way that $.text() and $.val() function in jQuery
 					saved;
 
 				// Store the data on this widget
-				$widget_root.data( 'note', data );
+				$widget_root.data( selectors.widget_content_data, data );
 
 				// Store the data on the widget content element if needed (usually on initial load)
 				if ( widget_content_data === undefined ) {
@@ -112,8 +122,11 @@ var note = note || {};
 				// Increase widget update count
 				widget_content_data.updateCount++;
 
+				// Update widget content
+				widget_content_data.content = data.widget.content;
+
 				// Store this data on the widget content element
-				$widget_content.data( 'note', widget_content_data );
+				$widget_content.data( selectors.widget_content_data, widget_content_data );
 			} );
 
 			// Listen for the "note-widget-focus" event from the Previewer
@@ -133,7 +146,6 @@ var note = note || {};
 
 			// Listen for the "note-widget-modal-active" event from the Previewer
 			previewer.bind( 'note-widget-modal-active', function( data ) {
-
 				// Set the active flag
 				self.is_widget_modal_active = data;
 			} );
@@ -153,7 +165,7 @@ var note = note || {};
 			// When the "Edit Content" button is clicked
 			$( document ).on( 'click', '.note-edit-content', function( event ) {
 				var $el = $( this ),
-					$widget_root = $el.parents( '.widget:first'),
+					$widget_root = $el.parents( '.widget:first' ),
 					data = $widget_root.data( 'note' );
 
 				// TODO: Widget data is empty on first iteration (new Note widget)
@@ -336,6 +348,17 @@ var note = note || {};
 			else {
 				api.NotePreviewer.needs_refresh = true;
 			}
+
+			if ( this.hasOwnProperty( 'loading' ) ) {
+				// When the Previewer is done loading
+				this.loading.done( function( data ) {
+					// Reset the focus flag
+					api.NotePreviewer.is_widget_focused = false;
+
+					// Reset the active flag
+					api.NotePreviewer.is_widget_modal_active = false;
+				} );
+			}
 		}
 	} );
 
@@ -350,5 +373,40 @@ var note = note || {};
 
 	// Document Ready
 	// TODO
-	//$( function() { } );
+	$( function() {
+		var $document = $( document ),
+			is_widget_focused = false,
+			is_widget_modal_active = false;
+
+		// Widget jQuery Sortable start
+		$document.on( 'sortstart', '#widgets-right .accordion-section-content', function( event, ui ) {
+			// Store a reference to the is_widget_focused flag
+			is_widget_focused = api.NotePreviewer.is_widget_focused;
+
+			// Store a reference to the is_widget_modal_active flag
+			is_widget_modal_active = api.NotePreviewer.is_widget_modal_active;
+
+			// Reset the is_widget_focused flag
+			api.NotePreviewer.is_widget_focused = false;
+
+			// Reset the is_widget_modal_active flag
+			api.NotePreviewer.is_widget_modal_active = false;
+		} );
+
+
+		// Widget jQuery Sortable stop
+		$document.on( 'sortstop', '#widgets-right .accordion-section-content', function( event, ui ) {
+			// Set the is_widget_focused flag
+			api.NotePreviewer.is_widget_focused = is_widget_focused;
+
+			// Set the is_widget_modal_active flag
+			api.NotePreviewer.is_widget_modal_active = is_widget_modal_active;
+
+			// Reset the is_widget_focused flag
+			is_widget_focused = false;
+
+			// Reset the is_widget_modal_active flag
+			is_widget_modal_active = false;
+		} );
+	} );
 } )( wp, jQuery );

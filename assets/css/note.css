@@ -10,7 +10,7 @@
  * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
  */
 
-.mce-placeholder {
+.mce-placeholder, .note-placeholder {
 	opacity: 0.5;
 }
 
@@ -172,6 +172,13 @@ div.mce-insert-panel .mce-ico {
 	margin: 0 auto;
 }
 
+div.mce-media-insert-panel .mce-ico {
+	width: 100px;
+	height: 100px;
+	font-size: 60px;
+	line-height: 100px;
+}
+
 div.mce-insert-panel .mce-btn {
 	border: 1px solid transparent;
 	position: relative;
@@ -183,6 +190,15 @@ div.mce-insert-panel .mce-btn {
 	color: #777;
 	height: 24px;
 	line-height: 24px;
+}
+
+div.mce-media-insert-panel .mce-btn {
+	height: 100px;
+	line-height: 64px;
+	margin: -54px 0 0 -51px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
 }
 
 div.mce-insert-panel .mce-btn:hover,
@@ -227,8 +243,12 @@ div.mce-insert-panel .mce-btn button i {
 	line-height: 20px;
 }
 
+div.mce-media-insert-panel .mce-btn button i {
+	line-height: 100px;
+}
+
 div.mce-tinymce-inline,
-div.mce-insert-panel {
+div.mce-insert-panel{
 	position: absolute;
 	z-index: 9998;
 	background: #f5f5f5;
@@ -253,6 +273,12 @@ div.mce-insert-panel {
 div.mce-insert-panel {
 	opacity: 1;
 	background: rgba(245, 245, 245, 0.85);
+}
+
+div.mce-media-insert-panel {
+	margin: 0;
+	background: transparent;
+	border: none;
 }
 
 .mce-tinymce-inline {
@@ -283,6 +309,11 @@ div.mce-insert-panel:after {
 	border-style: solid;
 	border-color: transparent;
 	content: '';
+}
+
+div.mce-media-insert-panel:before,
+div.mce-media-insert-panel:after {
+	display: none;
 }
 
 div.mce-tinymce-inline.mce-arrow-up:before {
@@ -344,6 +375,6 @@ div.mce-tinymce-inline.mce-arrow-full > div {
 }
 
 /* Note */
-.mce-edit-focus.mce-note-edit-focus {
-	background: #ffa;
+.mce-note-edit-focus {
+	background: #ffa !important;
 }
