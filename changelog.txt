@@ -2,9 +2,24 @@
 Plugin: Note
 Author: Slocum Design Studio
 Author URI: https://slocumstudio.com/
-Current Version: 1.1.2
+Current Version: 1.2.0
 ==========================================
 
+
+1.2.0 // June 09 2015
+---------------------
+- Introduce Note Sidebars
+- Introduce Note Sidebar UI Buttons
+- Introduce Note Modal Windows
+- Introduce Note Settings
+- Introduce Note Settings page in Dashboard (Settings > Note)
+- Introduce Note uninstall functionality
+- Replaced 'note_widget_content_placeholder' filter with 'note_tinymce_placeholder'
+- Adjust CSS on various Media Frame elements
+- Fixed issue where an uploaded image could not be inserted into a Note Widget during a Customizer session; Thanks Lise Galipeau
+- Fixed JavaScript error where the "frame" object was not yet added to the wp.media object and Note modal
+  commands were attempting to listen to the missing "frame" object resulting in a JavaScript error
+- Fixed bug where <address> content could not be aligned via the Note Toolbar properly while editing a Note Widget
 
 1.1.2 // March 12 2015
 ----------------------

@@ -3,11 +3,11 @@
  * Plugin Name: Note - A live edit text widget
  * Plugin URI: http://www.conductorplugin.com/note/
  * Description: Note is a simple and easy to use widget for editing bits of text, live, in your WordPress Customizer
- * Version: 1.1.2
+ * Version: 1.2.0
  * Author: Slocum Studio
  * Author URI: http://www.slocumstudio.com/
- * Requires at least: 4.0
- * Tested up to: 4.1.1
+ * Requires at least: 4.1
+ * Tested up to: 4.2.2
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -26,7 +26,7 @@ if ( ! class_exists( 'Note' ) ) {
 		/**
 		 * @var string
 		 */
-		public static $version = '1.1.2';
+		public static $version = '1.2.0';
 
 		/**
 		 * @var Note, Instance of the class
@@ -61,10 +61,18 @@ if ( ! class_exists( 'Note' ) ) {
 		 */
 		private function includes() {
 			// All
+			include_once( 'includes/class-note-options.php' ); // Note Options Class
+			include_once( 'includes/class-note-sidebars.php' ); // Note Sidebars Class
 			include_once( 'includes/class-note-customizer.php' ); // Note Customizer Class
+			include_once( 'includes/admin/class-note-admin.php' ); // Core/Main Note Admin Class
+			include_once( 'includes/note-template-functions.php' ); // Note Template Functions
 
 			// Admin Only
-			if ( is_admin() ) { }
+			if ( is_admin() ) {
+				if ( ! ( $note_option = get_option( Note_Options::$option_name ) ) )
+					include_once( 'includes/admin/class-note-admin-install.php' ); // Note Install Class
+
+			}
 
 			// Front-End Only
 			if ( ! is_admin() ) { }
@@ -106,6 +114,17 @@ if ( ! class_exists( 'Note' ) ) {
 		 */
 		public static function plugin_file() {
 			return __FILE__;
+		}
+
+		/**
+		 * This function returns a boolean result comparing against the current WordPress version.
+		 *
+		 * @return Boolean
+		 */
+		public static function wp_version_compare( $version, $operator = '>=' ) {
+			global $wp_version;
+
+			return version_compare( $wp_version, $version, $operator );
 		}
 	}
 

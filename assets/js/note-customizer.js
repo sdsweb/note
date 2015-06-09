@@ -180,9 +180,9 @@ var note = note || {};
 						},
 						// This data will be populated upon the 'note-widget-update' event from the Previewer
 						sidebar: {
-							 name: '',
-							 id: ''
-						 }
+							name: '',
+							id: ''
+						}
 					};
 
 					// Store partial data on widget
@@ -195,14 +195,155 @@ var note = note || {};
 				// Send the "note-widget-edit" event to the Previewer
 				previewer.send( 'note-widget-edit', data );
 			} );
+
+
+			/*
+			 * Note Sidebars
+			 */
+
+			// Convert registered sidebars to an object if it's empty since wp_localize_script() doesn't allow use of JSON_FORCE_OBJECTS at the time of development
+			note.sidebars.registered = ( Array.isArray( note.sidebars.registered ) && note.sidebars.registered.length === 0 ) ? {} : note.sidebars.registered;
+
+			// Listen for the "note-sidebar-args" event from the Previewer
+			previewer.bind( 'note-sidebar-args', function( data ) {
+				var note_widget_reorder_tmpl = wp.template( 'note-widget-reorder' );
+
+				// Loop through all Note Sidebars
+				_.each( note.sidebars.args, function( value, key ) {
+					// Determine if the data from the Previewer is different
+					if ( ! _.isEqual( value, data[key] ) ) {
+						// Update Note Sidebar arguments (overwrite value with new data)
+						_.extend( value, data[key] );
+
+						// Add the template data
+						value.customizer.widget_reorder_template = note_widget_reorder_tmpl( {
+							id: value.id,
+							description: value.description,
+							name: value.name
+						} );
+					}
+				} );
+			} );
+
+			// Listen for the "note-register-sidebar" event from the Previewer
+			previewer.bind( 'note-register-sidebar', function( data ) {
+				var note_sidebars_section = api.section( note.sidebars.customizer.section ),
+					$note_sidebars_input,
+					note_sidebar,
+					post_id = parseInt( data.post_id, 10 );
+
+				// Add the post ID property to the registered settings
+				if ( ! note.sidebars.registered.hasOwnProperty( post_id ) ) {
+					note.sidebars.registered[post_id] = [];
+				}
+
+				// Note Sidebars
+				if ( note_sidebars_section ) {
+					$note_sidebars_input = note_sidebars_section.container.find( 'input.note-sidebars' );
+
+					// Note Sidebars input (if we don't have this, we can't save the data)
+					if ( $note_sidebars_input.length ) {
+						// Grab the Note Sidebar settings for this post
+						note_sidebar = note.sidebars.registered[post_id];
+
+						// If this sidebar isn't already registered
+						if ( note_sidebar.indexOf( data.note_sidebar_id ) === -1 ) {
+							// Add the sidebar
+							note_sidebar.push( data.note_sidebar_id );
+
+							// "Register" the new sidebar for use in the Customizer
+							self.registerNoteSidebar( data.note_sidebar_id, data.post_id );
+
+							// Add the sidebar to the data string (compare the data string to current data)
+							if ( $note_sidebars_input.val() !== JSON.stringify( note.sidebars.registered ) ) {
+								// Add data string to Note Sidebars setting (hidden input elements do not automatically trigger the "change" method)
+								$note_sidebars_input.val( JSON.stringify( note.sidebars.registered ) ).trigger( 'change' );
+							}
+						}
+					}
+				}
+			} );
+
+			// Listen for the "note-edit-sidebar" event from the Previewer
+			previewer.bind( 'note-edit-sidebar', function( data ) {
+				// Edit Note Sidebar
+				self.editNoteSidebar( {
+					sidebar: {
+						id: data.sidebar_id
+					}
+				} );
+			} );
+
+			// Listen for the "note-add-widget" event from the Previewer
+			previewer.bind( 'note-add-widget', function( data ) {
+				// Add Widget to Sidebar (open "Add Widgets" Panel)
+				self.addWidgetToSidebar( data.sidebar_id );
+			} );
+
+			// Listen for the "note-add-note-widget" event from the Previewer
+			previewer.bind( 'note-add-note-widget', function( data ) {
+				// Add Widget to Sidebar (open "Add Widgets" Panel)
+				self.addWidgetToSidebar( data.sidebar_id, data.widget_id );
+			} );
+
+			// Listen for the "note-unregister-sidebar" event from the Previewer
+			previewer.bind( 'note-unregister-sidebar', function( data ) {
+				var note_sidebars_section = api.section( note.sidebars.customizer.section ),
+					$note_sidebars_input,
+					note_sidebar,
+					note_sidebar_index,
+					post_id = parseInt( data.post_id, 10 );
+
+				// Add the post ID property to the registered settings
+				if ( ! note.sidebars.registered.hasOwnProperty( post_id ) ) {
+					note.sidebars.registered[post_id] = [];
+				}
+
+				// Note Sidebars
+				if ( note_sidebars_section ) {
+					$note_sidebars_input = note_sidebars_section.container.find( 'input.note-sidebars' );
+
+					// Note Sidebars input (if we don't have this, we can't save the data)
+					if ( $note_sidebars_input.length ) {
+						// Grab the Note Sidebar settings for this post
+						note_sidebar = note.sidebars.registered[post_id];
+
+						// Grab the Note Sidebar index
+						note_sidebar_index = note.sidebars.registered[post_id].indexOf( data.note_sidebar_id );
+
+						// If this sidebar is registered
+						if ( note_sidebar_index !== -1 ) {
+							// "Unregister" the new sidebar for use in the Customizer
+							self.unregisterNoteSidebar( data.note_sidebar_id, data.post_id );
+
+							// Remove the sidebar from the list of registered Note Sidebars
+							note_sidebar.splice( note_sidebar_index, 1 );
+
+							// Remove the sidebar from the data string (compare the data string to current data)
+							if ( $note_sidebars_input.val() !== JSON.stringify( note.sidebars.registered ) ) {
+								// Add data string to Note Sidebars setting (hidden input elements do not automatically trigger the "change" method)
+								$note_sidebars_input.val( JSON.stringify( note.sidebars.registered ) ).trigger( 'change' );
+							}
+						}
+					}
+				}
+			} );
 		},
 		// Open (edit) a Note widget in the Customizer Sidebar
 		editNoteWidget: function( data ) {
 			// Open the Customizer Sidebar first
 			this.openCustomizerSidebar();
 
-			// Open the Note Widget
-			this.openNoteWidgetSidebar( data.sidebar.id, data.widget.id );
+			// Open the Customizer Sidebar (and then the Note Widget)
+			this.openSidebarSection( data.sidebar.id, data.widget.id );
+		},
+		// Open (edit) a Note Sidebar in the Customizer Sidebar
+		editNoteSidebar: function( data ) {
+			// Open the Customizer Sidebar first
+			this.openCustomizerSidebar();
+
+			// Open the Customizer Sidebar
+			this.openSidebarSection( data.sidebar.id );
 		},
 		// Open the Customizer Sidebar
 		openCustomizerSidebar: function() {
@@ -213,7 +354,7 @@ var note = note || {};
 			}
 		},
 		// Open the Customizer Widgets Panel and Sidebar Section
-		openNoteWidgetSidebar: function( sidebar_id, widget_id ) {
+		openSidebarSection: function( sidebar_id, widget_id ) {
 			var self = this,
 				sidebar_section,
 				$sidebar_panel;
@@ -223,21 +364,30 @@ var note = note || {};
 				sidebar_section = api.section( 'sidebar-widgets-' + sidebar_id ); // Grab the sidebar from the collection of sections
 
 				// If the sidebar section is not currently open
-				if ( sidebar_section && ! sidebar_section.expanded() ) {
+				if ( sidebar_section ) {
+					// Collapse the sidebar section first (this prevents issues where the Widget Panel isn't active but the sidebar section is still expanded)
+					sidebar_section.collapse( { duration: 0 } );
+
 					// Expanding the sidebar section will also open the Widgets Panel
 					sidebar_section.expand( {
 						duration: 0, // Open immediately (no animation)
 						// On completion
 						completeCallback: function() {
-							// Open the control
-							self.openNoteWidgetControl( sidebar_id, widget_id );
+							// If a widget ID was passed
+							if ( widget_id ) {
+								// Open the control
+								self.openNoteWidgetControl( sidebar_id, widget_id );
+							}
 						}
 					} );
 				}
 				// Otherwise attempt to open the Note Widget control
 				else {
-					// Open the control
-					self.openNoteWidgetControl( sidebar_id, widget_id );
+					// If a widget ID was passed
+					if ( widget_id ) {
+						// Open the control
+						self.openNoteWidgetControl( sidebar_id, widget_id );
+					}
 				}
 			}
 			// WordPress 4.0
@@ -249,23 +399,33 @@ var note = note || {};
 					// Open the Widgets panel
 					self.openCustomizerWidgetsPanel( self.$widgets_panel );
 
-					// Find the correct widget (first list item is the description of the widget area)
-					var $widget = $sidebar_panel.find( '.accordion-section-content #customize-control-widget_' + widget_id );
+					// If a widget ID was passed
+					if ( widget_id ) {
+						// Find the correct widget (first list item is the description of the widget area)
+						var $widget = $sidebar_panel.find( '.accordion-section-content #customize-control-widget_' + widget_id );
 
-					// If we have a widget
-					if ( $widget.length ) {
+						// If we have a widget
+						if ( $widget.length ) {
+							// Open the Sidebar Panel (if it's not already open)
+							if ( ! $sidebar_panel.hasClass( 'open' ) ) {
+								$sidebar_panel.find( '.accordion-section-title' ).trigger( 'click' );
+							}
+
+							// Open the widget for editing (if it's not already open)
+							if ( ! $widget.hasClass( 'expanded' ) ) {
+								$widget.find( '.widget-top' ).trigger( 'click' );
+							}
+
+							// Scroll to sidebar panel in Customizer sidebar (wait for other animations to finish)
+							self.scrollCustomizerSidebar( $sidebar_panel, self );
+						}
+					}
+					// Otherwise just open the sidebar panel
+					else {
 						// Open the Sidebar Panel (if it's not already open)
 						if ( ! $sidebar_panel.hasClass( 'open' ) ) {
 							$sidebar_panel.find( '.accordion-section-title' ).trigger( 'click' );
 						}
-
-						// Open the widget for editing (if it's not already open)
-						if ( ! $widget.hasClass( 'expanded' ) ) {
-							$widget.find( '.widget-top' ).trigger( 'click' );
-						}
-
-						// Scroll to sidebar panel in Customizer sidebar (wait for other animations to finish)
-						self.scrollCustomizerSidebar( $sidebar_panel, self );
 					}
 				}
 			}
@@ -310,6 +470,362 @@ var note = note || {};
 					scrollTop: $sidebar_panel.offset().top - self.$customize_sidebar_header.height()
 				}, 100 );
 			}, 400 ); // 400ms ensures that most (if not all) other animations have completed
+		},
+		// "Register" a sidebar within the Customizer
+		registerNoteSidebar: function( note_sidebar_id, post_id ) {
+			var sidebar_section_priority = -1,
+				sidebar_section_prefix = note.sidebars.customizer.section_prefix,
+				note_sidebar_args = note.sidebars.args[note_sidebar_id],
+				inactive_sidebar_widgets,
+				note_inactive_sidebars_widgets,
+				is_setting_dirty = false,
+				// Customizer data
+				note_customizer_setting = note_sidebar_args.customizer.setting,
+				note_customizer_section = note_sidebar_args.customizer.section,
+				note_customizer_control = note_sidebar_args.customizer.control,
+				// Customizer Setting
+				setting = {
+					id: note_customizer_setting.id,
+					transport: note_customizer_setting.transport,
+					value: note_customizer_setting.value,
+					dirty: note_customizer_setting.dirty
+				},
+				// Customizer Section
+				section = {
+					active: note_customizer_section.active,
+					content: note_customizer_section.content,
+					panel: note_customizer_section.panel,
+					sidebarId: note_customizer_section.sidebarId,
+					title: note_customizer_section.title,
+					type: note_customizer_section.type,
+					instanceNumber: _.size( api.settings.sections ),
+					priority: -1
+				},
+				// Customizer Control
+				control = {
+					active: note_customizer_control.active,
+					content: note_customizer_control.content,
+					section: note_customizer_control.section,
+					sidebar_id: note_customizer_control.sidebar_id,
+					priority: note_customizer_control.priority,
+					settings: note_customizer_control.settings,
+					type: note_customizer_control.type,
+					instanceNumber: _.size( api.settings.controls )
+					//description: ""
+					//label: ""
+				},
+				customizer_setting_value = [],
+				sectionConstructor, customizer_section, customizer_control_control,
+				controlConstructor, customizer_control,
+				control_priority = 0;
+
+			// Generate the correct priority for this sidebar section
+			api.section.each( function ( section ) {
+				var priority = section.priority();
+
+				// Sidebar section
+				if ( section.id.indexOf( sidebar_section_prefix ) !== -1 && priority > sidebar_section_priority ) {
+					sidebar_section_priority = priority;
+				}
+			} );
+
+			// Increase the priority by 1 to make sure there are no conflicts
+			sidebar_section_priority++;
+
+			// Set the priority on the section object
+			section.priority = sidebar_section_priority;
+
+			// Add our sidebar to the list of registered sidebars (omitting our 'customizer' key)
+			api.Widgets.registeredSidebars.add( _.omit( note_sidebar_args, 'customizer' ) );
+
+			// Grab inactive sidebar widgets for this sidebar
+			note_inactive_sidebars_widgets = note.sidebars.customizer.inactive_sidebars_widgets;
+			inactive_sidebar_widgets = note_inactive_sidebars_widgets[control.sidebar_id];
+
+			// Determine if we have any widgets that were previously inactive
+			if ( inactive_sidebar_widgets ) {
+				// Loop through inactive sidebar widgets
+				_.each( inactive_sidebar_widgets, function( widget, index ) {
+					// Add the widget to the setting value for this sidebar at the correct priority
+					if ( customizer_setting_value.indexOf( widget.widget_id ) === -1 ) {
+						customizer_setting_value.splice( index, 0, widget.widget_id );
+					}
+				} );
+
+				// Mark this setting as dirty since new widgets have been added
+				setting.dirty = true;
+			}
+
+			/*
+			 * Customizer Setting
+			 */
+
+			// Add setting data to api.settings.settings
+			api.settings.settings[setting.id] = {
+				transport: setting.transport,
+				value: setting.value
+			};
+
+			// Add Customizer setting (value will be an empty array if there are no widgets previously assigned)
+			api.create( setting.id, setting.id, setting.value, {
+				transport: setting.transport,
+				previewer: api.previewer,
+				dirty: !! setting.dirty
+			} );
+
+			// If there is a difference in setting values
+			if ( _.difference( customizer_setting_value, setting.value ).length ) {
+				// set() the setting (make it _dirty)
+				api( setting.id ).set( customizer_setting_value );
+			}
+			// Otherwise, no difference, but let's check the indexes just to be sure
+			else {
+				// Loop through each of the setting values (we know they will both contain the same values)
+				_.each( setting.value, function( value, index ) {
+					// Only if the setting is not already dirty and the indexs do not match
+					if ( ! is_setting_dirty && index !== customizer_setting_value.indexOf( value ) ) {
+						// set() the setting (make it _dirty)
+						api( setting.id ).set( customizer_setting_value );
+
+						// Set the dirty flag
+						is_setting_dirty = true;
+					}
+				} );
+			}
+
+
+			/*
+			 * Customizer Section
+			 */
+
+			// Add section data to api.settings.sections
+			api.settings.sections[note_customizer_section.id] = section;
+
+			// Determine the correct constructor (should be sidebar constructor in our case; fallback to default section)
+			sectionConstructor = api.sectionConstructor[section.type] || api.Section;
+
+			// Create the section
+			customizer_section = new sectionConstructor( note_customizer_section.id, {
+				params: section
+			} );
+
+			// Add the section
+			api.section.add( note_customizer_section.id, customizer_section );
+
+
+			/*
+			 * Customizer Control
+			 */
+
+			// Add control data to api.settings.controls
+			api.settings.controls[note_customizer_control.id] = control;
+
+			// Determine the correct constructor (should be sidebar constructor in our case; fallback to default control)
+			controlConstructor = api.controlConstructor[control.type] || api.Control;
+
+			// Create the control
+			customizer_control = new controlConstructor( note_customizer_control.id, {
+				params: control,
+				previewer: api.previewer
+			} );
+
+			// Add the control
+			api.control.add( note_customizer_control.id, customizer_control );
+
+			// Loop through controls
+			api.control.each( function( control ) {
+				// Widget form controls only
+				if ( control.params && control.params.type === 'widget_form' ) {
+					// Find the re-order element and add the new sidebar element
+					control.container.find( '.widget-area-select' ).append( note_sidebar_args.customizer.widget_reorder_template );
+				}
+			} );
+
+			// Determine if we have any widgets that were previously inactive
+			if ( inactive_sidebar_widgets ) {
+				// Grab the control for this sidebar
+				customizer_control_control = api.control( note_customizer_control.id );
+
+				// Loop through inactive sidebar widgets
+				_.each( inactive_sidebar_widgets, function( widget, index ) {
+					// Find the control for this widget
+					var widget_control = api.control( widget.setting_id );
+
+					// Adjust the section for this widget (move it to the new sidebar)
+					widget_control.section( note_customizer_section.id );
+
+					// Adjust the priority for this widget
+					widget_control.priority( index );
+
+					// Increase the priority value used for the sidebar control
+					control_priority++;
+
+					// This widget is no longer inactive, remove it
+					note.sidebars.customizer.inactive_widgets.splice( note.sidebars.customizer.inactive_widgets.map( function( widget ) { return widget.setting_id; } ).indexOf( widget.setting_id ), 1 );
+				} );
+
+				// Adjust the priority of the section to ensure the sidebar control remains at end
+				customizer_control_control.priority( control_priority );
+
+				// Refresh the sortable positions in the section
+				api.section( note_customizer_section.id ).container.find( '.accordion-section-content:first' ).sortable( 'refreshPositions' );
+
+				// This sidebar is no longer inactive, remove it
+				delete note.sidebars.customizer.inactive_sidebars_widgets[control.sidebar_id];
+				note.sidebars.customizer.inactive_sidebars.splice( note.sidebars.customizer.inactive_sidebars.indexOf( control.sidebar_id ), 1 );
+			}
+		},
+		// "Unregister" a sidebar within the Customizer
+		unregisterNoteSidebar: function( note_sidebar_id, post_id ) {
+			var note_sidebar_args = note.sidebars.args[note_sidebar_id],
+				inactive_sidebar_widgets,
+				note_inactive_sidebars_widgets,
+				// Customizer data
+				note_customizer_setting = note_sidebar_args.customizer.setting,
+				note_customizer_section = note_sidebar_args.customizer.section,
+				note_customizer_control = note_sidebar_args.customizer.control,
+				// Registered sidebar model
+				registered_sidebar = api.Widgets.registeredSidebars.findWhere( {
+					id: note_sidebar_args.id
+				} ),
+				customizer_section,
+				customizer_control,
+				customizer_control_section;
+
+
+			// Grab inactive sidebar widgets for this sidebar
+			note_inactive_sidebars_widgets = note.sidebars.customizer.inactive_sidebars_widgets;
+
+			// Remove our sidebar to the list of registered sidebars
+			if ( registered_sidebar ) {
+				api.Widgets.registeredSidebars.remove( registered_sidebar );
+			}
+
+
+			/*
+			 * Customizer Control
+			 */
+
+			// Grab the control
+			customizer_control = api.control( note_customizer_control.id );
+
+			// Grab the control section
+			customizer_control_section = customizer_control.section();
+
+			// Loop through controls
+			api.control.each( function( control ) {
+				// Widget form controls that are in this control section only
+				if ( control.params && control.params.type === 'widget_form' && control.section() === customizer_control_section ) {
+					// Create inactive sidebar widgets for this sidebar if it doesn't already exist
+					if ( ! note_inactive_sidebars_widgets[note_customizer_control.sidebar_id] ) {
+						note.sidebars.customizer.inactive_sidebars.push( note_customizer_control.sidebar_id );
+						note_inactive_sidebars_widgets[note_customizer_control.sidebar_id] = [];
+						inactive_sidebar_widgets = note_inactive_sidebars_widgets[note_customizer_control.sidebar_id];
+					}
+
+					// Add the data for this inactive widget
+					inactive_sidebar_widgets[control.priority()] = {
+						widget_id: control.params.widget_id,
+						setting_id: control.setting.id
+					};
+					note.sidebars.customizer.inactive_widgets.push( inactive_sidebar_widgets[control.priority()] );
+
+					// Collapse the the widget first
+					control.collapse();
+
+					// Adjust the section for this widget (move it to a temporary/hidden section)
+					control.section( 'sidebar-widgets-note-temporary-inactive-sidebar' );
+				}
+
+				// Widget form controls only
+				if ( control.params && control.params.type === 'widget_form' ) {
+					// Find the re-order elements and remove the sidebar element (this prevents errors upon api.Widgets.WidgetControl::updateAvailableSidebars())
+					control.container.find( '.widget-area-select li[data-id="' + note_sidebar_args.id + '"]' ).remove();
+				}
+			} );
+
+			// Remove Customizer control
+			api.control.remove( note_customizer_control.id );
+
+			// Remove control data from api.settings.controls
+			delete api.settings.controls[note_customizer_control.id];
+
+
+			/*
+			 * Customizer Section
+			 */
+
+			// Remove the Customizer section HTML element
+			customizer_section = api.section( note_customizer_section.id );
+
+			if ( customizer_section ) {
+				customizer_section.container.remove();
+			}
+
+			// Remove Customizer section
+			api.section.remove( note_customizer_section.id );
+
+			// Remove section data from api.settings.sections
+			delete api.settings.sections[note_customizer_section.id];
+
+
+			/*
+			 * Customizer Setting
+			 */
+
+			// Remove Customizer setting
+			api.remove( note_customizer_setting.id );
+
+			// Remove setting data from api.settings.settings
+			delete api.settings.settings[note_customizer_setting.id];
+		},
+		// Add a widget to a sidebar
+		addWidgetToSidebar: function( sidebar_id, widget_id ) {
+			var self = this,
+				sidebar_section;
+
+			// Open the Customizer Sidebar first
+			this.openCustomizerSidebar();
+
+			// In WordPress 4.1 and above the process has been simplified for us
+			if ( self.wp_version > 4 ) {
+				sidebar_section = api.section( 'sidebar-widgets-' + sidebar_id ); // Grab the sidebar from the collection of sections
+
+				// If we have a Sidebar Section
+				if ( sidebar_section ) {
+					// Open the Customizer Sidebar
+					self.openSidebarSection( sidebar_id );
+
+					// Trigger a click on the "Add a Widget" button
+					sidebar_section.container.find( '.add-new-widget' ).trigger( 'click' );
+
+					// Add a Conductor Widget (api.Widgets.availableWidgetsPanel is a Backbone View)
+					api.Widgets.availableWidgetsPanel.$( '.widget-tpl[data-widget-id^="' + widget_id + '"]' ).trigger( 'click' );
+				}
+			}
+			// WordPress 4.0
+			else if ( self.wp_major_version === 4 ) {
+				var $sidebar_panel = self.$widgets_panel.find( '.accordion-section[id$="' + sidebar_id + '"]' ); // Grab the sidebar element
+
+				// Open the Customizer Sidebar
+				self.openSidebarSection( sidebar_id );
+
+				// If we have a Sidebar Panel
+				if ( $sidebar_panel.length ) {
+					// Open the Sidebar Panel (if it's not already open)
+					if ( ! $sidebar_panel.hasClass( 'open' ) ) {
+						$sidebar_panel.find( '.accordion-section-title' ).trigger( 'click' );
+					}
+
+					// Open the "Add a Widget" panel (if it's not already open)
+					if ( ! self.$body.hasClass( 'adding-widget' ) ) {
+						$sidebar_panel.find( '.add-new-widget' ).trigger( 'click' );
+					}
+
+					// Add a Conductor Widget (api.Widgets.availableWidgetsPanel is a Backbone View)
+					api.Widgets.availableWidgetsPanel.$( '.widget-tpl[data-widget-id^="' + widget_id + '"]' ).trigger( 'click' );
+				}
+			}
 		}
 	};
 
@@ -372,7 +888,6 @@ var note = note || {};
 	} );
 
 	// Document Ready
-	// TODO
 	$( function() {
 		var $document = $( document ),
 			is_widget_focused = false,

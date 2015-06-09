@@ -145,67 +145,40 @@ tinymce.PluginManager.add( 'noteinsert', function( editor ) {
 	} );
 
 	// TODO: Move to image plugin
-	// TODO: Store a reference to frame on editor if possible/necessary
 	editor.addButton( 'wp_image', {
 		tooltip: 'Image',
 		icon: 'dashicons-format-image',
 		onclick: function( event ) {
-			// If wpActiveEditor is wrong, set the active editor here
-			if ( window.wpActiveEditor !== editor.id ) {
-				window.wpActiveEditor = editor.id;
-			}
+			// Attach the frame to the editor
+			editor.note.media.frame = frame = wp.media.editor.open( editor.id, {
+				id: 'note-insert', // Unique ID for this frame
+				state: 'note-insert', // Custom Note state
+				frame: 'post', // Select state for frame
+				// States attached to this frame
+				states: [
+					// Note Insert State
+					new wp.media.controller.Library( {
+						id: 'note-insert',
+						title: wp.media.view.l10n.insertMediaTitle,
+						priority: 20,
+						filterable: 'all',
+						library: wp.media.query( { type: 'image' } ),
+						multiple: false, // Only allow one selection
+						editable: false,
+						display: true, // TODO: Necessary?
+						displaySettings: true,
+						displayUserSettings: true
+					} )
+				],
+				// Frame button configuration
+				button: {
+					text: 'Insert Into Widget', // Button label // TODO: l10n - move to Note Customizer
+					event: 'insert' // Trigger the insert event on click
+				}
+			} );
 
-			// If we already have a frame, open it and trigger an event
-			if ( frame ) {
-				// Open the existing frame (pass the editor ID to set this editor as the active editor)
-				frame = wp.media.editor.open( editor.id, { state: 'note-insert' } );
-
-				// Fire an event on the editor (pass an empty array of data and the frame)
-				editor.fire( 'wpLoadImageForm', { data : [], frame: frame } );
-			}
-			// Otherwise, create the frame and set up the event listeners
-			else {
-				// Create a custom media editor frame for Note
-				frame = wp.media.editor.open( editor.id, {
-					id: 'note-insert', // Unique ID for this frame
-					state: 'note-insert', // Custom Note state
-					frame: 'select', // Select state for frame
-					// States attached to this frame
-					states: [
-						// Note Insert State
-						new wp.media.controller.Library( {
-							id: 'note-insert',
-							title: wp.media.view.l10n.insertMediaTitle,
-							priority: 20,
-							filterable: 'all',
-							library: wp.media.query( { type: 'image' } ),
-							editable: false,
-							display: true,
-							displaySettings: true,
-							displayUserSettings: true
-						} )
-					],
-					// Frame button configuration
-					button: {
-						text: 'Insert Into Widget', // Button label // TODO: l10n - move to Note Customizer
-						state: 'insert', // State of the media modal is insert on click
-						event: 'insert' // Trigger the insert event on click
-					}
-				} );
-
-				/*
-				 * Event listeners
-				 */
-
-				// TODO: Necessary?
-				jQuery( frame.el )
-					.find( 'select.attachment-filters' )
-					.val( 'image' )
-					.trigger( 'change' );
-
-				// Fire an event on the editor (pass an empty array of data and the frame)
-				editor.fire( 'wpLoadImageForm', { data : [], frame: frame } );
-			}
+			// Fire an event on the editor (pass an empty array of data and the frame)
+			editor.fire( 'wpLoadImageForm', { data : [], frame: frame } );
 		}
 	} );
 
@@ -217,8 +190,6 @@ tinymce.PluginManager.add( 'noteinsert', function( editor ) {
 		onclick: function( event ) {
 			// Send data to the Customizer
 			wp.customize.NotePreview.preview.send( 'note-widget-edit', editor.note.widget_data );
-
-			// TODO: event.preventDefault()?
 		}
 	} );
 } );

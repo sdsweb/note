@@ -167,7 +167,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 			<div class="clear"></div>
 
 			<p class="note-widget-slug">
-				<?php printf( __( 'Content management brought to you by <a href="%1$s" target="_blank">Conductor</a>','note' ), esc_url( 'https://conductorplugin.com/?utm_source=note&utm_medium=link&utm_content=note-widget-branding&utm_campaign=note' ) ); ?>
+				<?php printf( __( 'Content management brought to you by <a href="%1$s" target="_blank">Conductor</a>','note' ), esc_url( 'https://conductorplugin.com/note/?utm_source=note&utm_medium=link&utm_content=note-widget-branding&utm_campaign=note' ) ); ?>
 			</p>
 		<?php
 		}

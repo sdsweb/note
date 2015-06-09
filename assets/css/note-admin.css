@@ -1,0 +1,271 @@
+/**
+ * Note Admin Stylesheet
+ */
+
+h3.note-nav-tab-wrapper {
+	margin-top: 0;
+}
+
+.form-table {
+	margin-top: 5px;
+	border-bottom: 1px solid #dfdfdf;
+}
+
+.form-table th {
+	width: 160px;
+}
+
+.form-table td {
+	padding-bottom: 1.5em;
+	position: relative;
+}
+
+.note-about-text {
+	margin: 0;
+}
+
+/* Form */
+#note-form {
+	width: 72%;
+	margin: 0;
+	padding: 0;
+	display: inline-block;
+}
+
+#note-form.note-form-add-ons {
+	width: 100%;
+}
+
+/* Over-ride default WP styling that hides error messages */
+.about-wrap div.updated, .about-wrap div.error {
+	margin-top: 1em;
+	display: block !important;
+}
+
+/* Tabs */
+.note-tab-content {
+	display: none;
+}
+
+.note-tab-content-active {
+	display: block;
+}
+
+/* Checkboxes */
+.note-checkbox input[type=checkbox] {
+	display: none;
+}
+
+.note-checkbox {
+	width: 112px;
+	height: 26px;
+	background: #fff;
+	margin: 0 0 10px;
+
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	border-radius: 5px;
+	position: relative;
+
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.5);
+	-moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.5);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.note-checkbox:before {
+	content: attr(data-label-left);
+	width: 50%;
+	padding: 0;
+
+	font-size: 14px;
+	line-height: 26px;
+	text-transform: uppercase;
+	text-align: center;
+
+	color: #fff;
+	background: #0074a2;
+
+	position: absolute;
+	left: 0;
+	z-index: 0;
+
+	border-radius: 4px 0 0 4px;
+
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.5);
+	-moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.5);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.note-checkbox:after {
+	content: attr(data-label-right);
+	width: 50%;
+	font-size: 14px;
+	line-height: 26px;
+	color: #666;
+	position: absolute;
+	right: 0;
+	z-index: 0;
+	text-transform: uppercase;
+	text-align: center;
+}
+
+.note-checkbox label {
+	display: block;
+	width: 56px;
+	height: 26px;
+
+	-webkit-border-radius: 4px 2px 2px 4px;
+	-moz-border-radius: 4px 2px 2px 4px;
+	-ms-border-radius: 4px 2px 2px 4px;
+	border-radius: 4px 2px 2px 4px;
+
+	-webkit-transition: all .25s ease;
+	-moz-transition: all .25s ease;
+	-o-transition: all .25s ease;
+	-ms-transition: all .25s ease;
+	transition: all .25s ease;
+	cursor: pointer;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 1;
+
+	text-align: center;
+	line-height: 21px;
+	font-size: 14px;
+	font-weight: bold;
+	color: #777;
+	text-shadow: 1px 1px 0 #fff;
+
+	-webkit-box-shadow: 0 0 5px 0 rgba(0,0,0,0.5);
+	-moz-box-shadow: 0 0 5px 0 rgba(0,0,0,0.5);
+	box-shadow: 0 0 5px 0 rgba(0,0,0,0.5);
+	background: #fffffc;
+}
+
+.note-checkbox input[type=checkbox]:checked + label {
+	left: 56px;
+
+	-webkit-border-radius: 2px 4px 4px 2px;
+	-moz-border-radius: 2px 4px 4px 2px;
+	-ms-border-radius: 2px 4px 4px 2px;
+	border-radius: 2px 4px 4px 2px;
+}
+
+#note-form .note-video {
+	max-width: 80%;
+}
+
+#note-form iframe {
+	max-width: 100%;
+	max-height: 352px;
+}
+
+/* Sidebar */
+#note-sidebar {
+	width: 23%;
+	margin: 0;
+	padding: 1em 2%;
+	background: #e5eef6;
+	border: 1px solid #e5eef6;
+	display: inline-block;
+	vertical-align: top;
+}
+
+#note-sidebar .note-widget {
+	margin: 0;
+	padding: 0 0 1em;
+	border-bottom: 1px dashed #ccc;
+}
+
+#note-sidebar .note-widget-last {
+	border-bottom: none;
+}
+
+#note-sidebar img {
+	max-width: 100%;
+	height: auto;
+}
+
+#note-sidebar iframe {
+	width: 100%;
+	background: #f9f9f9;
+}
+
+/* Specific Note Sidebar "Widgets" */
+#note-sidebar .note-rating,
+#note-sidebar .twitter-subscribe {
+	padding-top: 1em;
+}
+
+/* Ads */
+.note-ad {
+	margin: 0;
+	padding: 1em 0;
+	border-bottom: 1px dashed #ccc;
+}
+
+.note-upgrade-ad a {
+	padding: 1em;
+	color: #fff;
+	display: block;
+	text-decoration: none;
+
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	border-radius: 5px;
+}
+
+.note-upgrade-ad-dark-gray a {
+	background: #333;
+}
+
+.note-upgrade-ad:hover a {
+	color: #fff;
+	text-decoration: none;
+}
+
+.note-upgrade-ad h2, .note-upgrade-ad h3 {
+	margin: 0;
+	padding: 0;
+	color: #fff;
+	text-shadow: none;
+}
+
+.note-upgrade-ad ul {
+	padding-left: 1em;
+	list-style: disc;
+}
+
+/* Buttons */
+.note-btn-yellow {
+	width: 100%;
+	padding: 20px 0;
+	background-color: #deb132;
+	color: #fff;
+	text-decoration: none;
+	text-align: center;
+	display: block;
+	font-size: 18px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	text-shadow: 1px 1px 1px #555555;
+	filter: dropshadow(color=#555555, offx=1, offy=1);
+	box-shadow: inset 0px 0px 0px 1px rgba(0,0,0,0.2), inset 0px -5px 0px 0px rgba(0,0,0,0.3), inset 0px 2px 0px 0px rgba(255,255,255,0.5);
+
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	border-radius: 5px;
+}
+
+.note-btn-yellow:hover {
+	box-shadow: inset 0px 0px 0px 1px rgba(0,0,0,0.4), inset 0px -5px 0px 0px rgba(0,0,0,0.5);
+}
+
+.note-btn-yellow:active {
+	box-shadow: inset 0px 0px 0px 1px rgba(0,0,0,0.2), inset 0px -2px 0px 0px rgba(0,0,0,0.3), inset 0px 2px 0px 0px rgba(255,255,255,0.5);
+}

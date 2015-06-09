@@ -1,0 +1,2 @@
+<p><?php printf( __( 'Learn more about our newest features by watching the video below. Upgrade to Conductor to create custom layouts and grids of content on any page. <a href="%1$s" target="_blank">Upgrade now!</a>', 'note' ), 'https://conductorplugin.com/note/?utm_source=note&utm_medium=link&utm_content=sidebar&utm_campaign=note' ); ?></p>
+<p class="note-video"><?php echo wp_oembed_get( 'https://vimeo.com/130115355' ); ?></p>

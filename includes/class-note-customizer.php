@@ -4,7 +4,7 @@
  *
  * @class Note_Customizer
  * @author Slocum Studio
- * @version 1.1.2
+ * @version 1.2.0
  * @since 1.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.1.2';
+		public $version = '1.2.0';
 
 		/**
 		 * @var array
@@ -33,6 +33,46 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		 * @var array
 		 */
 		public $note_tinymce_localize = array();
+
+		/**
+		 * @var array
+		 */
+		public $note_sidebar_args = array();
+
+		/**
+		 * @var array
+		 */
+		public $note_sidebar_locations = array();
+
+		/**
+		 * @var array
+		 */
+		public $note_registered_sidebars = array();
+
+		/**
+		 * @var array
+		 */
+		public $note_unregistered_sidebars = array();
+
+		/**
+		 * @var array
+		 */
+		public $note_inactive_sidebars = array();
+
+		/**
+		 * @var array
+		 */
+		public $note_inactive_widgets = array();
+
+		/**
+		 * @var array
+		 */
+		public $note_inactive_sidebars_widgets = array();
+
+		/**
+		 * @var array
+		 */
+		public $old_sidebars_widgets = array();
 
 		/**
 		 * @var Note_Customizer, Instance of the class
@@ -54,11 +94,13 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		 * This function sets up all of the actions and filters on instance. It also loads (includes)
 		 * the required files and assets.
 		 */
-		function __construct( ) {
+		function __construct() {
 			// Hooks
 			add_action( 'init', array( $this, 'init' ) ); // Init
-			add_action( 'customize_register', array( $this, 'customize_register' ), 0 ); // Customizer Register (before anything else)
+			add_action( 'wp_loaded', array( $this, 'wp_loaded' ), 1 ); // WP Loaded (early; before core Customizer)
+			add_action( 'customize_register', array( $this, 'customize_register' ) ); // Customizer Register (before anything else)
 			add_action( 'customize_controls_enqueue_scripts', array( $this, 'customize_controls_enqueue_scripts' ) ); // Enqueue scripts in Customizer
+			add_action( 'customize_controls_print_footer_scripts', array( $this, 'customize_controls_print_footer_scripts' ) ); // Print scripts in Customizer
 			add_action( 'customize_preview_init', array( $this, 'customize_preview_init' ) ); // Customizer Preview Initialization
 		}
 
@@ -66,6 +108,8 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		 * Include required core files used in admin and on the frontend.
 		 */
 		private function includes() {
+			include_once( 'customizer/class-note-customizer-sidebar-section.php' ); // Note Sidebar Section
+			include_once( 'customizer/class-note-customizer-sidebar-control.php' ); // Note Sidebar Control
 		}
 
 		/**
@@ -73,17 +117,113 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		 * to adjust those properties by filtering.
 		 */
 		public function init() {
-			global $wp_version;
+			global $wp_version, $wp_customize, $wp_registered_widgets, $wp_registered_sidebars;
+
+			// Load required assets
+			$this->includes();
+
+			// Grab the Note Widget instance
+			$note_widget = Note_Widget();
 
 			// Determine HTML5 support
 			$caption_html5_support = current_theme_supports( 'html5', 'caption' ); // Captions
 			$gallery_html5_support = current_theme_supports( 'html5', 'gallery' ); // Galleries
 
+			// Grab Note options
+			$note_options = Note_Options::get_options();
+
+			// Setup of Note Sidebar data if we're in the Customizer
+			if ( is_customize_preview() ) {
+				// Grab the Note Sidebars instance
+				$note_sidebars = Note_Sidebars();
+
+				// Grab Note Sidebar Customizer arguments
+				$this->note_sidebar_args = Note_Sidebars::get_customizer_sidebar_args();
+
+				// Loop through Note sidebars
+				foreach ( $note_sidebars->sidebars as $post_id => $note_sidebar_ids ) {
+					// Loop through Note sidebar locations
+					foreach ( $note_sidebars->sidebar_locations as $sidebar_location )
+						// Loop through each sidebar within this location
+						foreach ( $sidebar_location as $sidebar_id )
+							// Add the sidebar ID to the list of registered sidebars
+							$this->note_sidebar_locations[] = Note_Sidebars::get_sidebar_id( $sidebar_id, $post_id );
+
+					// Loop through registered Note Sidebar IDs
+					foreach ( $note_sidebar_ids as $sidebar_id )
+						// Add the sidebar ID to the list of registered sidebars
+						$this->note_registered_sidebars[] = Note_Sidebars::get_sidebar_id( $sidebar_id, $post_id );
+				}
+
+				$this->note_unregistered_sidebars = array_values( array_diff( $this->note_sidebar_locations, $this->note_registered_sidebars ) );
+
+				$sidebars_widgets = array_merge(
+					array( 'wp_inactive_widgets' => array() ),
+					array_fill_keys( array_keys( $wp_registered_sidebars ), array() ),
+					wp_get_sidebars_widgets()
+				);
+
+				// Loop through sidebar widgets
+				foreach ( $sidebars_widgets as $sidebar_id => $sidebar_widget_ids ) {
+					if ( empty( $sidebar_widget_ids ) )
+						$sidebar_widget_ids = array();
+
+					// Unregistered Note Sidebars only
+					if ( in_array( $sidebar_id, $this->note_unregistered_sidebars ) ) {
+						// Store a reference to sidebars that were previously active but are now inactive
+						$this->note_inactive_sidebars[] = $sidebar_id;
+
+						// Add a control for each inactive widget
+						foreach ( $sidebar_widget_ids as $i => $widget_id )
+							// Only widgets that are still registered
+							if ( isset( $wp_registered_widgets[$widget_id] ) ) {
+								// Customizer is ready
+								if ( is_a( $wp_customize, 'WP_Customize_Manager' ) ) {
+									$setting_id = $wp_customize->widgets->get_setting_id( $widget_id );
+
+									// Store a reference to the Customizer setting ID for this inactive widget
+									$this->note_inactive_widgets[] = array(
+										'widget_id' => $widget_id,
+										'setting_id' => $setting_id
+									);
+
+									if ( ! isset( $this->note_inactive_sidebars_widgets[$sidebar_id] ) )
+										$this->note_inactive_sidebars_widgets[$sidebar_id] = array();
+
+									// Store a reference to the inactive widget attached to the sidebar ID
+									$this->note_inactive_sidebars_widgets[$sidebar_id][$i] = array(
+										'widget_id' => $widget_id,
+										'setting_id' => $setting_id
+									);
+								}
+							}
+					}
+				}
+			}
+
 			// Setup Customizer localization
 			$this->note_customizer_localize = apply_filters( 'note_customizer_localize', array(
 				'wp_version' => $wp_version,
-				'wp_major_version' => ( int ) substr( $wp_version, 0, 1 )
+				'wp_major_version' => ( int ) substr( $wp_version, 0, 1 ),
+				// Note Sidebars
+				'sidebars' => array(
+					// Registered sidebars
+					'registered' => $note_options['sidebars'],
+					// Customizer data
+					'customizer' => array(
+						'setting' => 'note[sidebars]',
+						'section' => 'note_sidebars',
+						'control' => 'note_sidebars',
+						'section_prefix' => 'sidebar-widgets-',
+						'inactive_sidebars' => $this->note_inactive_sidebars,
+						'inactive_widgets' => $this->note_inactive_widgets,
+						'inactive_sidebars_widgets' => $this->note_inactive_sidebars_widgets
+					),
+					// Note Sidebar args
+					'args' => $this->note_sidebar_args
+				)
 			), $this );
+
 
 			// Setup Previewer localization
 			$this->note_localize = apply_filters( 'note_localize', array(
@@ -127,7 +267,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 						// Align Left
 						'alignleft' => array(
 							array(
-								'selector' => 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li',
+								'selector' => 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,address',
 								'styles' => array(
 									'textAlign' => 'left'
 								)
@@ -142,7 +282,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 						// Align Center
 						'aligncenter' => array(
 							array(
-								'selector' => 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li',
+								'selector' => 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,address',
 								'styles' => array(
 									'textAlign' => 'center'
 								)
@@ -157,7 +297,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 						// Align Right
 						'alignright' => array(
 							array(
-								'selector' => 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li',
+								'selector' => 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,address',
 								'styles' => array(
 									'textAlign' => 'right'
 								)
@@ -176,7 +316,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 					'convert_urls' => false,
 					'browser_spellcheck' => true,
 					'entity_encoding' => 'named',
-					'placeholder' => apply_filters( 'note_widget_content_placeholder', __( 'Start typing here&hellip;', 'note' ), $this ),
+					'placeholder' => apply_filters( 'note_tinymce_placeholder', __( 'Start typing here&hellip;', 'note' ), $this ),
 					// HTML5 Support
 					'html5_support' => array(
 						// Captions
@@ -213,7 +353,10 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 							'wpLoadImageForm'
 						),
 						// Document, events triggered on the document( $( document ) ); jQuery( document ).on()
-						'document' => array(),
+						'document' => array(
+							// On the document "note-modal-open" event
+							'note-modal-open'
+						),
 						// wp.media.events, events triggered on the media frame
 						'wp.media.events' => array(
 							// On the wp.media editor:image-edit command, when an editor image is edited, bind the close event
@@ -232,10 +375,12 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 								'wp.media.frame' => 'close' // Command name that we should look for, close is triggered when the modal is closed
 							)
 						),
-						// Document, events triggered on the document( $( document ) ); jQuery( document ).on()
+						// Document, events triggered on the document ( $( document ) ); jQuery( document ).on()
 						'document' => array(
 							// On the document "wplink-close" event
-							'wplink-close'
+							'wplink-close',
+							// On the document "note-modal-close" event
+							'note-modal-close'
 						),
 						// wp.media.events, events triggered on the media frame
 						'wp.media.events' => array(
@@ -246,8 +391,39 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 							)
 						)
 					)
+				),
+				// Note Widget
+				'widget' => array(
+					'id' => $note_widget->id_base
+				),
+				// Note modal windows
+				'modals' => array(
+					// Register Sidebar
+					'register_sidebar' => array(
+						'title' => __( 'Add Note Sidebar', 'note' ),
+						'content' => sprintf( '%1$s <div class="inputs"><input type="checkbox" name="ignore-register-sidebar" id="note-ignore-register-sidebar" class="ignore-register-sidebar ignore-register-sidebar-modal" value="true" /> <label for="note-ignore-register-sidebar">%2$s</label></div>',
+							__( 'Are you sure you want to add a sidebar to this location?', 'note' ),
+							__( 'Don\'t display this confirmation in the future', 'note' )
+						),
+						'submit_label' => __( 'Add Note Sidebar', 'note' )
+					),
+					// Unregister (Remove) Sidebar
+					'unregister_sidebar' => array(
+						'title' => __( 'Remove Note Sidebar', 'note' ),
+						'content' => sprintf( '%1$s',
+							__( 'Are you sure you want to remove this sidebar?', 'note' )
+						),
+						// TODO
+						/*'content' => sprintf( '%1$s <div class="inputs"><input type="checkbox" name="remove-note-widgets" class="remove-note-widgets" value="true" /> <label for="remove-note-widgets">%2$s</label> <span class="description">%3$s</span></div>',
+							__( 'Are you sure you want to remove this sidebar?', 'note' ),
+							__( 'Remove all widgets in this sidebar', 'note' ),
+							__( 'Widgets that are not removed will be placed in the Inactive Sidebar.', 'note' )
+						),*/
+						'submit_label' => __( 'Remove Note Sidebar', 'note' )
+					)
 				)
 			) );
+
 
 			// Setup Previewer TinyMCE localization
 			$this->note_tinymce_localize = apply_filters( 'note_tinymce_localize', array(
@@ -257,17 +433,171 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		}
 
 		/**
+		 * This function checks to see if a theme is being previewed in the Customizer and attempts
+		 * to keep Note Sidebars and widgets.
+		 */
+		public function wp_loaded() {
+			global $wp_customize;
+
+			// Bail if the Customizer isn't ready or we're doing AJAX or the theme is active
+			if ( ! is_a( $wp_customize, 'WP_Customize_Manager' ) || $wp_customize->doing_ajax() || $wp_customize->is_theme_active() )
+				return;
+
+			// TODO: Possibly use $wp_customize->widgets->old_sidebars_widgets here
+			// Grab the current version of the sidebar widgets
+			$this->old_sidebars_widgets = wp_get_sidebars_widgets();
+
+			// Filter the sidebars widgets
+			add_filter( 'option_sidebars_widgets', array( $this, 'option_sidebars_widgets' ), 20 ); // After core Customizer
+		}
+
+		/**
+		 * This function filters the sidebars_widgets option after it is returned from the database.
+		 */
+		public function option_sidebars_widgets( $value ) {
+			global $wp_customize;
+
+			// Bail if the Customizer isn't ready
+			if ( ! is_a( $wp_customize, 'WP_Customize_Manager' ) )
+				return $value;
+
+			$note_sidebars = Note_Sidebars(); // Grab the Note Sidebars instance
+
+			// Attempt to save Note sidebars/widgets
+			$value = $note_sidebars->pre_update_option_sidebars_widgets( $value, $this->old_sidebars_widgets );
+
+			return $value;
+		}
+
+		/**
 		 * This function registers sections and settings for use in the Customizer.
 		 */
 		public function customize_register( $wp_customize ) {
-			// Load required assets
-			$this->includes();
+			// Bail if lower than WordPress 4.1
+			if ( Note::wp_version_compare( '4.1', '<' ) )
+				return;
+
+			$note_option_defaults = Note_Options::get_option_defaults();
+			$note_sidebars = Note_Sidebars(); // Grab the Note Sidebars instance
+
+			/**
+			 * Note
+			 */
+
+			/*
+			 * Note Sidebars
+			 */
+
+			// Setting (data is sanitized upon update_option() call using the sanitize function in Note_Admin_Options)
+			$wp_customize->add_setting(
+				new WP_Customize_Setting( $wp_customize,
+					'note[sidebars]', // IDs can have nested array keys
+					array(
+						'default' => $note_option_defaults['sidebars'],
+						'type' => 'option',
+						'sanitize_callback' => array( $note_sidebars, 'sanitize_callback' ),
+						'sanitize_js_callback' => array( $note_sidebars, 'sanitize_js_callback' )
+					)
+				)
+			);
+
+			// Section
+			$wp_customize->add_section(
+				new WP_Customize_Section(
+					$wp_customize,
+					'note_sidebars',
+					array(
+						'title' => __( 'Note Sidebars', 'note' ),
+						'priority' => 999
+					)
+				)
+			);
+
+			// Control
+			$wp_customize->add_control(
+				new WP_Customize_Control(
+					$wp_customize,
+					'note_sidebars',
+					array(
+						'label' => __( 'Note Sidebars', 'note' ),
+						'section' => 'note_sidebars',
+						'settings' => 'note[sidebars]',
+						'input_attrs' => array(
+							'class' => 'note-sidebars note-hidden'
+						),
+						'active_callback' => '__return_false' // Hide this control by default
+						//'type' => 'note_hidden', // Used in js controller (we're not registering this type of control constructor so a regular control will be created on init)
+					)
+				)
+			);
+
+
+			/*
+			 * Note Temporary Sidebar
+			 */
+
+			// Setting
+			$wp_customize->add_setting(
+				new WP_Customize_Setting( $wp_customize,
+					'sidebars_widgets[note-temporary-inactive-sidebar]', // IDs can have nested array keys
+					array(
+						'default' => array(),
+						'type' => 'option',
+						'sanitize_callback' => array( $wp_customize->widgets, 'sanitize_sidebar_widgets' ),
+						'sanitize_js_callback' => array( $wp_customize->widgets, 'sanitize_sidebar_widgets_js_instance' )
+					)
+				)
+			);
+
+			// Section
+			$wp_customize->add_section(
+				new WP_Customize_Sidebar_Section(
+					$wp_customize,
+					'sidebar-widgets-note-temporary-inactive-sidebar',
+					array(
+						'title' => __( 'Note Temporary Inactive Sidebar', 'note' ),
+						'description' => __( 'This is a temporary sidebar registered by Note in the Customizer only. It will hold inactive Note Sidebar widgets during a session', 'note' ),
+						'priority' => 999,
+						'panel' => 'widgets',
+						'sidebar_id' => 'note-temporary-inactive-sidebar',
+					)
+				)
+			);
+
+			// Control
+			$wp_customize->add_control(
+				new WP_Widget_Area_Customize_Control(
+					$wp_customize,
+					'sidebars_widgets[note-temporary-inactive-sidebar]',
+					array(
+						'section'    => 'sidebar-widgets-note-temporary-inactive-sidebar',
+						'sidebar_id' => 'note-temporary-inactive-sidebar',
+						'priority'   => 999,
+						'active_callback' => '__return_false' // Hide this control by default
+					)
+				)
+			);
+
+
+			/*
+			 * Inactive Widgets
+			 *
+			 * WordPress does not create controls for inactive widgets, but we need those controls
+			 * because sidebars can be removed and added dynamically. Only do this in the Customizer
+			 * and only do this for Note Sidebars.
+			 *
+			 * The Previewer controls are added in Note_Customizer::wp() after the core filters have been run.
+			 */
+
+			// Admin
+			if ( is_admin() )
+				$this->register_inactive_note_widgets();
 		}
 
 		/**
 		 * This function enqueues scripts within the Customizer.
 		 */
-		function customize_controls_enqueue_scripts() {
+		public function customize_controls_enqueue_scripts() {
 			// Note Customizer
 			wp_enqueue_script( 'note-customizer', Note::plugin_url() . '/assets/js/note-customizer.js', array( 'customize-widgets' ), Note::$version, true );
 
@@ -276,13 +606,53 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		}
 
 		/**
+		 * This function prints scripts within the Customizer.
+		 */
+		public function customize_controls_print_footer_scripts() {
+			// Note Widget Re-Order Template
+			self::note_widget_reorder_template();
+		}
+
+		/**
 		 * This function fires on the initialization of the Customizer. We add actions that pertain to the
 		 * Customizer preview window here. The actions added here are fired only in the Customizer preview.
 		 */
 		public function customize_preview_init() {
+			add_action( 'wp', array( $this, 'wp' ) ); // WP
 			add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) ); // Previewer Scripts/Styles
 			add_action( 'dynamic_sidebar_params', array( $this, 'dynamic_sidebar_params' ) ); // Filter Dynamic Sidebar Parameters (Note Widgets)
 			add_action( 'wp_footer', array( $this, 'wp_footer' ) ); // Output WordPress Link Dialog Template
+		}
+
+		/**
+		 * This function runs after the WP and WP_Query objects are set up.
+		 */
+		function wp() {
+			// Bail if lower than WordPress 4.1
+			if ( Note::wp_version_compare( '4.1', '<' ) )
+				return;
+
+			// Note Sidebars (single content types only)
+			if ( is_singular() ) {
+				// Grab Note Sidebar Customizer arguments (keep Customizer Sections/Controls active for Previewer)
+				$this->note_sidebar_args = Note_Sidebars::get_customizer_sidebar_args( true );
+
+				// Note Sidebar args
+				if ( ! isset( $this->note_localize['sidebars'] ) )
+					$this->note_localize['sidebars'] = array();
+
+				$this->note_localize['sidebars']['args'] = apply_filters( 'note_localize_sidebar_args', $this->note_sidebar_args, $this );
+
+				/*
+				 * Inactive Widgets
+				 *
+				 * WordPress does not create controls for inactive widgets, but we need those controls
+				 * because sidebars can be removed and added/re-added dynamically. Only do this in the
+				 * Customizer and only do this for Note Sidebars.
+				 */
+
+				$this->register_inactive_note_widgets( true );
+			}
 		}
 
 		/**
@@ -327,7 +697,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 			wp_enqueue_script( 'note-tinymce-theme', Note::plugin_url() . '/assets/js/note-tinymce-theme.js', array( 'note-tinymce' ), Note::$version, true );
 
 			// Note Core
-			wp_enqueue_script( 'note', Note::plugin_url() . '/assets/js/note.js', array( 'note-tinymce', 'wp-util', 'editor', 'wp-lists', 'customize-preview-widgets', 'jquery-ui-core', 'underscore' ), Note::$version, true );
+			wp_enqueue_script( 'note', Note::plugin_url() . '/assets/js/note.js', array( 'note-tinymce', 'wp-util', 'editor', 'wp-lists', 'customize-preview-widgets', 'jquery-ui-core', 'underscore', 'wp-backbone' ), Note::$version, true );
 			wp_localize_script( 'note', 'note', $this->note_localize );
 
 			// WordPress Lists
@@ -358,6 +728,9 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 
 			// Dashicons
 			wp_enqueue_style( 'dashicons' );
+
+			// Open Sans
+			wp_enqueue_style( 'open-sans' );
 		}
 
 		/**
@@ -390,6 +763,243 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 				require( ABSPATH . WPINC . '/class-wp-editor.php' );
 
 			_WP_Editors::wp_link_dialog();
+
+			// Note Modal Templates
+			self::note_modal_templates();
+		}
+
+
+		/**********************
+		 * Internal Functions *
+		 **********************/
+
+		/**
+		 * This function outputs a note sidebar placeholder element based on parameters.
+		 */
+		// TODO: Filter
+		public static function note_sidebar_placeholder( $sidebar_id, $post_id, $inactive = false ) {
+			// Base CSS Classes
+			$css_classes = array(
+				'note-sidebar',
+				'note-sidebar-placeholder',
+				'note-sidebar-placeholder-register',
+				'note-sidebar-placeholder-' . $sidebar_id,
+				'note-sidebar-placeholder-' . $sidebar_id . '-' . $post_id
+			);
+
+			// Inactive CSS classes
+			if ( $inactive ) {
+				// Remove the 'note-sidebar-placeholder-register' CSS class
+				if ( ( $key = array_search( 'note-sidebar-placeholder-register', $css_classes ) ) !== false ) {
+					unset( $css_classes[$key] );
+				}
+
+				$css_classes = array_merge( $css_classes, array(
+					'note-sidebar-placeholder-inactive',
+					'note-sidebar-placeholder-inactive-' . $sidebar_id,
+					'note-sidebar-placeholder-inactive-' . $sidebar_id . '-' . $post_id
+				) );
+			}
+
+			// Sanitize CSS classes
+			$css_classes = array_filter( $css_classes, 'sanitize_html_class' );
+
+			// Note Sidebar Placeholder (inactive sidebar)
+			$placeholder = '<div class="' . esc_attr( implode( ' ', $css_classes ) ) . '" data-post-id="' . esc_attr( $post_id ) . '" data-note-sidebar-id="' . esc_attr( $sidebar_id ) . '" data-note-sidebar="true">';
+				// Note UI Buttons for inactive sidebars, register sidebar button for non-registered sidebars
+				$placeholder .= ( $inactive ) ? self::note_sidebar_ui_buttons() : '<div class="note-sidebar-register"></div>';
+			$placeholder .='</div>';
+
+			return $placeholder;
+		}
+
+		/**
+		 * This function creates markup for all Note UI buttons.
+		 */
+		public static function note_sidebar_ui_buttons() {
+			// Note UI buttons
+			$note_ui_buttons = apply_filters( 'note_sidebar_ui_buttons', array(
+				// Add Widget Button
+				array(
+				 	'id' => 'add-widget',
+					'label' => 'W',
+					'title' => __( 'Add Widget', 'note' )
+				),
+				// Add Note Widget Button
+				array(
+				 	'id' => 'add-note-widget',
+					'label' => 'N',
+					'title' => __( 'Add Note Widget', 'note' )
+				),
+				// Remove Sidebar Button
+				array(
+				 	'id' => 'remove-note-sidebar',
+					'label' => '<span class="dashicons dashicons-no-alt"></span>',
+					'title' => __( 'Remove Note Sidebar', 'note' )
+				)
+			) );
+
+			$buttons_html = '<div class="note-sidebar-placeholder-edit-buttons">';
+				// Note Edit Button
+				$buttons_html .= '<span class="note-ui-button note-button note-edit-sidebar-button" title="Edit Sidebar">';
+					$buttons_html .= '<span class="dashicons dashicons-edit note-button-label"></span>';
+				$buttons_html .= '</span>';
+
+				// Loop through each placeholder button
+				foreach ( $note_ui_buttons as $number => $button )
+					$buttons_html .= self::note_sidebar_ui_button( $button, ( $number + 1 ) );
+
+			$buttons_html .= '</div>';
+
+			// TODO: Filter
+			return $buttons_html;
+		}
+
+		/**
+		 * This function creates markup for a single Note UI button.
+		 */
+		public static function note_sidebar_ui_button( $button, $number ) {
+			// CSS classes
+			// TODO: Filter
+			$css_classes = array(
+				'note-ui-button',
+				'note-button',
+				'note-secondary-button',
+				'note-secondary-button-' . $number,
+				'note-' . $button['id'],
+				'note-' . $button['id'] . '-button'
+			);
+
+			// Sanitize CSS classes
+			$css_classes = array_filter( $css_classes, 'sanitize_html_class' );
+
+			// Button HTML
+			$button_html = '<span class="note-ui-button-wrap note-secondary-button-wrap note-secondary-button-wrap-' . esc_attr( $number ) . '">';
+				$button_html .= '<span class="' . esc_attr( implode( ' ', $css_classes ) ) . '" title="' . esc_attr( $button['title'] ) . '">';
+					$button_html .= ( strpos($button['label'], 'dashicons' ) ) ? '<span class="note-ui-button-label note-button-label note-button-label-dashicons">' : '<span class="note-ui-button-label note-button-label note-button-label-text">';
+						$button_html .= $button['label'];
+					$button_html .= '</span>';
+				$button_html .= '</span>';
+			$button_html .= '</span>';
+
+			// TODO: Filter
+			return $button_html;
+		}
+
+		/**
+		 * This function outputs the Note modal UnderscoreJS templates.
+		 */
+		public static function note_modal_templates() {
+			// Note Modal Overlay Template
+			self::note_modal_overlay_template();
+
+			// Note Modal Content Template
+			self::note_modal_content_template();
+
+			// Note Modal HTML Elements
+			self::note_modal_html_elements();
+		}
+
+		/**
+		 * This function outputs the Note modal overlay UnderscoreJS template.
+		 */
+		public static function note_modal_overlay_template() {
+		?>
+			<script type="text/template" id="tmpl-note-modal-overlay">
+				<div class="note-overlay"></div>
+			</script>
+		<?php
+		}
+
+		/**
+		 * This function outputs the Note modal content UnderscoreJS template.
+		 */
+		// TODO: i18n, l10n
+		public static function note_modal_content_template() {
+		?>
+			<script type="text/template" id="tmpl-note-modal-content">
+				<div class="note-modal wp-core-ui">
+					<div class="note-modal-header">
+						{{ data.title }}
+						<a class="note-modal-close" href="#" title="<?php esc_attr_e( 'Close', 'note' ); ?>">
+							<span class="dashicons dashicons-no"></span>
+							<span class="screen-reader-text"><?php _e( 'Close', 'note' ); ?></span>
+						</a>
+					</div>
+					<div class="note-modal-content">{{{ data.content }}}</div>
+					<div class="note-modal-footer">
+						<div class="note-modal-buttons note-modal-buttons-left">
+							<a class="note-modal-cancel" href="#" title="<?php esc_attr_e( 'Cancel', 'note' ); ?>">
+								<?php _e( 'Cancel', 'note' ); ?>
+							</a>
+						</div>
+						<div class="note-modal-buttons note-modal-buttons-right">
+							<button class="note-modal-submit button button-primary" name="note-modal-submit">{{ data.submit_label }}</button
+						</div>
+					</div>
+				</div>
+			</script>
+		<?php
+		}
+
+		/**
+		 * This function outputs the Note modal HTML elements.
+		 */
+		public static function note_modal_html_elements() {
+		?>
+			<div id="note-modal">
+				<div id="note-modal-overlay"></div>
+				<div id="note-modal-content"></div>
+			</div>
+		<?php
+		}
+
+		/**
+		 * This function outputs the Note widget re-order UnderscoreJS template.
+		 */
+		public static function note_widget_reorder_template() {
+		?>
+			<script type="text/template" id="tmpl-note-widget-reorder" xmlns="http://www.w3.org/1999/html">
+				<li class="" data-id="{{ data.id }}" title="{{ data.description }}" tabindex="0">{{ data.name }}</li>
+			</script>
+		<?php
+		}
+
+		/**
+		 * This function registers controls for all inactive widgets inside of previously
+		 * inactive Note Sidebars.
+		 */
+		public function register_inactive_note_widgets( $previewer = false ) {
+			global $wp_customize, $wp_registered_widgets, $wp_registered_widget_controls;
+
+			// Loop through inactive sidebars
+			foreach ( $this->note_inactive_sidebars_widgets as $sidebar_id => $widgets )
+				// Loop through widgets
+				foreach ( $widgets as $i => $widget ) {
+					$widget_id = $widget['widget_id'];
+					$setting_id = $widget['setting_id'];
+					$registered_widget = $wp_registered_widgets[$widget_id];
+					$id_base = $wp_registered_widget_controls[$widget_id]['id_base'];
+
+					$control_args = array(
+						'label' => $registered_widget['name'],
+						'section' => 'sidebar-widgets-note-temporary-inactive-sidebar', // Temporary/hidden section
+						'sidebar_id' => $sidebar_id,
+						'widget_id' => $widget_id,
+						'widget_id_base' => $id_base,
+						'priority' => $i,
+						'width' => $wp_registered_widget_controls[$widget_id]['width'],
+						'height' => $wp_registered_widget_controls[$widget_id]['height'],
+						'is_wide' => $wp_customize->widgets->is_wide_widget( $widget_id ),
+						'active_callback' => '__return_true' // Fake an active state
+					);
+
+					// Create the control
+					$control = new WP_Widget_Form_Customize_Control( $wp_customize, $setting_id, $control_args );
+
+					// Add the control
+					$wp_customize->add_control( $control );
+				}
 		}
 	}
 

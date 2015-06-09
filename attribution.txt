@@ -105,3 +105,9 @@
  *
  * @see https://github.com/WordPress/WordPress/blob/4.0-branch/wp-includes/js/tinymce/plugins/wpview/plugin.js
  */
+
+/**
+ * FitVids - /assets/js/fitvids.js - https://github.com/davatron5000/FitVids.js
+ * License: WTFPL
+ * Copyright: Chris Coyier - http://css-tricks.com/ & Dave Rupert - http://daverupert.com/
+ */

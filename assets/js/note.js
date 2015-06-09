@@ -31,6 +31,7 @@
 		is_widget_modal_active: false,
 		$note_widgets: false,
 		$document: false,
+        $body: false,
 		transition_duration: 400, // CSS transition is 400ms
 		// Initialization
 		init: function () {
@@ -44,6 +45,9 @@
 
 			// Set the document jQuery reference
 			this.$document = $( document );
+
+            // Set the document jQuery reference
+            this.$body = $( 'body' );
 
 			// When the previewer is active
 			this.preview.bind( 'active', function() {
@@ -146,7 +150,8 @@
 							prev_content: '', // Reference to the previous content within the editor
 							focus_event: false, // Flag
 							current_element: false,
-							current_offset: 0
+							current_offset: 0,
+							media: {}
 						};
 
 						// Add this editor reference to the list of editors
@@ -230,13 +235,6 @@
 								content = editor.getContent(),
 								data = {};
 
-							// Stop propagation to other callbacks on links to prevent Previewer refreshes
-							// TODO: Necessary?
-							/*$el.find( 'a' ).on( 'click.note-widget', function( event ) {
-								event.stopImmediatePropagation(); // prevent this event from bubbling up and firing other callbacks and event handlers
-								event.stopPropagation(); // prevent this event from bubbling up and firing other callbacks and event handlers
-							} );*/
-
 							// Content within the editor has changed or this is an initial Previewer load
 							if ( ( ! editor.note.hasOwnProperty( 'prevent_widget_update' ) || ! editor.note.prevent_widget_update ) && ( editor.note.prev_content === '' || editor.note.prev_content !== content ) ) {
 								// Deep copy
@@ -260,9 +258,7 @@
 						if ( self.modal_commands && self.modal_commands.hasOwnProperty( 'activate' ) ) {
 							// Setup active modal commands
 							self.setupModalCommands( 'activate', self.modal_commands.activate, {
-								editor: editor,
-								document: self.$document,
-								media: wp.media
+								editor: editor
 							} );
 						}
 
@@ -270,13 +266,150 @@
 						if ( self.modal_commands && self.modal_commands.hasOwnProperty( 'deactivate' ) ) {
 							// Setup active modal commands
 							self.setupModalCommands( 'deactivate', self.modal_commands.deactivate, {
-								editor: editor,
-								document: self.$document,
-								media: wp.media
+								editor: editor
 							} );
 						}
 					}
 				} ) );
+
+				/*
+				 * Determine if we have any modal commands that should set the active
+				 * or inactive modal flags in the Customizer.
+				 */
+
+				// Activate
+				if ( self.modal_commands && self.modal_commands.hasOwnProperty( 'activate' ) ) {
+					// Setup active modal commands
+					self.setupModalCommands( 'activate', self.modal_commands.activate, {
+						document: self.$document,
+						media: wp.media
+					} );
+				}
+
+				// Deactivate
+				if ( self.modal_commands && self.modal_commands.hasOwnProperty( 'deactivate' ) ) {
+					// Setup active modal commands
+					self.setupModalCommands( 'deactivate', self.modal_commands.deactivate, {
+						document: self.$document,
+						media: wp.media
+					} );
+				}
+
+
+				/*
+				 * Note Sidebars
+				 */
+
+				// Note Sidebars exist
+				if ( note.hasOwnProperty( 'sidebars' ) && note.sidebars.hasOwnProperty( 'args' ) && note.sidebars.args ) {
+					// Send the Note Sidebar arguments to the Customizer (specific to the page being displayed)
+					self.preview.send( 'note-sidebar-args', note.sidebars.args );
+
+					/*
+					 * Note UI Buttons
+					 */
+
+					// Note Edit Sidebar Button Mouseenter
+					self.$document.on( 'mouseenter.note', '.note-edit-sidebar-button', function( event ) {
+						var $this = $( this );
+
+						// Stop the timer to remove "hover" CSS class
+						clearTimeout( $this.data( 'note-hover-timer' ) );
+
+						// Add the "hover" CSS classes
+						$this.parent().addClass( 'hover' );
+
+						$this.parents( '.note-sidebar' ).addClass( 'note-edit-border' );
+					} );
+
+					// Note Edit Sidebar Button Mouseleave
+					self.$document.on( 'mouseleave.note', '.note-edit-sidebar-button', function( event ) {
+						var $this = $( this );
+
+						// Remove the "hover" CSS classes after 400ms
+						$this.data( 'note-hover-timer', setTimeout( function() {
+							$this.parent().removeClass( 'hover' );
+
+							$this.parents( '.note-sidebar' ).removeClass( 'note-edit-border' );
+						}, self.transition_duration ) );
+					} );
+
+					// Note Edit Sidebar Button Click
+					self.$document.on( 'touch click', '.note-edit-sidebar-button', function( event ) {
+						var $this = $( this ),
+							$sidebar = $this.parents( '.note-sidebar' ),
+							sidebar_id = $sidebar.attr( 'data-note-sidebar-id' );
+
+						// Send the 'note-edit-sidebar' data to the Customizer
+						self.preview.send( 'note-edit-sidebar', {
+							sidebar_id: ( $sidebar.attr( 'data-note-sidebar' ) === 'true' ) ? note.sidebars.args[sidebar_id].customizer.section.sidebarId : sidebar_id
+						} );
+					} );
+
+					// Note Secondary Buttons Mouseenter
+					self.$document.on( 'mouseenter.note', '.note-secondary-button-wrap', function( event ) {
+						var $this = $( this ),
+							$edit_button = $this.parent().find( '.note-edit-sidebar-button' );
+
+						// Stop the timer to remove "hover" CSS class
+						clearTimeout( $edit_button.data( 'note-hover-timer' ) );
+					} );
+
+					// Note Secondary Buttons Mouseleave
+					self.$document.on( 'mouseleave.note', '.note-secondary-button-wrap', function( event ) {
+						var $this = $( this ),
+							$edit_button = $this.parent().find( '.note-edit-sidebar-button' );
+
+						// Remove the "hover" CSS classes after 400ms
+						$edit_button.data( 'note-hover-timer', setTimeout( function() {
+							$edit_button.parent().removeClass( 'hover' );
+
+							$edit_button.parents( '.note-sidebar' ).removeClass( 'note-edit-border' );
+						}, self.transition_duration ) );
+					} );
+
+					// Note Add Widget Button
+					self.$document.on( 'touch click', '.note-add-widget-button', function( event ) {
+						var $this = $( this ),
+							$sidebar = $this.parents( '.note-sidebar' ),
+							sidebar_id = $sidebar.attr( 'data-note-sidebar-id' );
+
+						// Send the 'note-add-widget' data to the Customizer
+						self.preview.send( 'note-add-widget', {
+							sidebar_id: ( $sidebar.attr( 'data-note-sidebar' ) === 'true' ) ? note.sidebars.args[sidebar_id].customizer.section.sidebarId : sidebar_id
+						} );
+					} );
+
+					// Note Add Note Widget Button
+					self.$document.on( 'touch click', '.note-add-note-widget-button', function( event ) {
+						var $this = $( this ),
+							$sidebar = $this.parents( '.note-sidebar' ),
+							sidebar_id = $sidebar.attr( 'data-note-sidebar-id' );
+
+						// Send the 'note-add-note-widget' data to the Customizer
+						self.preview.send( 'note-add-note-widget', {
+							sidebar_id: ( $sidebar.attr( 'data-note-sidebar' ) === 'true' ) ? note.sidebars.args[sidebar_id].customizer.section.sidebarId : sidebar_id,
+							widget_id: note.widget.id
+						} );
+					} );
+
+					// Note Remove Note Sidebar Button
+					self.$document.on( 'touch click', '.note-remove-note-sidebar-button', function( event ) {
+						var $this = $( this ),
+							$sidebar = $this.parents( '.note-sidebar' ),
+							post_id = $sidebar.attr( 'data-post-id' ),
+							sidebar_id = $sidebar.attr( 'data-note-sidebar-id' );
+
+						// Render the modal
+						api.NotePreview.views.modals.unregister_sidebar.modal.render( {
+							command: 'note-unregister-sidebar',
+							data: {
+								post_id: post_id,
+								note_sidebar_id: sidebar_id
+							}
+						} );
+					} );
+				}
 			} );
 		},
 		/**
@@ -308,7 +441,7 @@
 						// wp.media Events
 						case 'wp.media.events':
 							// Reference to wp.media.events
-							target = targets.media.events;
+							target = targets.media && targets.media.events;
 						break;
 
 						// wp.media Frame
@@ -370,8 +503,8 @@
 			// Setup the listener function
 			listener = function( event ) {
 				var event_sub_command = false,
-					content = editor.getContent(), // Get the editor content
-					data = $.extend( true, editor.note.widget_data, { widget: { content: content } } ), // Deep copy
+					content = editor && editor.getContent() || '', // Get the editor content
+					data = $.extend( true, editor && editor.note && editor.note.widget_data || {}, { widget: { content: content } } ), // Deep copy
 					obj_keys = [], // Reference to sub-command object keys
 					listener_obj_keys = [], // Reference to listener sub-command object keys
 					sub_target,
@@ -421,13 +554,13 @@
 						// wp.media Events
 						case 'wp.media.events':
 							// Reference to wp.media.events
-							sub_target = media.events;
+							sub_target = wp.media.events;
 						break;
 
 						// wp.media Frame
 						case 'wp.media.frame':
 							// Reference to wp.media.frame
-							sub_target = media.frame;
+							sub_target = wp.media.frame;
 						break;
 					}
 
@@ -502,6 +635,357 @@
 					self.preview.send( 'note-widget-modal-inactive', true );
 				break;
 			}
+		},
+		// Note WP/Backbone Views
+		Views: {
+			// Modal
+			Modal: wp.Backbone.View.extend( {
+				el: '#note-modal',
+				overlay_el: '#note-modal-overlay',
+				content_el: '#note-modal-content',
+				// Initialize
+				initialize: function() {
+					// Bind "this" to all functions
+					_.bindAll(
+						this,
+						'render',
+						'open',
+						'close'
+					);
+				},
+				// Render
+				render: function( data ) {
+					// Setup submit data across subviews first
+					if ( this.hasData( data, 'command' ) && this.hasData( data, 'data' ) ) {
+						this.setupSubmitData( data.command, data.data );
+					}
+
+					// Verify that we've passed localStorage checks before rendering
+					if ( this.hasData( data, 'localStorage' ) && this.checklocalStorageData( data.localStorage.key, data.localStorage.value ) ) {
+						// "Close" the modal if localStorage data is set
+						this.close( {}, true );
+
+						return this;
+					}
+
+					// Call (apply) the default wp.Backbone.View render function
+					wp.Backbone.View.prototype.render.apply( this, arguments );
+
+					// "Open" the modal
+					this.open();
+
+					// Setup localStorage data across subviews
+					if ( this.hasData( data, 'localStorage' ) ) {
+						this.setuplocalStorageData( data.localStorage.key, data.localStorage.value );
+					}
+
+					return this;
+				},
+				// This function runs on the opening of the modal overlay
+				open: function() {
+					var subviews = this.views.all();
+
+					// Show the modal element
+					this.$el.show();
+
+					// Loop through subviews
+					_.each( subviews, function ( view ) {
+						// If the sub-vew has an open function
+						if ( view.hasOwnProperty( 'open' ) && _.isFunction( view.open ) ) {
+							// Open the sub-view
+							view.open();
+						}
+					} );
+
+					// Trigger an event on the document
+					api.NotePreview.$document.trigger( 'note-modal-open', this );
+
+					// Allow chaining
+					return this;
+				},
+				// This function runs on the closing of the modal overlay
+				close: function( event, submit ) {
+					var subviews = this.views.all();
+
+					// Trigger an event on the document
+					api.NotePreview.$document.trigger( 'note-modal-close', this );
+
+					// Hide the modal element
+					this.$el.hide();
+
+					// Reset the rendered flag
+					this.views.rendered = false;
+
+					// Loop through subviews
+					_.each( subviews, function ( view ) {
+						// If the sub-vew has a close function
+						if ( view.hasOwnProperty( 'close' ) && _.isFunction( view.close ) ) {
+							// Close the sub-view
+							view.close( event, submit );
+
+							// Reset the rendered flag
+							view.views.rendered = false;
+						}
+					} );
+
+					// Allow chaining
+					return this;
+				},
+				// This function passes render data to subviews
+				setupSubmitData: function( command, data ) {
+					var subviews = this.views.all();
+
+					// Loop through subviews
+					_.each( subviews, function ( view ) {
+						// Add submit command
+						view.options.submit_command = command;
+
+						// Add submit data
+						view.options.submit_data = data;
+					} );
+				},
+				// This function passes localStorage data to subviews
+				setuplocalStorageData: function( key, value ) {
+					var subviews = this.views.all();
+
+					// Loop through subviews
+					_.each( subviews, function ( view ) {
+						// Create the localStorage option
+						view.options.localStorage = view.options.localStorage || {};
+
+						// Add submit command
+						view.options.localStorage.key = key;
+
+						// Add submit data
+						view.options.localStorage.value = value;
+					} );
+				},
+				// This function checks to see if data exists
+				hasData: function( data, key ) {
+					return data.hasOwnProperty( key );
+				},
+				// This function checks localStorage data to verify
+				checklocalStorageData: function( key, value ) {
+					var localStorageData = ( localStorage['note'] !== undefined ) ? JSON.parse( localStorage['note'] ) : {};
+
+					// Determine if we have a key and the value matches
+					return localStorageData['modals'] && localStorageData['modals'][key] && localStorageData['modals'][key] === value;
+				}
+			} ),
+			// Modal Content
+			ModalContent: wp.Backbone.View.extend( {
+				template: wp.template( 'note-modal-content' ),
+				// Events
+				events: {
+					'click.note .note-modal-close': 'closeModal',
+					'click.note .note-modal-cancel': 'closeModal',
+					'click.note .note-modal-submit': function( event ) {
+						// Prevent default
+						event.preventDefault();
+
+						// Close the modal
+						this.closeModal( event, true );
+					}
+				},
+				// Initialize
+				initialize: function() {
+					// Bind "this" to all functions
+					_.bindAll(
+						this,
+						'render',
+						'open',
+						'close',
+						'closeModal',
+						'sendSubmitData',
+						'setlocalStorageData'
+					);
+				},
+				// Render
+				render: function( data ) {
+					// Call (apply) the default wp.Backbone.View render function
+					wp.Backbone.View.prototype.render.apply( this, arguments );
+				},
+				// This function runs on the opening of the modal TODO
+				open: function() {
+					// Show the content element (parent element)
+					this.$el.parent().show();
+
+					// TODO: Reset HTML here if necessary
+					// TODO: Open logic here if necessary
+				},
+				// This function runs on the closing of the modal TODO
+				close: function( event, submit ) {
+					// Hide the content element (parent element)
+					this.$el.parent().hide();
+
+					// If the modal was "submit"ed
+					if ( submit ) {
+						// Set the localStorage data
+						if ( this.hasData( this.options, 'localStorage' ) ) {
+							this.setlocalStorageData();
+						}
+
+						// Send the submission data
+						if ( this.hasData( this.options, 'submit_command' ) && this.hasData( this.options, 'submit_data' ) ) {
+							this.sendSubmitData( event );
+						}
+					}
+
+					// Clear the html
+					this.$el.html( '' );
+
+					// TODO: Close logic here if necessary
+				},
+				// This function closes the modal
+				closeModal: function( event, submit ) {
+					// Prevent default
+					if ( event.preventDefault && _.isFunction( event.preventDefault ) )  {
+						event.preventDefault();
+					}
+
+					// Since this is a sub-view, call the parent view close() method, which calls all sub-view close() methods if they exist
+					this.views.parent.close( event, submit );
+
+					// Allow chaining
+					return this;
+				},
+				// This function sends data to the Customizer
+				sendSubmitData: function( event ) {
+					var self = this,
+						$inputs = this.$( 'input, textarea', this.$( '.note-modal-content' ) );
+
+					// Prevent default
+					if ( event.hasOwnProperty( 'preventDefault' ) && _.isFuncton( event.preventDefault ) )  {
+						event.preventDefault();
+					}
+
+					// Determine if there were any input elements, merge their data
+					if ( $inputs.length ) {
+						// Loop through inputs
+						$inputs.each( function() {
+							var $this = $( this ),
+								type = $this.attr( 'type' );
+
+							// Checkboxes and radio buttons
+							if ( type === 'checkbox' || type === 'radio' ) {
+								self.options.submit_data[$this.attr( 'name' )] = $this.prop( 'checked' );
+							}
+							// All other inputs
+							else {
+								self.options.submit_data[$this.attr( 'name' )] = $this.val();
+							}
+						} );
+					}
+
+					// Send the command data to the Customizer
+					api.NotePreview.preview.send( this.options.submit_command, this.options.submit_data );
+
+					// Allow chaining
+					return this;
+				},
+				// This function checks to see if data exists
+				hasData: function( data, key ) {
+					return data.hasOwnProperty( key );
+				},
+				// This function sets localStorage data
+				setlocalStorageData: function() {
+					var self = this,
+						$inputs = this.$( 'input, textarea', this.$( '.note-modal-content' ) ),
+						localStorageData = ( localStorage['note'] !== undefined ) ? JSON.parse( localStorage['note'] ) : {};
+
+					// Add the modals key
+					localStorageData['modals'] = localStorageData['modals'] || {};
+
+					// Determine if there were any input elements, merge their data
+					if ( $inputs.length ) {
+						// Loop through inputs
+						$inputs.each( function() {
+							var $this = $( this ),
+								type = $this.attr( 'type' );
+
+							// Checkboxes and radio buttons
+							if ( ( type === 'checkbox' || type === 'radio' ) && $this.attr( 'name' ) === self.options.localStorage.key ) {
+								localStorageData['modals'][$this.attr( 'name' )] = $this.prop( 'checked' );
+							}
+							// All other inputs
+							else if ( $this.attr( 'name' ) === self.options.localStorage.key ) {
+								localStorageData['modals'][$this.attr( 'name' )] = $this.val();
+							}
+						} );
+
+						// store the localStorage data
+						localStorage['note'] = JSON.stringify( localStorageData );
+					}
+
+					// Allow chaining
+					return this;
+				}
+			} ),
+			// Modal Overlay
+			ModalOverlay: wp.Backbone.View.extend( {
+				//template: wp.template( 'note-modal-overlay' ),
+				initialize: function() {
+					// Bind "this" to all functions
+					_.bindAll(
+						this,
+						'render',
+						'open',
+						'close'
+					);
+				},
+				// Render
+				render: function( data ) {
+					// Call (apply) the default wp.Backbone.View render function
+					wp.Backbone.View.prototype.render.apply( this, arguments );
+
+					// "Open" the overlay
+					this.open();
+				},
+				// This function runs on the opening of the modal overlay
+				open: function() {
+					// Add the modal-open CSS class to the <body> element
+					api.NotePreview.$body.addClass( 'modal-open' );
+
+					// Show the overlay (parent element)
+					this.$el.parent().show();
+
+					// Allow chaining
+					return this;
+				},
+				// This function runs on the closing of the modal overlay
+				close: function() {
+					// Remove the modal-open CSS class to the <body> element
+					api.NotePreview.$body.removeClass( 'modal-open' );
+
+					// Hide the overlay (parent element)
+					this.$el.parent().hide();
+
+					// Allow chaining
+					return this;
+				}
+			} )
+		},
+		// Reference to all views created be NotePreviewer
+		views: {
+			// Modal views
+			modals: {
+				// Register Sidebar
+				register_sidebar: {},
+				// Unregister (Remove) Sidebar
+				unregister_sidebar: {}
+			}
+		},
+		// Note WP/Backbone Models TODO
+		Models: {},
+		// Reference to all models created be NotePreviewer
+		models: {
+			// Modal models
+			modals: {
+				// Register Sidebar
+				register_sidebar: {},
+				// Unregister (Remove) Sidebar
+				unregister_sidebar: {}
+			}
 		}
 		// TODO: Function to remove event listeners
 	};
@@ -519,7 +1003,7 @@
 			 */
 
 			// Stop propagation to other callbacks on modal links to prevent Previewer refreshes
-			$( document.body ).on( 'click.note', '.media-modal a, .wp-link-wrap a', function( event ) {
+			$( document.body ).on( 'click.note', '.media-modal a, .wp-link-wrap a, #note-modal a', function( event ) {
 				event.stopImmediatePropagation(); // prevent this event from bubbling up and firing other callbacks and event handlers
 			} );
 
@@ -532,15 +1016,197 @@
 	 * Document Ready
 	 */
 	$( function() {
-		var note = window.note;
+		var note = window.note,
+			$note_sidebar_placeholder = $( '.note-sidebar-placeholder' ),
+			$note_sidebar_placeholder_register = $( '.note-sidebar-placeholder-register' ),
+			note_modal_models = api.NotePreview.models.modals,
+			note_modal_views = api.NotePreview.views.modals;
 
 		if ( ! note ) {
 			return;
 		}
 
+		// Extend our Note Preview parameters with Note data
 		$.extend( api.NotePreview, note );
 
 		// Initialize our custom Preview
 		api.NotePreview.init();
+
+
+		/*
+		 * Note Sidebars
+		 */
+
+		/*
+		 * Note Sidebars - WP/Backbone Models & Views for registering a sidebar
+		 */
+
+		// Modal Content Model
+		note_modal_models.register_sidebar.modal_content = new Backbone.Model( {
+			title: note.modals.register_sidebar.title,
+			content: note.modals.register_sidebar.content,
+			submit_label: note.modals.register_sidebar.submit_label
+		} );
+
+		// Modal Content View
+		note_modal_views.register_sidebar.modal_content = new api.NotePreview.Views.ModalContent( {
+			model: note_modal_models.register_sidebar.modal_content, // Model
+			title: note_modal_models.register_sidebar.modal_content.get( 'title' ), // Title
+			content: note_modal_models.register_sidebar.modal_content.get( 'content' ), // Content
+			submit_label: note_modal_models.register_sidebar.modal_content.get( 'submit_label' ) // Submit Button Label
+		} );
+
+		// Modal Overlay View
+		note_modal_views.register_sidebar.modal_overlay = new api.NotePreview.Views.ModalOverlay();
+
+		// Modal View
+		note_modal_views.register_sidebar.modal = new api.NotePreview.Views.Modal();
+
+		// Modal Subviews
+		note_modal_views.register_sidebar.modal.views.set(
+			note_modal_views.register_sidebar.modal.overlay_el,
+			note_modal_views.register_sidebar.modal_overlay,
+			{ silent: true } // No DOM modifications
+		); // Attach modal overlay view
+		note_modal_views.register_sidebar.modal.views.set(
+			note_modal_views.register_sidebar.modal.content_el,
+			note_modal_views.register_sidebar.modal_content,
+			{ silent: true } // No DOM modifications
+		); // Attach modal content view
+
+
+		/*
+		 * Note Sidebars - WP/Backbone Models & Views for unregistering (removing) a sidebar
+		 */
+
+		// Modal Content Model
+		note_modal_models.unregister_sidebar.modal_content = new Backbone.Model( {
+			title: note.modals.unregister_sidebar.title,
+			content: note.modals.unregister_sidebar.content,
+			submit_label: note.modals.unregister_sidebar.submit_label
+		} );
+
+		// Modal Content View
+		note_modal_views.unregister_sidebar.modal_content = new api.NotePreview.Views.ModalContent( {
+			model: note_modal_models.unregister_sidebar.modal_content, // Model
+			title: note_modal_models.unregister_sidebar.modal_content.get( 'title' ), // Title
+			content: note_modal_models.unregister_sidebar.modal_content.get( 'content' ), // Content
+			submit_label: note_modal_models.unregister_sidebar.modal_content.get( 'submit_label' ) // Submit Button Label
+		} );
+
+		// Modal Overlay View
+		note_modal_views.unregister_sidebar.modal_overlay = new api.NotePreview.Views.ModalOverlay();
+
+		// Modal View
+		note_modal_views.unregister_sidebar.modal = new api.NotePreview.Views.Modal();
+
+		// Modal Subviews
+		note_modal_views.unregister_sidebar.modal.views.set(
+			note_modal_views.unregister_sidebar.modal.overlay_el,
+			note_modal_views.unregister_sidebar.modal_overlay,
+			{ silent: true } // No DOM modifications
+		); // Attach modal overlay view
+		note_modal_views.unregister_sidebar.modal.views.set(
+			note_modal_views.unregister_sidebar.modal.content_el,
+			note_modal_views.unregister_sidebar.modal_content,
+			{ silent: true } // No DOM modifications
+		); // Attach modal content view
+
+
+		/*
+		 * Note Sidebars - Placeholders
+		 */
+
+		// Mouseover
+		$note_sidebar_placeholder.on( 'mouseover', function( event ) {
+			var $this = $( this );
+
+			// Stop the timer to remove "hover" CSS class
+			clearTimeout( $this.data( 'note-hover-timer' ) );
+
+			// Stop the timer to remove "pulse" CSS class
+			clearTimeout( $this.data( 'note-pulse-timer' ) );
+
+			// Add the "hover pulse" CSS classes
+			$this.addClass( 'hover pulse' );
+		} );
+
+		// Mousemove
+		$note_sidebar_placeholder.on( 'mousemove', function( event ) {
+			var $this = $( this ),
+				$edit = $this.find( '.note-sidebar-register' ),
+				el_left = Math.ceil( event.pageX - $this.offset().left );
+
+
+			// Stop the timer to remove "hover" CSS class
+			clearTimeout( $this.data( 'note-hover-timer' ) );
+
+			// Stop the timer to remove "pulse" CSS class
+			clearTimeout( $this.data( 'note-pulse-timer' ) );
+
+			// Stop the timer to remove "mousemove" CSS class
+			clearTimeout( $this.data( 'note-mousemove-timer' ) );
+
+			// Add the "hover pulse" CSS classes
+			$this.addClass( 'mousemove' );
+
+			// New left position is outside of placeholder boundary (right; width)
+			if ( el_left > $this.width() ) {
+				el_left = $this.width();
+			}
+			// New left position is outside of placeholder boundary (left; zero)
+			else if ( el_left < 0 ) {
+				el_left = 0;
+			}
+
+			// Adjust the left position of the edit button
+			$edit.css( 'left', el_left );
+
+			// Remove the "mousemove" CSS class after 400ms
+			$this.data( 'note-mousemove-timer', setTimeout( function() {
+				$this.removeClass( 'mousemove' );
+			}, api.NotePreview.transition_duration ) );
+		} );
+
+		// Mouseout
+		$note_sidebar_placeholder.on( 'mouseout', function( event ) {
+			var $this = $( this ),
+				$edit = $this.find( '.note-sidebar-register' );
+
+			// Remove the "pulse" and "mousemove" CSS classes
+			$this.removeClass( 'mousemove' );
+
+			// Remove the "pulse" CSS class after 200ms
+			$this.data( 'note-pulse-timer', setTimeout( function() {
+				$this.removeClass( 'pulse' );
+			}, ( api.NotePreview.transition_duration - 200 ) ) );
+
+			// Remove the "hover" CSS class after 400ms
+			$this.data( 'note-hover-timer', setTimeout( function() {
+				$this.removeClass( 'hover' );
+			}, api.NotePreview.transition_duration ) );
+
+			// Reset the left position of the edit button
+			//$edit.css( 'left', 'auto' );
+		} );
+
+		// Click
+		$note_sidebar_placeholder_register.on( 'click', function( event ) {
+			var $this = $( this );
+
+			// Render the modal
+			api.NotePreview.views.modals.register_sidebar.modal.render( {
+				command: 'note-register-sidebar',
+				data: {
+					post_id: $this.attr( 'data-post-id' ),
+					note_sidebar_id: $this.attr( 'data-note-sidebar-id' )
+				},
+				// localStorage data
+				localStorage: {
+					key: 'ignore-register-sidebar',
+					value: true
+				}
+			} );
+		} );
 	} );
 } )( wp, jQuery );
