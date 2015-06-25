@@ -616,13 +616,13 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 					$customizer_sidebar_id = self::get_sidebar_arg( 'id', $sidebar_args );
 
 					// Generate a setting ID
-					$setting_id = 'sidebars_widgets[' . self::get_sidebar_arg( 'id', $sidebar_args ) . ']';
+					$setting_id = 'sidebars_widgets[' . $customizer_sidebar_id . ']';
 
 					// Create a mock Customizer Setting
 					$wp_customize->add_setting( $setting_id, $wp_customize->widgets->get_setting_args( $setting_id ) );
 
 					// Generate a section ID
-					$section_id = $section_prefix . self::get_sidebar_arg( 'id', $sidebar_args );
+					$section_id = $section_prefix . $customizer_sidebar_id;
 
 					// Create a mock Customizer Section
 					$customizer_section = new Note_Customizer_Sidebar_Section( $wp_customize, $section_id, array(

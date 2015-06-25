@@ -4,7 +4,7 @@ Donate link:
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
 Requires at least: 4.1.0
 Tested up to: 4.2.2
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,7 +51,7 @@ You must be in the front-end Customizer of your WordPress website. Once you're t
 
 Note was created so you could visualize the look & feel of your copy in the context of your website's design. The best way to experience Note is - do it live.
 
-= When will you other features in Note? =
+= When will you support other features in Note? =
 
 We're happy to take your feedback at [https://conductorplugin.com/contact/](https://conductorplugin.com/contact/).
 
@@ -64,6 +64,11 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 
 == Changelog ==
+
+= 1.2.1 // June 25 2015 =
+* Fixed a bug where the Note_Widget() function may not be defined and the Note_Customizer class would throw a fatal PHP error; Thanks Luis Martins
+  * This bug indirectly caused conflict with WordPress SEO by Yoast on the sitemap pages
+  * @see https://github.com/Yoast/wordpress-seo/blob/09488fd5662d25a843d9715a12133e22e4aaf38d/inc/class-sitemaps.php#L106-L117
 
 = 1.2.0 // June 09 2015 =
 * Introduce Note Sidebars

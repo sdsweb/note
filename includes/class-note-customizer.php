@@ -4,7 +4,7 @@
  *
  * @class Note_Customizer
  * @author Slocum Studio
- * @version 1.2.0
+ * @version 1.2.1
  * @since 1.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.2.0';
+		public $version = '1.2.1';
 
 		/**
 		 * @var array
@@ -123,7 +123,8 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 			$this->includes();
 
 			// Grab the Note Widget instance
-			$note_widget = Note_Widget();
+			if ( function_exists( 'Note_Widget' ) )
+				$note_widget = Note_Widget();
 
 			// Determine HTML5 support
 			$caption_html5_support = current_theme_supports( 'html5', 'caption' ); // Captions
@@ -394,7 +395,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 				),
 				// Note Widget
 				'widget' => array(
-					'id' => $note_widget->id_base
+					'id' => ( isset(  $note_widget ) ) ? $note_widget->id_base : 'note-widget' // Fallback for when Note_Widget() doesn't exist
 				),
 				// Note modal windows
 				'modals' => array(

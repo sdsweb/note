@@ -3,7 +3,7 @@
  * Plugin Name: Note - A live edit text widget
  * Plugin URI: http://www.conductorplugin.com/note/
  * Description: Note is a simple and easy to use widget for editing bits of text, live, in your WordPress Customizer
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Slocum Studio
  * Author URI: http://www.slocumstudio.com/
  * Requires at least: 4.1
@@ -26,7 +26,7 @@ if ( ! class_exists( 'Note' ) ) {
 		/**
 		 * @var string
 		 */
-		public static $version = '1.2.0';
+		public static $version = '1.2.1';
 
 		/**
 		 * @var Note, Instance of the class
