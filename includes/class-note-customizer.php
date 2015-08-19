@@ -4,7 +4,7 @@
  *
  * @class Note_Customizer
  * @author Slocum Studio
- * @version 1.2.1
+ * @version 1.2.2
  * @since 1.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.2.1';
+		public $version = '1.2.2';
 
 		/**
 		 * @var array
@@ -234,6 +234,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 					'selector' => '.note-widget .widget-content',
 					// Allow filtering of plugins on an array instead of a space separated string
 					'plugins' => implode( ' ', array_unique( apply_filters( 'note_tinymce_plugins', array(
+						'wordpress',
 						'wplink',
 						'wpview',
 						'paste',

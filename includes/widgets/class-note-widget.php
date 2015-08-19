@@ -4,7 +4,7 @@
  *
  * @class Note_Widget
  * @author Slocum Studio
- * @version 1.1.2
+ * @version 1.2.2
  * @since 1.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.1.2';
+		public $version = '1.2.2';
 
 		/**
 		 * @var string
@@ -81,8 +81,8 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 				'css_class' => false
 			), $this ); // Set up the default widget settings
 
-			// New WP_Widget
-			self::WP_Widget( $id_base, sprintf( __( '%1$s', 'note' ), $this->name ), $this->widget_options, $this->control_options );
+			// Call the parent constructor element
+			parent::__construct( $id_base, sprintf( __( '%1$s', 'note' ), $this->name ), $this->widget_options, $this->control_options );
 
 			// Hooks
 			if ( ! has_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) ) )

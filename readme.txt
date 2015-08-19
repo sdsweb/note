@@ -3,8 +3,8 @@ Contributors: slocumstudio
 Donate link: 
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
 Requires at least: 4.1.0
-Tested up to: 4.2.2
-Stable tag: 1.2.1
+Tested up to: 4.3.0
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,12 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 
 == Changelog ==
+
+= 1.2.1 // August 19 2015 =
+* WordPress 4.3 Fixes
+  * Replaced Note Widget self::WP_Widget() call with parent::__construct() call (fixes PHP warnings in WordPress 4.3+)
+  * Fix bug in WordPress 4.3 where _createToolbar() function was not available on the editor wp object (editor.wp), due to Note Widget TinyMCE configuration not including the TinyMCE 'wordpress' plugin
+  * Adjusted Note Widget TinyMCE theme CSS
 
 = 1.2.1 // June 25 2015 =
 * Fixed a bug where the Note_Widget() function may not be defined and the Note_Customizer class would throw a fatal PHP error; Thanks Luis Martins

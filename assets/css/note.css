@@ -262,7 +262,7 @@ div.mce-insert-panel{
 	border-radius: 3px;
 	top: 0;
 	left: 0;
-	opacity: 0;
+	opacity: 1;
 	-moz-user-select: none;
 	-webkit-user-select: none;
 	-ms-user-select: none;
@@ -374,6 +374,18 @@ div.mce-tinymce-inline.mce-arrow-full > div {
 
 .mce-toolbar .mce-btn-group .mce-btn.mce-active:hover i.mce-ico {
 	color: #555;
+}
+
+.mce-tinymce-inline .mce-btn.mce-listbox button {
+	padding-right: 24px;
+}
+
+.mce-tinymce-inline .mce-btn button .mce-caret {
+	margin-top: 8px;
+}
+
+.mce-tinymce-inline .mce-btn.mce-listbox button .mce-caret {
+	margin-top: -2px;
 }
 
 /* Note */

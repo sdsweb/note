@@ -2,8 +2,17 @@
 Plugin: Note
 Author: Slocum Design Studio
 Author URI: https://slocumstudio.com/
-Current Version: 1.2.1
+Current Version: 1.2.2
 ==========================================
+
+
+1.2.2 // August 19 2015
+-----------------------
+- WordPress 4.3 Fixes
+-- Replaced Note Widget self::WP_Widget() call with parent::__construct() call (fixes PHP warnings in WordPress 4.3+)
+-- Fix bug in WordPress 4.3 where _createToolbar() function was not available on the editor wp object (editor.wp),
+   due to Note Widget TinyMCE configuration not including the TinyMCE 'wordpress' plugin
+-- Adjusted Note Widget TinyMCE theme CSS
 
 1.2.1 // June 25 2015
 ---------------------
