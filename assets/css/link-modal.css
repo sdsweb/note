@@ -191,6 +191,12 @@
 	text-align: right;
 	padding-right: 5px;
 	max-width: 24%;
+	vertical-align: middle;
+	word-wrap: break-word;
+}
+
+#wp-link #link-options label span {
+	padding-top: 10px;
 }
 
 #wp-link .link-search-field {
@@ -260,7 +266,6 @@
 	display: block;
 	padding: 6px;
 	border-left: 4px solid #2ea2cc;
-	font-size: 13px;
 }
 
 #wp-link .unselectable.no-matches-found {
@@ -357,6 +362,17 @@
 #wp-link-cancel {
 	line-height: 25px;
 	float: left;
+}
+
+#wp-link-cancel a {
+	color: #a00;
+	line-height: 25px;
+	text-decoration: none;
+}
+
+#wp-link-cancel a:hover {
+	color: #f00;
+	text-decoration: none;
 }
 
 #wp-link-update {

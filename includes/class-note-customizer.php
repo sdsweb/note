@@ -4,7 +4,7 @@
  *
  * @class Note_Customizer
  * @author Slocum Studio
- * @version 1.2.2
+ * @version 1.3.0
  * @since 1.0.0
  */
 
@@ -17,7 +17,12 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.2.2';
+		public $version = '1.2.1';
+
+		/**
+		 * @var array
+		 */
+		public $note_editor_types = array( 'default', 'media', 'rich_text_only' );
 
 		/**
 		 * @var array
@@ -202,6 +207,11 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 				}
 			}
 
+
+			// Note Widget Editor Types
+			$this->note_editor_types = apply_filters( 'note_tinymce_editor_types', $this->note_editor_types, $this );
+
+
 			// Setup Customizer localization
 			$this->note_customizer_localize = apply_filters( 'note_customizer_localize', array(
 				'wp_version' => $wp_version,
@@ -234,23 +244,32 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 					'selector' => '.note-widget .widget-content',
 					// Allow filtering of plugins on an array instead of a space separated string
 					'plugins' => implode( ' ', array_unique( apply_filters( 'note_tinymce_plugins', array(
+						// General
+						'paste',
+						'lists',
+						'hr',
+						'textcolor',
+						'colorpicker',
+						// WordPress
 						'wordpress',
 						'wplink',
 						'wpview',
-						'paste',
-						'lists',
-						'noteinsert',
-						'noteimage',
-						'hr'
+						// Note
+						'note_insert', // Note TinyMCE Insert Plugin
+						'note_image', // Note TinyMCE Image Plugin
+						'note_placeholder', // Note TinyMCE Placeholder Plugin
 					), $this ) ) ),
 					// Block level elements
-					'blocks' => array(
+					'blocks' => apply_filters( 'note_tinymce_blocks', array(
 						'wp_image',
 						'note_edit'
-					),
+					), $this ),
 					// Custom TinyMCE theme expects separate "rows"
 					'toolbar' => apply_filters( 'note_tinymce_toolbar', array(
 						'formatselect',
+						'styleselect',
+						'forecolor',
+						'backcolor',
 						'bold',
 						'italic',
 						'link',
@@ -312,6 +331,156 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 							)
 						)
 					),
+					// Block Formats
+					/*'block_formats' => implode( '', array_unique( apply_filters( 'note_tinymce_block_formats', array(
+						'Paragraph=p;',
+						'Address=address;',
+						'Pre=pre;',
+						'Heading 1=h1;',
+						'Heading 2=h2;',
+						'Heading 3=h3;',
+						'Heading 4=h4;',
+						'Heading 5=h5;',
+						'Heading 6=h6;'
+					), $this ) ) ),*/
+					// Preview Styles, which CSS styles should the style_formats be allowed for the preview
+					'preview_styles' => implode( ' ', array_unique( apply_filters( 'note_tinymce_preview_styles', array(
+						'font-family',
+						'font-size',
+						'font-weight',
+						'font-style',
+						'text-decoration',
+						'text-transform',
+						'color',
+						'background-color',
+						'border',
+						'border-radius',
+						'outline',
+						'text-shadow'
+					), $this ) ) ),
+					// Style Formats @see http://www.tinymce.com/wiki.php/Configuration:style_formats, @see http://www.tinymce.com/wiki.php/Configuration:formats
+					'style_formats' => apply_filters( 'note_tinymce_style_formats', array(
+						// 12px
+						array(
+							'title' => __( '12px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '12px'
+							)
+						),
+						// 14px
+						array(
+							'title' => __( '14px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '14px'
+							)
+						),
+						// 16px
+						array(
+							'title' => __( '16px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '16px'
+							)
+						),
+						// 18px
+						array(
+							'title' => __( '18px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '18px'
+							)
+						),
+						// 20px
+						array(
+							'title' => __( '20px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '20px'
+							)
+						),
+						// 22px
+						array(
+							'title' => __( '22px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '22px'
+							)
+						),
+						// 24px
+						array(
+							'title' => __( '24px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '24px'
+							)
+						),
+						// 28px
+						array(
+							'title' => __( '28px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '28px'
+							)
+						),
+						// 32px
+						array(
+							'title' => __( '32px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '32px'
+							)
+						),
+						// 36px
+						array(
+							'title' => __( '36px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '36px'
+							)
+						),
+						// 42px
+						array(
+							'title' => __( '42px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '42px'
+							)
+						),
+						// 48px
+						array(
+							'title' => __( '48px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '48px'
+							)
+						),
+						// 56px
+						array(
+							'title' => __( '56px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '56px'
+							)
+						),
+						// 64px
+						array(
+							'title' => __( '64px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '64px'
+							)
+						),
+						// 72px
+						array(
+							'title' => __( '72px', 'note' ),
+							'inline' => 'span',
+							'styles' => array(
+								'fontSize' => '72px'
+							)
+						)
+					), $this ),
 					'theme' => 'note',
 					'inline' => true,
 					'relative_urls' => false,
@@ -330,11 +499,11 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 					'caption_html' => $caption_html5_support ? array(
 						'itemtag' => 'figure',
 						'icontag' =>'div',
-						'captiontag' => 'figcaption',
+						'captiontag' => 'figcaption'
 					) : array(
 						'itemtag' => 'dl',
 						'icontag' => 'dt',
-						'captiontag' => 'dd',
+						'captiontag' => 'dd'
 					),
 					// Gallery HTML
 					// TODO:
@@ -398,6 +567,12 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 				'widget' => array(
 					'id' => ( isset(  $note_widget ) ) ? $note_widget->id_base : 'note-widget' // Fallback for when Note_Widget() doesn't exist
 				),
+				// Widget Settings & Templates
+				'widgets' => array(
+					'defaults' => array(), // Note Widget defaults
+					'settings' => array(), // Settings for individual widgets
+					'templates' => array() // Available widget templates/config
+				),
 				// Note modal windows
 				'modals' => array(
 					// Register Sidebar
@@ -425,6 +600,94 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 					)
 				)
 			) );
+
+
+			// If we have editor types
+			if ( is_array( $this->note_editor_types ) && ! empty( $this->note_editor_types ) ) {
+				// Adjust Note localization data (store TinyMCE data in an array under the 'default' key)
+				$this->note_localize['tinymce'] = array(
+					'default' => $this->note_localize['tinymce']
+				);
+
+				// Shim for Conductor 1.2.* TODO: Remove in a future version
+				if ( ! Note::conductor_has_flexbox_display() )
+					$this->note_localize['tinymce'] = array_merge( $this->note_localize['tinymce'], $this->note_localize['tinymce']['default'] );
+
+				// Loop through editor types for configuration
+				foreach ( $this->note_editor_types as $editor_type ) {
+					// Copy Note localization data
+					$settings = $this->note_localize['tinymce']['default'];
+
+					// Switch based on editor type
+					switch ( $editor_type ) {
+						// Rich Text Only
+						case 'rich_text_only':
+							// Make plugins an array
+							$settings['plugins'] = explode( ' ', $settings['plugins'] );
+
+							// Search for the 'note_image' TinyMCE plugin in existing settings
+							$note_image = array_search( 'note_image', $settings['plugins'] );
+
+							// If we have an index for the the 'note_image' TinyMCE plugin
+							if ( $note_image !== false ) {
+								// Remove the 'note_image' TinyMCE plugin
+								unset( $settings['plugins'][$note_image] );
+
+								// Reset array keys to ensure JavaScript logic receives an array
+								$settings['plugins'] = array_values( $settings['plugins'] );
+							}
+
+							// Make plugins a string again
+							$settings['plugins'] = implode( ' ', $settings['plugins'] );
+
+
+							// Search for the 'wp_image' TinyMCE block in existing settings
+							$wp_image = array_search( 'wp_image', $settings['blocks'] );
+
+							// If we have an index for the the 'wp_image' TinyMCE block
+							if ( $wp_image !== false ) {
+								// Remove the 'wp_image' TinyMCE block
+								unset( $settings['blocks'][$wp_image] );
+
+								// Reset array keys to ensure JavaScript logic receives an array
+								$settings['blocks'] = array_values( $settings['blocks'] );
+							}
+						break;
+
+						// Media
+						case 'media':
+							// Add media blocks
+							$settings['media_blocks'] = array( 'wp_image' );
+
+							// Reset the placeholder
+							$settings['placeholder'] = '';
+						break;
+
+						// Rich Text (Also default; just inherit from Note)
+						default:
+							// Do nothing (for now)
+						break;
+					}
+
+					// Allow filtering of plugins, toolbar items, and placeholder
+					$settings['plugins'] = explode( ' ', $settings['plugins'] );
+					$settings['plugins'] = implode( ' ', array_unique( apply_filters( 'note_tinymce_editor_plugins', $settings['plugins'], $editor_type, $this ) ) );
+					$settings['blocks'] = apply_filters( 'note_tinymce_editor_blocks', $settings['blocks'], $editor_type, $this );
+					$settings['toolbar'] = apply_filters( 'note_tinymce_editor_toolbar', $settings['toolbar'], $editor_type, $this );
+					//$settings['block_formats'] = apply_filters( 'note_tinymce_editor_block_formats', $settings['block_formats'], $editor_type, $this );
+					$settings['preview_styles'] = explode( ' ', $settings['preview_styles'] );
+					$settings['preview_styles'] = implode( ' ', array_unique( apply_filters( 'note_tinymce_editor_preview_styles', $settings['preview_styles'], $editor_type, $this ) ) );
+					$settings['style_formats'] = apply_filters( 'note_tinymce_editor_style_formats', $settings['style_formats'], $editor_type, $this );
+					$settings['placeholder'] = apply_filters( 'note_tinymce_editor_placeholder', $settings['placeholder'], $editor_type, $this );
+
+					// Add the Note editor type
+					$settings['note_type'] = $editor_type;
+
+					// Assign the configuration to the localization data
+					$settings = apply_filters( 'note_tinymce_editor_settings', $settings, $editor_type, $this );
+					$this->note_localize['tinymce'][$editor_type] = $settings;
+				}
+			}
 
 
 			// Setup Previewer TinyMCE localization
@@ -603,6 +866,12 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 			// Note Customizer
 			wp_enqueue_script( 'note-customizer', Note::plugin_url() . '/assets/js/note-customizer.js', array( 'customize-widgets' ), Note::$version, true );
 
+			// Setup Note Widget localize data
+			$this->setup_note_widget_localize_data();
+
+			// Merge Previewer localize data with Customizer localize data
+			$this->note_customizer_localize = array_merge( $this->note_customizer_localize, $this->note_localize );
+
 			// Localize the Note Customizer script information
 			wp_localize_script( 'note-customizer', 'note', $this->note_customizer_localize );
 		}
@@ -634,8 +903,8 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 			if ( Note::wp_version_compare( '4.1', '<' ) )
 				return;
 
-			// Note Sidebars (single content types only)
-			if ( is_singular() ) {
+			// Note Sidebars (single content types only or if filter returns true)
+			if ( is_singular() || apply_filters( 'note_customizer_localize_sidebar_args', false, $this ) ) {
 				// Grab Note Sidebar Customizer arguments (keep Customizer Sections/Controls active for Previewer)
 				$this->note_sidebar_args = Note_Sidebars::get_customizer_sidebar_args( true );
 
@@ -652,7 +921,6 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 				 * because sidebars can be removed and added/re-added dynamically. Only do this in the
 				 * Customizer and only do this for Note Sidebars.
 				 */
-
 				$this->register_inactive_note_widgets( true );
 			}
 		}
@@ -662,7 +930,10 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		 */
 		// TODO: SCRIPT_DEBUG support
 		public function wp_enqueue_scripts() {
-			global $tinymce_version, $concatenate_scripts, $compress_scripts, $wp_version;
+			global $tinymce_version, $concatenate_scripts, $compress_scripts, $wp_version, $wp_registered_widgets;
+
+			// Setup Note Widget localize data
+			$this->setup_note_widget_localize_data();
 
 			// Concatenate Scripts
 			if ( ! isset( $concatenate_scripts ) )
@@ -689,11 +960,20 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 				wp_enqueue_script( 'note-tinymce-lists', Note::plugin_url() . '/assets/js/note-tinymce-lists.js', array( 'note-tinymce' ), Note::$version, true );
 			}
 
+			// Load our version of 'wplink' plugin TODO: Remove if not necessary (check 4.2.4 for backwards compat)
+			//wp_enqueue_script( 'note-tinymce-link', Note::plugin_url() . '/assets/js/note-tinymce-link.js', array( 'note-tinymce' ), Note::$version, true );
+
 			// Note TinyMCE Insert Plugin
 			wp_enqueue_script( 'note-tinymce-insert', Note::plugin_url() . '/assets/js/note-tinymce-insert.js', array( 'note-tinymce' ), Note::$version, true );
 
 			// Note TinyMCE Image Plugin
 			wp_enqueue_script( 'note-tinymce-image', Note::plugin_url() . '/assets/js/note-tinymce-image.js', array( 'note-tinymce' ), Note::$version, true );
+
+			// Note TinyMCE Placeholder Plugin
+			wp_enqueue_script( 'note-tinymce-placeholder', Note::plugin_url() . '/assets/js/note-tinymce-placeholder.js', array( 'note-tinymce' ), Note::$version, true );
+
+			// Note TinyMCE Background Plugin
+			wp_enqueue_script( 'note-tinymce-background', Note::plugin_url() . '/assets/js/note-tinymce-background.js', array( 'note-tinymce' ), Note::$version, true );
 
 			// Note TinyMCE Theme
 			wp_enqueue_script( 'note-tinymce-theme', Note::plugin_url() . '/assets/js/note-tinymce-theme.js', array( 'note-tinymce' ), Note::$version, true );
@@ -736,13 +1016,14 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		}
 
 		/**
-		 * This function prepends input elements to Note widgets
-		 * for use in the Previewer JS scripts.
+		 * This function prepends input elements to Note widgets for use in the Previewer JS scripts.
 		 */
+		// TODO: Search to see if these elements have already been added to the wrapper <input[ a-zA-Z0-9=\"\'-_]+(class)
 		function dynamic_sidebar_params( $params ) {
 			$note_widget = Note_Widget();
 
 			// Only on Note Widgets
+			// TODO: Check id_base here to be sure, also check if elements already exist by checking the class attribute
 			if ( $params[0]['widget_name'] === $note_widget->name ) {
 				$widget_after = '<input type="hidden" name="widget_number" class="widget-number" value="' . esc_attr( $params[1]['number'] ) . '" />'; // Widget Number
 				$widget_after .= '<input type="hidden" name="widget_id" class="widget-id" value="' . esc_attr( $params[0]['widget_id'] ) . '" />'; // Widget ID
@@ -1002,6 +1283,78 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 					// Add the control
 					$wp_customize->add_control( $control );
 				}
+		}
+
+		/**
+		 * This function sets up Note Widget localize data.
+		 */
+		public function setup_note_widget_localize_data() {
+			global $wp_registered_widgets;
+
+			$note_widget = Note_Widget(); // Note Widget instance
+
+			// Re-add the widgets key if it doesn't exist (due to filtering above)
+			if ( ! isset( $this->note_localize['widgets'] ) )
+				$this->note_localize['widgets'] = array(
+					'defaults' => array(), // Note Widget defaults
+					'settings' => array(), // Settings for individual widgets
+					'templates' => array() // Available widget templates/config
+				);
+
+			// Setup the defaults data
+			$this->note_localize['widgets']['defaults'] = $note_widget->defaults;
+
+			// Setup the template data
+			$this->note_localize['widgets']['templates'] = $note_widget->templates;
+
+			// Setup the background image CSS
+			$this->note_localize['widgets']['background_image_css'] = $note_widget->background_image_css;
+
+			// Find Note Widgets in sidebars
+			// TODO: The following logic will fetch data for all Note Widgets in all sidebars, can we just output data for displayed widgets?
+			$sidebars_widgets = wp_get_sidebars_widgets();
+			$note_widget_settings = array();
+
+			if ( is_array( $sidebars_widgets ) )
+				// Loop through sidebars
+				foreach ( $sidebars_widgets as $sidebar => $widgets ) {
+					// Ignore inactive or orphaned
+					if ( $sidebar !== 'wp_inactive_widgets' && substr( $sidebar, 0, 16 ) !== 'orphaned_widgets' && is_array( $widgets ) )
+						// Loop through widgets
+						foreach ( $widgets as $widget ) {
+							// Verify that this is a Note Widget
+							if ( $note_widget->id_base === _get_widget_id_base( $widget ) ) {
+								// Make sure this widget has a callback
+								if ( isset( $wp_registered_widgets[$widget] ) ) {
+									// Store a reference to this widget object
+									$wp_widget = $wp_registered_widgets[$widget];
+									$widget_number = $wp_widget['params'][0]['number'];
+
+									// Store a reference to the widget settings (all Note Widgets)
+									if ( empty( $note_widget_settings ) )
+										$note_widget_settings = $note_widget->get_settings();
+
+									// Find this widget in settings
+									if ( array_key_exists( $widget_number, $note_widget_settings ) ) {
+										// Widget settings (parse with Note Widget defaults to prevent PHP warnings and missing setting values)
+										$this->note_localize['widgets']['settings'][$widget_number] = wp_parse_args( ( array ) $note_widget_settings[$widget_number], $note_widget->defaults );
+
+										// Store a reference to the widget number
+										$this->note_localize['widgets']['settings'][$widget_number]['widget_number'] = $widget_number;
+
+										// Store a reference to the widget ID
+										$this->note_localize['widgets']['settings'][$widget_number]['widget_id'] = $widget;
+
+										// Store a reference to the sidebar ID
+										$this->note_localize['widgets']['settings'][$widget_number]['sidebar_id'] = $sidebar;
+									}
+								}
+							}
+						}
+				}
+
+			// Allow for filtering of localization widget data
+			$this->note_localize['widgets'] = apply_filters( 'note_localize_widgets', $this->note_localize['widgets'], $this );
 		}
 	}
 

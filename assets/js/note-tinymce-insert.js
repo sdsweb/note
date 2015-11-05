@@ -10,7 +10,7 @@
 
 /* global tinymce */
 
-tinymce.PluginManager.add( 'noteinsert', function( editor ) {
+tinymce.PluginManager.add( 'note_insert', function( editor ) {
 	'use strict';
 
 	var panel,
@@ -32,8 +32,8 @@ tinymce.PluginManager.add( 'noteinsert', function( editor ) {
 	 * logic to interact with the panel.
 	 */
 	editor.on( 'PreInit', function( event ) {
-		// Create the Panel
-		panel = tinymce.ui.Factory.create( {
+		// Create the Panel (also store a reference to the panel on the editor)
+		panel = editor.note.insert_panel = tinymce.ui.Factory.create( {
 			type: 'panel',
 			layout: 'flow',
 			classes: 'insert-panel note-insert-panel',
@@ -146,7 +146,7 @@ tinymce.PluginManager.add( 'noteinsert', function( editor ) {
 
 	// TODO: Move to image plugin
 	editor.addButton( 'wp_image', {
-		tooltip: 'Image',
+		tooltip: 'Image', // TODO: i18n, l10n
 		icon: 'dashicons-format-image',
 		onclick: function( event ) {
 			// Attach the frame to the editor
@@ -172,7 +172,7 @@ tinymce.PluginManager.add( 'noteinsert', function( editor ) {
 				],
 				// Frame button configuration
 				button: {
-					text: 'Insert Into Widget', // Button label // TODO: l10n - move to Note Customizer
+					text: 'Insert Into Widget', // Button label // TODO: I18n & l10n - move to Note Customizer
 					event: 'insert' // Trigger the insert event on click
 				}
 			} );
@@ -185,7 +185,7 @@ tinymce.PluginManager.add( 'noteinsert', function( editor ) {
 
 	// Edit Widget Button
 	editor.addButton( 'note_edit', {
-		tooltip: 'Edit',
+		tooltip: 'Edit', // TODO: i18n, l10n
 		icon: 'dashicons-edit',
 		onclick: function( event ) {
 			// Send data to the Customizer

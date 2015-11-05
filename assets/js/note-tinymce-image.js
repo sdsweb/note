@@ -10,7 +10,7 @@
 
 /* global tinymce */
 
-tinymce.PluginManager.add( 'noteimage', function( editor ) {
+tinymce.PluginManager.add( 'note_image', function( editor ) {
 	var caption_html5_support = editor.getParam( 'html5_support' ), // Caption HTML5 support
 		caption_html = editor.getParam( 'caption_html' ), // Caption HTML tags
 		// Fallback to regular HTML support
@@ -922,7 +922,7 @@ tinymce.PluginManager.add( 'noteimage', function( editor ) {
 	 * Add a button to the editor to remove images.
 	 */
 	editor.addButton( 'remove', {
-		tooltip: 'Remove',
+		tooltip: 'Remove', // TODO: i18n, l10n
 		icon: 'dashicons-no',
 		onclick: function() {
 			removeImage( editor.selection.getNode() );
@@ -933,7 +933,7 @@ tinymce.PluginManager.add( 'noteimage', function( editor ) {
 	 * Add a button to the editor to edit images.
 	 */
 	editor.addButton( 'edit', {
-		tooltip: 'Edit',
+		tooltip: 'Edit', // TODO: i18n, l10n
 		icon: 'dashicons-edit',
 		onclick: function() {
 			editImage( editor.selection.getNode() );
@@ -944,10 +944,10 @@ tinymce.PluginManager.add( 'noteimage', function( editor ) {
 	 * Add alignment buttons to the toolbar when images are selected within the editor.
 	 */
 	tinymce.each( {
-		alignleft: 'Align Left',
-		aligncenter: 'Align Center',
-		alignright: 'Align Right',
-		alignnone: 'Don’t Align'
+		alignleft: 'Align Left', // TODO: i18n, l10n
+		aligncenter: 'Align Center', // TODO: i18n, l10n
+		alignright: 'Align Right', // TODO: i18n, l10n
+		alignnone: 'Don’t Align' // TODO: i18n, l10n
 	}, function( tooltip, name ) {
 		var direction = name.slice( 5 );
 

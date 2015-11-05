@@ -3,11 +3,11 @@
  * Plugin Name: Note - A live edit text widget
  * Plugin URI: http://www.conductorplugin.com/note/
  * Description: Note is a simple and easy to use widget for editing bits of text, live, in your WordPress Customizer
- * Version: 1.2.2
+ * Version: 1.3.0
  * Author: Slocum Studio
  * Author URI: http://www.slocumstudio.com/
  * Requires at least: 4.1
- * Tested up to: 4.3.0
+ * Tested up to: 4.3.1
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -26,7 +26,7 @@ if ( ! class_exists( 'Note' ) ) {
 		/**
 		 * @var string
 		 */
-		public static $version = '1.2.2';
+		public static $version = '1.3.0';
 
 		/**
 		 * @var Note, Instance of the class
@@ -64,6 +64,7 @@ if ( ! class_exists( 'Note' ) ) {
 			include_once( 'includes/class-note-options.php' ); // Note Options Class
 			include_once( 'includes/class-note-sidebars.php' ); // Note Sidebars Class
 			include_once( 'includes/class-note-customizer.php' ); // Note Customizer Class
+			include_once( 'includes/class-note-scripts-styles.php' ); // Note Scripts & Styles Class
 			include_once( 'includes/admin/class-note-admin.php' ); // Core/Main Note Admin Class
 			include_once( 'includes/note-template-functions.php' ); // Note Template Functions
 
@@ -117,6 +118,16 @@ if ( ! class_exists( 'Note' ) ) {
 		}
 
 		/**
+		 * This function returns the template path for which themes should place their
+		 * templates into to override Note default templates (i.e. your-theme/note/).
+		 *
+		 * @return string, Directory for Note theme templates
+		 */
+		public static function theme_template_path() {
+			return untrailingslashit( apply_filters( 'note_template_path', 'note' ) );
+		}
+
+		/**
 		 * This function returns a boolean result comparing against the current WordPress version.
 		 *
 		 * @return Boolean
@@ -125,6 +136,27 @@ if ( ! class_exists( 'Note' ) ) {
 			global $wp_version;
 
 			return version_compare( $wp_version, $version, $operator );
+		}
+
+
+		/**********************
+		 * Internal Functions *
+		 **********************/
+
+		/**
+		 * This function checks to see if Conductor has the new flexbox display.
+		 */
+		// TODO: Remove in a future version as necessary
+		public static function conductor_has_flexbox_display( $conductor_widget = false ) {
+			// Bail if Conductor doesn't exist
+			if ( ! class_exists( 'Conductor' ) || ! function_exists( 'Conduct_Widget' ) )
+				return false;
+
+			// If we don't have a Conductor Widget reference, grab one now
+			$conductor_widget = ( ! $conductor_widget ) ? Conduct_Widget() : $conductor_widget;
+
+			// If Conductor is greater than 1.2.9 or Conductor Widget instance has the "displays" property, we can check to see if the custom display exists
+			return ( ( version_compare( Conductor::$version, '1.2.9', '>' ) || property_exists( $conductor_widget, 'displays' ) ) && isset( $conductor_widget->displays['flexbox'] ) );
 		}
 	}
 

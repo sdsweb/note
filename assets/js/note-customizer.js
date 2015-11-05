@@ -82,7 +82,7 @@ var note = note || {};
 				// Store the data on the widget content element if needed (usually on initial load)
 				if ( widget_content_data === undefined ) {
 					widget_content_data = {
-						content: data.widget.content,
+						content: data.widget.content, // TODO: $widget_content.val()?
 						updateCount: 0
 					};
 				}
@@ -107,14 +107,17 @@ var note = note || {};
 					form_control.updateWidget( {
 						// Complete callback function
 						complete: function( message, args ) {
-							// Reset the isWidgetUpdating flag
-							form_control.isWidgetUpdating = false;
+							// If this request wasn't aborted (there might be multiple values updated, requiring multiple AJAX requests that may be canceled as new values are updated and new AJAX requests are created)
+							if ( ! message || message !== 'abort' ) {
+								// Re-bind the preview refresh after saving
+								this.setting.bind( form_control.setting.preview );
 
-							// Re-bind the preview refresh after saving
-							this.setting.bind( form_control.setting.preview );
+								// Remove the loading CSS class
+								this.container.removeClass( 'previewer-loading' );
 
-							// Remove the loading CSS class
-							this.container.removeClass( 'previewer-loading' );
+								// Reset the isWidgetUpdating flag
+								form_control.isWidgetUpdating = false;
+							}
 						}
 					} );
 				}
@@ -230,7 +233,7 @@ var note = note || {};
 				var note_sidebars_section = api.section( note.sidebars.customizer.section ),
 					$note_sidebars_input,
 					note_sidebar,
-					post_id = parseInt( data.post_id, 10 );
+					post_id = data.post_id; // was previously parseInt( data.post_id, 10 );
 
 				// Add the post ID property to the registered settings
 				if ( ! note.sidebars.registered.hasOwnProperty( post_id ) ) {
@@ -292,7 +295,10 @@ var note = note || {};
 					$note_sidebars_input,
 					note_sidebar,
 					note_sidebar_index,
-					post_id = parseInt( data.post_id, 10 );
+					note_sidebar_args,
+					widgets_panel = api.panel( 'widgets' ),
+					sidebar_section, // Grab the sidebar from the collection of sections
+					post_id = data.post_id; // was previously parseInt( data.post_id, 10 );
 
 				// Add the post ID property to the registered settings
 				if ( ! note.sidebars.registered.hasOwnProperty( post_id ) ) {
@@ -313,6 +319,27 @@ var note = note || {};
 
 						// If this sidebar is registered
 						if ( note_sidebar_index !== -1 ) {
+							// Grab the sidebar arguments
+							note_sidebar_args = note.sidebars.args[data.note_sidebar_id];
+
+							// Grab the sidebar from the collection of sections
+							sidebar_section = api.section( note_sidebar_args.customizer.section.id );
+
+							// If the sidebar section is currently open
+							if ( sidebar_section && sidebar_section.expanded() && sidebar_section.active() ) {
+								// Collapse the section
+								sidebar_section.collapse( { duration: 0 } );
+
+								// Deactivate the section
+								sidebar_section.deactivate();
+
+								// Activate the Widget Panel
+								widgets_panel.activate();
+
+								// Expand the Widget Panel
+								widgets_panel.expand( { duration: 0 } );
+							}
+
 							// "Unregister" the new sidebar for use in the Customizer
 							self.unregisterNoteSidebar( data.note_sidebar_id, data.post_id );
 
@@ -357,16 +384,24 @@ var note = note || {};
 		openSidebarSection: function( sidebar_id, widget_id ) {
 			var self = this,
 				sidebar_section,
-				$sidebar_panel;
+				$sidebar_panel,
+				widgets_panel;
 
 			// WordPress 4.1 and above
 			if ( self.wp_version > 4 ) {
+				widgets_panel = api.panel( 'widgets' );
 				sidebar_section = api.section( 'sidebar-widgets-' + sidebar_id ); // Grab the sidebar from the collection of sections
 
 				// If the sidebar section is not currently open
-				if ( sidebar_section ) {
-					// Collapse the sidebar section first (this prevents issues where the Widget Panel isn't active but the sidebar section is still expanded)
-					sidebar_section.collapse( { duration: 0 } );
+				if ( sidebar_section && ( ! sidebar_section.expanded() || ! widgets_panel.expanded() ) ) {
+					// If the Widget Panel isn't expanded
+					if ( ! widgets_panel.expanded() ) {
+						// Collapse the sidebar section first (this prevents issues where the Widget Panel isn't active but the sidebar section is still expanded)
+						sidebar_section.collapse( { duration: 0 } );
+
+						// Expand the Widget Panel
+						widgets_panel.expand( { duration: 0 } );
+					}
 
 					// Expanding the sidebar section will also open the Widgets Panel
 					sidebar_section.expand( {
@@ -450,7 +485,7 @@ var note = note || {};
 				} );
 			}
 			// Otherwise just focus the first input element (title)
-			else {
+			else if ( form_control ) {
 				// Select the first input element (title)
 				form_control.container.find( 'input:first' ).focus();
 			}
@@ -491,29 +526,9 @@ var note = note || {};
 					dirty: note_customizer_setting.dirty
 				},
 				// Customizer Section
-				section = {
-					active: note_customizer_section.active,
-					content: note_customizer_section.content,
-					panel: note_customizer_section.panel,
-					sidebarId: note_customizer_section.sidebarId,
-					title: note_customizer_section.title,
-					type: note_customizer_section.type,
-					instanceNumber: _.size( api.settings.sections ),
-					priority: -1
-				},
+				section = note_customizer_section,
 				// Customizer Control
-				control = {
-					active: note_customizer_control.active,
-					content: note_customizer_control.content,
-					section: note_customizer_control.section,
-					sidebar_id: note_customizer_control.sidebar_id,
-					priority: note_customizer_control.priority,
-					settings: note_customizer_control.settings,
-					type: note_customizer_control.type,
-					instanceNumber: _.size( api.settings.controls )
-					//description: ""
-					//label: ""
-				},
+				control = note_customizer_control,
 				customizer_setting_value = [],
 				sectionConstructor, customizer_section, customizer_control_control,
 				controlConstructor, customizer_control,
@@ -534,6 +549,12 @@ var note = note || {};
 
 			// Set the priority on the section object
 			section.priority = sidebar_section_priority;
+
+			// Set the instance number on the section object
+			section.instanceNumber = _.size( api.settings.sections );
+
+			// Set the instance number on the control object
+			control.instanceNumber = _.size( api.settings.controls );
 
 			// Add our sidebar to the list of registered sidebars (omitting our 'customizer' key)
 			api.Widgets.registeredSidebars.add( _.omit( note_sidebar_args, 'customizer' ) );
@@ -609,7 +630,7 @@ var note = note || {};
 				params: section
 			} );
 
-			// Add the section
+			// Add the section to the Backbone collection
 			api.section.add( note_customizer_section.id, customizer_section );
 
 
@@ -799,7 +820,7 @@ var note = note || {};
 					// Trigger a click on the "Add a Widget" button
 					sidebar_section.container.find( '.add-new-widget' ).trigger( 'click' );
 
-					// Add a Conductor Widget (api.Widgets.availableWidgetsPanel is a Backbone View)
+					// Add a Note Widget (api.Widgets.availableWidgetsPanel is a Backbone View)
 					api.Widgets.availableWidgetsPanel.$( '.widget-tpl[data-widget-id^="' + widget_id + '"]' ).trigger( 'click' );
 				}
 			}
@@ -822,7 +843,7 @@ var note = note || {};
 						$sidebar_panel.find( '.add-new-widget' ).trigger( 'click' );
 					}
 
-					// Add a Conductor Widget (api.Widgets.availableWidgetsPanel is a Backbone View)
+					// Add a Note Widget (api.Widgets.availableWidgetsPanel is a Backbone View)
 					api.Widgets.availableWidgetsPanel.$( '.widget-tpl[data-widget-id^="' + widget_id + '"]' ).trigger( 'click' );
 				}
 			}

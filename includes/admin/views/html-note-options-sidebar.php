@@ -2,16 +2,31 @@
 	<?php do_action( 'note_admin_options_sidebar_before' ); ?>
 
 	<div class="note-ads">
-		<div class="note-ad note-upgrade-ad note-upgrade-ad-dark-gray">
-			<a href="https://conductorplugin.com/note/?utm_source=note&utm_medium=link&utm_content=sidebar&utm_campaign=note" target="_blank">
-				<h3><?php _e( 'Introducing Conductor Plugin', 'modern-business' ); ?></h3>
+		<div class="note-ad note-upgrade-ad note-pwcc-ad-dark-blue">
+		<a href="https://www.getdrip.com/forms/3013999/submissions/new" target="_blank">
+				<h3><?php _e( 'How-to build the perfect WordPress website', 'note' ); ?></h3>
 				<ul>
-					<li><?php _e( 'Custom Layouts', 'modern-business' ); ?></li>
-					<li><?php _e( 'Custom Content Displays', 'modern-business' ); ?></li>
-					<li><?php _e( 'No Code Required!', 'modern-business' ); ?></li>
+					<li><?php _e( 'Free 9-part course', 'note' ); ?></li>
+					<li><?php _e( 'Great for business owners', 'note' ); ?></li>
+					<li><?php _e( 'Learn the best plugins', 'note' ); ?></li>
+					<li><?php _e( 'Speed up your website', 'note' ); ?></li>
+					<li><?php _e( 'Get more leads', 'note' ); ?></li>
+					<li><?php _e( 'And more!', 'note' ); ?></li>
 				</ul>
 
-				<span class="note-btn-yellow"><?php _e( 'Get Conductor!', 'modern-business' ); ?></span>
+				<span class="note-btn-yellow"><?php _e( 'Signup Free!', 'note' ); ?></span>
+			</a>
+		</div>
+		<div class="note-ad note-upgrade-ad note-upgrade-ad-dark-gray">
+			<a href="https://conductorplugin.com/note/?utm_source=note&utm_medium=link&utm_content=sidebar&utm_campaign=note" target="_blank">
+				<h3><?php _e( 'Introducing Conductor Plugin', 'note' ); ?></h3>
+				<ul>
+					<li><?php _e( 'Custom Layouts', 'note' ); ?></li>
+					<li><?php _e( 'Custom Content Displays', 'note' ); ?></li>
+					<li><?php _e( 'No Code Required!', 'note' ); ?></li>
+				</ul>
+
+				<span class="note-btn-yellow"><?php _e( 'Get Conductor!', 'note' ); ?></span>
 			</a>
 		</div>
 	</div>

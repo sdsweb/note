@@ -352,15 +352,19 @@ tinymce.ThemeManager.add( 'note', function( editor ) {
 		};
 
 		panel.on( 'show', function() {
-			var self = this;
+			//var self = this;
 
 			setTimeout( function() {
-				self._visible && DOM.addClass( self.getEl(), 'mce-inline-toolbar-active' );
+				//self._visible && DOM.addClass( self.getEl(), 'mce-inline-toolbar-active' );
+				panel.state.data.visible && DOM.addClass( panel.getEl(), 'mce-inline-toolbar-active' );
 			}, 100 );
 		} );
 
 		panel.on( 'hide', function() {
-			DOM.removeClass( this.getEl(), 'mce-inline-toolbar-active' );
+			// Only hide the panel if the selection is truly collapsed
+			if ( ! editor.selection || ( editor.selection &&  editor.selection.isCollapsed() ) ) {
+				DOM.removeClass( this.getEl(), 'mce-inline-toolbar-active' );
+			}
 		} );
 
 		panel.on( 'cancel', function() {
@@ -371,7 +375,7 @@ tinymce.ThemeManager.add( 'note', function( editor ) {
 			panel.hide();
 		} );
 
-		editor.on( 'selectionchange nodechange', function( event ) {
+		editor.on( 'SelectionChange NodeChange', function( event ) {
 			var element = event.element || editor.selection.getNode(),
 				view = editor.plugins.wpview.getView();
 

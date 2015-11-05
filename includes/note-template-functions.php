@@ -3,7 +3,7 @@
  * Note Template Functions
  *
  * @author Slocum Studio
- * @version 1.0.0
+ * @version 1.3.0
  * @since 1.2.0
  */
 
@@ -67,3 +67,78 @@ function note_register_sidebar_location( $args ) {
 // TODO: Introduce a note_unregister_sidebar_location function
 
 // TODO: Introduce a note_sidebar() function to output a sidebar in a particular location within a template
+
+
+/**
+ * This function locates and loads templates based on arguments. Optionally an array of data can be passed
+ * that will be extract()ed and the template will have access to the $data. If data is passed, WordPress
+ * global variables can be included as well. The template file can also be required once if necessary.
+ *
+ * Verify if the file exists in the theme first, then load the plugin template if necessary as a fallback.
+ */
+function note_get_template_part( $slug, $name = '', $data = array(), $wp_globals = false, $require_once = false ) {
+	// note_get_template_part filter
+	$template = apply_filters( 'note_get_template_part', note_locate_template_part( $slug, $name ), $slug, $name );
+
+	// Finally, if we have a template, lets load it
+	if ( $template ) {
+		// If data was passed we have to require() the files
+		if ( is_array( $data ) && ! empty( $data ) ) {
+			$data = apply_filters( 'note_get_template_part_data', $data, $slug, $name );
+
+			// WordPress Globals
+			if ( $wp_globals )
+				global $posts, $post, $wp_did_header, $wp_query, $wp_rewrite, $wpdb, $wp_version, $wp, $id, $comment, $user_ID;
+
+			// Extract the data for use in the template
+			extract( $data, EXTR_SKIP ); // Skip collisions
+			unset( $data ); // We don't need the $data var anymore
+
+			// Require Once
+			if ( $require_once )
+				require_once( $template );
+			// Require
+			else
+				require( $template );
+
+		}
+		// Otherwise we can load_template()
+		else
+			load_template( $template, $require_once );
+	}
+}
+
+/**
+ * This function locates templates based on arguments.
+ *
+ * Verify if the file exists in the theme first, then locate the plugin template if necessary as a fallback.
+ */
+function note_locate_template_part( $slug, $name = '' ) {
+	$template = '';
+	$templates = array();
+
+	// Find the more specific template in the theme first
+	if ( $name ) {
+		//$templates[] = $slug . '-' . $name . '.php';
+		$templates[] = Note::theme_template_path() . '/' . $slug . '-' . $name . '.php';
+		$template = locate_template( $templates );
+
+		// Find the more specific template in Note if it was not found in the theme
+		if ( ! $template && file_exists( Note::plugin_dir() . '/templates/' . $slug . '-' . $name . '.php' ) )
+			$template = Note::plugin_dir() . '/templates/' . $slug . '-' . $name . '.php';
+	}
+
+	// Find the more generic template in the theme if the more specific template doesn't exist
+	if ( ! $template ) {
+		$templates = array(); // Reset templates array first
+		//$templates[] = $slug . '.php';
+		$templates[] = Note::theme_template_path() . '/' . $slug . '.php';
+		$template = locate_template( $templates );
+
+		// Find the more generic template in Note if it was not found in the theme
+		if ( ! $template && file_exists( Note::plugin_dir() . '/templates/' . $slug . '.php' ) )
+			$template = Note::plugin_dir() . '/templates/' . $slug . '.php';
+	}
+
+	return $template;
+}

@@ -190,6 +190,7 @@ if( ! class_exists( 'Note_Admin_Options' ) ) {
 		/**
 		 * This function sanitizes the option values before they are stored in the database.
 		 */
+		// TODO: We need filters here
 		public function sanitize_option( $input ) {
 			// TODO Reset to defaults?
 			//if ( isset( $input['reset'] ) )

@@ -3,8 +3,8 @@ Contributors: slocumstudio
 Donate link: 
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
 Requires at least: 4.1.0
-Tested up to: 4.3.0
-Stable tag: 1.2.2
+Tested up to: 4.3.1
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,7 +65,44 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 == Changelog ==
 
-= 1.2.1 // August 19 2015 =
+= 1.3.0 // November 05 2015 =
+* Note Widget
+  * Replaced Note Widget self::WP_Widget() call with parent::__construct() call (fixes PHP warnings in future versions of WordPress)
+  * Introduce note_tinymce_editor_types filter to allow for different TinyMCE editor types to be declared
+  * Introduce note_tinymce_preview_styles to allow for adjustment of CSS properties that TinyMCE styles_format would inherit for the "preview" within the Styles TinyMCE dropdown
+  * Introduce note_tinymce_blocks filter to allow for adjusting block elements that were added to the Note TinyMCE "Insert" Panel
+  * Introduce note_tinymce_style_formats filter to allow for of adjusting style formats on Note TinyMCE editors
+  * Introduce note_tinymce_editor_plugins filter to allow for adjusting of specific Note TinyMCE editor type plugins
+  * Introduce note_tinymce_editor_blocks filter to allow for adjusting of specific Note TinyMCE editor type blocks
+  * Introduce note_tinymce_editor_toolbar filter to allow for adjusting of specific Note TinyMCE editor type toolbar buttons
+  * Introduce note_tinymce_editor_preview_styles filter to allow for adjusting of specific Note TinyMCE editor type preview styles
+  * Introduce note_tinymce_editor_style_formats filter to allow for adjusting of specific Note TinyMCE editor type style formats
+  * Introduce note_tinymce_editor_placeholder filter to allow for adjusting specific Note TinyMCE editor type placeholder
+  * Introduce note_tinymce_editor_settings filter to allow for adjusting all specific Note TinyMCE editor type settings
+  * Added functionality to ensure that Previewer refresh logic was re-implemented only after all AJAX requests for Note Widget updates had finished (checking to make sure the request was not aborted due to another setting value change); Due to the nature of Note, this ensures that the previewer doesn't refresh during content editing
+  * Introduce "Display Layouts" setting in Note Widgets to allow for different content displays (ported from a previous version of Conductor)
+  * Introduce Note TinyMCE Background Plugin to allow for a background image to be applied to a Note Widget (not enabled by default)
+    * Introduce note_widget_background_image_css fitler to allow for CSS adjustments on Note Widget background images
+  * Introduce Note TinyMCE Placeholder Plugin to allow for more unique placeholder elements in Note Widgets
+    * Contains logic to determine when mixed placeholder content exists and to only apply placeholder logic to placeholder elements within content
+    * Contains logic to allow for placeholder elements nested within other elements
+    * Use data-note-placeholder="false" attribute to specify elements that should not inherit placeholder functionality
+    * Adjusted Note TinyMCE Placeholder Plugin logic to ensure pasting content into a placeholder element removed functionality
+  * Adjusted all Note Widget TinyMCE Plugin names/IDs for better readability (added '_' between words in names/IDs)
+  * Added event listener for TinyMCE "SetAttrib" event to ensure updated content was sent to Note Widgets when attributes on elements were updated
+  * Adjusted Customizer logic to ensure a better user experience in the Customizer when "Edit" button logic on the Note TinyMCE Insert Plugin was triggered
+* Note Widget TinyMCE Theme
+  * Adjusted CSS to ensure better cross-theme compatibility
+  * Adjusted "core" CSS to ensure user experience between back-end and front-end editing remained consistent
+* Note Templates
+  * Introduce Note Templates (templating system)
+  * Introduce note_get_template_part() function to allow specific templates to be loaded in Note Widgets based on "Display Layout" setting/config
+  * Introduce note_locate_template_part() function to check for/locate template part files
+* Note Sidebars
+  * Fixed bug where removal of a Note Sidebar would result in an unusable Customizer Sidebar when the Note Sidebar was the active Customizer component
+  * Fixed bug where Note Sidebar Customizer action and description were not rendered properly upon creation during a Customizer session
+
+= 1.2.2 // August 19 2015 =
 * WordPress 4.3 Fixes
   * Replaced Note Widget self::WP_Widget() call with parent::__construct() call (fixes PHP warnings in WordPress 4.3+)
   * Fix bug in WordPress 4.3 where _createToolbar() function was not available on the editor wp object (editor.wp), due to Note Widget TinyMCE configuration not including the TinyMCE 'wordpress' plugin

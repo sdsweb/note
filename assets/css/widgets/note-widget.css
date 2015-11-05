@@ -1,0 +1,98 @@
+/**
+ * Note Widget Stylesheet
+ */
+
+
+/**
+ * Note Flexbox Row
+ */
+.note-flex {
+	width: 100%;
+	margin: auto;
+
+	/* TODO: Likely need to include MS prefixed declaratons here as IE10 doesn't support new flexbox syntax */
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-flow: row wrap;
+	flex-flow: row wrap;
+	-webkit-justify-content: space-around;
+	justify-content: space-around;
+	-webkit-align-content: flex-start;
+	align-content: flex-start;
+
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+/**
+ * Note Flexbox Columns
+ */
+.note-flex .note-col {
+	width: 100%;
+	padding: 0 1em;
+	position: relative;
+
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.note-flex-1-columns .note-col {
+	width: 100%;
+}
+
+.note-flex-2-columns .note-col {
+	width: 50%;
+}
+
+.note-flex-3-columns .note-col {
+	width: 33.333%;
+}
+
+.note-flex-4-columns .note-col {
+	width: 25%;
+}
+
+.note-flex-5-columns .note-col {
+	width: 20%;
+}
+
+.note-flex-6-columns .note-col {
+	width: 16.6665%;
+}
+
+/* Responsive Structure */
+@media only screen and (max-width : 768px) {
+	.note-flex-2-columns .note-col {
+		width: 100%;
+	}
+
+	.note-flex-4-columns .note-col {
+		width: 50%;
+	}
+
+	.note-flex-5-columns .note-col {
+		width: 33%;
+	}
+
+	.note-flex-6-columns .note-col {
+		width: 33%;
+	}
+}
+
+@media only screen and (max-width : 568px) {
+	.note-flex-3-columns .note-col {
+		width: 100%;
+	}
+
+	.note-flex-4-columns .note-col {
+		width: 100%;
+	}
+
+	.note-flex-5-columns .note-col {
+		width: 100%;
+	}
+
+	.note-flex-6-columns .note-col {
+		width: 100%;
+	}
+}
