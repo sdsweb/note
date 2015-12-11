@@ -2,9 +2,9 @@
 Contributors: slocumstudio
 Donate link: 
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
-Requires at least: 4.1.0
-Tested up to: 4.3.1
-Stable tag: 1.3.0
+Requires at least: 4.1
+Tested up to: 4.4
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,10 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 
 == Changelog ==
+
+= 1.3.1 // December 11 2015 =
+* Fixed a bug in WordPress 4.4+ where data sent from the Previewer (TinyMCE editor) to the Customizer (Note Widget control) wasn't saved
+* Fixed a bug in WordPress 4.4+ where field names on Note Widgets did not properly contain a closing square bracket resulting in data not being saved
 
 = 1.3.0 // November 05 2015 =
 * Note Widget

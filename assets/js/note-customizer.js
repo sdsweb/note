@@ -13,6 +13,7 @@ var note = note || {};
 	}
 
 	var api = wp.customize, OldPreviewer,
+		wp_version = parseFloat( note.wp_version ),
 		wp_major_version = parseInt( note.wp_major_version, 10 );
 
 	// Note Previewer
@@ -75,6 +76,7 @@ var note = note || {};
 					$widget_content = $widget_content_container.find( selectors.widget_content ),
 					widget_content_data = $widget_content.data( selectors.widget_content_data ), // We need to store data instead of checking the textarea value due to the way that $.text() and $.val() function in jQuery
 					saved;
+
 
 				// Store the data on this widget
 				$widget_root.data( selectors.widget_content_data, data );
@@ -903,6 +905,37 @@ var note = note || {};
 	api.bind( 'ready', function() {
 		// 4.0 and above
 		if ( wp_major_version >= 4 ) {
+			/*
+			 * WordPress 4.4 introduces logic to defer loading of widget controls and content. We need
+			 * to ensure that Note Widget control and content have been populated to ensure that data
+			 * in the Previewer can be properly sent over to the Customizer.
+			 *
+			 * We're calling control.embedWidgetControl() and control.embedWidgetContent() to ensure
+			 * that both the control and content is populated for all Note Widgets.
+			 *
+			 * @see https://core.trac.wordpress.org/ticket/33901
+			 */
+			if ( wp_version >= 4.4 ) {
+				// Loop through controls
+				api.control.each( function( control ) {
+					// Widget form controls only
+					if ( control.params && control.params.type === 'widget_form' ) {
+						// Note Widgets
+						if ( control.params.widget_id_base === note.widget.id ) {
+							// Embed the widget control markup
+							if ( control.embedWidgetControl ) {
+								control.embedWidgetControl();
+							}
+
+							// Embed the widget content markup
+							if ( control.embedWidgetContent ) {
+								control.embedWidgetContent();
+							}
+						}
+					}
+				} );
+			}
+
 			// Initialize our Previewer
 			api.NotePreviewer.init( api.previewer );
 		}

@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.2.1';
+		public $version = '1.3.0';
 
 		/**
 		 * @var array

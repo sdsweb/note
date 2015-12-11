@@ -4,7 +4,7 @@
  *
  * @class Note_Widget
  * @author Slocum Studio
- * @version 1.3.0
+ * @version 1.3.1
  * @since 1.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.3.0';
+		public $version = '1.3.1';
 
 		/**
 		 * @var string
@@ -637,7 +637,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 						// Loop through content areas
 						for ( $i = 1; $i <= $this->max_content_areas; $i++ ) :
 				?>
-					<textarea class="note-input note-hidden note-column-content note-content-<?php echo $i; ?>" id="<?php echo $this->get_field_id( 'content-area-' . $i ); ?>" name="<?php echo $this->get_field_name( 'content_area][' . $i ); ?>" rows="16" cols="20"><?php echo ( isset( $instance['content_areas'][$i] ) ) ? $instance['content_areas'][$i] : false; ?></textarea>
+					<textarea class="note-input note-hidden note-column-content note-content-<?php echo $i; ?>" id="<?php echo $this->get_field_id( 'content-area-' . $i ); ?>" name="<?php echo ( Note::wp_version_compare( '4.4' ) ) ? $this->get_field_name( 'content_area[' . $i . ']' ) : $this->get_field_name( 'content_area][' . $i ); ?>" rows="16" cols="20"><?php echo ( isset( $instance['content_areas'][$i] ) ) ? $instance['content_areas'][$i] : false; ?></textarea>
 				<?php
 						endfor;
 					endif;
@@ -667,7 +667,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 				<?php do_action( 'note_widget_settings_extras_inner_before', $instance, $this ); ?>
 
 				<?php // Background Image Attachment ID ?>
-				<input type="text" class="note-input note-background-image-id" id="<?php echo $this->get_field_id( 'extras_background_image_attachment_id' ); ?>" name="<?php echo $this->get_field_name( 'extras][background_image_attachment_id' ); ?>" value="<?php echo esc_attr( $instance['extras']['background_image_attachment_id'] ); ?>" />
+				<input type="text" class="note-input note-background-image-id" id="<?php echo $this->get_field_id( 'extras_background_image_attachment_id' ); ?>" name="<?php echo ( Note::wp_version_compare( '4.4' ) ) ? $this->get_field_name( 'extras[background_image_attachment_id]' ) : $this->get_field_name( 'extras][background_image_attachment_id' ); ?>" value="<?php echo esc_attr( $instance['extras']['background_image_attachment_id'] ); ?>" />
 
 				<?php do_action( 'note_widget_settings_extras_inner_after', $instance, $this ); ?>
 			</div>
