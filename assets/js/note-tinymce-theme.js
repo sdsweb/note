@@ -14,231 +14,392 @@
 
 tinymce.ThemeManager.add( 'note', function( editor ) {
 	var self = this,
-		settings = editor.settings,
+		DOM = tinymce.DOM,
 		Factory = tinymce.ui.Factory,
 		each = tinymce.each,
-		DOM = tinymce.DOM,
+		settings = editor.settings,
 		adminBarHeight = 32,
-		focus;
+		focus = false,
+		open_window = false,
+		toolbars = {},
+		main_toolbar_id = 'main',
+		WP_Link = false;
 
-	function getParent( node, nodeName ) {
-		while ( node ) {
-			if ( node.nodeName === nodeName ) {
-				return node;
-			}
-
-			node = node.parentNode;
-		}
-
-		return false;
-	}
-
-	function toolbarItems( array, block ) {
-		var items = [],
-			buttonGroup;
-
-		if ( ! array ) {
-			return;
-		}
-
-		each( array, function( item ) {
-			var itemName;
-
-			function bindSelectorChanged() {
-				var selection = editor.selection;
-
-				if ( itemName === 'bullist' ) {
-					selection.selectorChanged( 'ul > li', function( state, args ) {
-						var nodeName,
-							i = args.parents.length;
-
-						while ( i-- ) {
-							nodeName = args.parents[ i ].nodeName;
-
-							if ( nodeName === 'OL' || nodeName === 'UL' ) {
-								break;
-							}
-						}
-
-						item.active( state && nodeName === 'UL' );
-					} );
-				}
-
-				if ( itemName === 'numlist' ) {
-					selection.selectorChanged( 'ol > li', function(state, args) {
-						var nodeName,
-							i = args.parents.length;
-
-						while ( i-- ) {
-							nodeName = args.parents[ i ].nodeName;
-
-							if ( nodeName === 'OL' || nodeName === 'UL' ) {
-								break;
-							}
-						}
-
-						item.active( state && nodeName === 'OL' );
-					} );
-				}
-
-				if ( item.settings.stateSelector ) {
-					selection.selectorChanged( item.settings.stateSelector, function( state ) {
-						item.active( state );
-					}, true );
-				}
-
-				if ( item.settings.disabledStateSelector ) {
-					selection.selectorChanged( item.settings.disabledStateSelector, function( state ) {
-						item.disabled( state );
-					} );
-				}
-			}
-
-			if ( item === '|' ) {
-				buttonGroup = null;
-			} else {
-				if ( Factory.has( item ) ) {
-					item = {
-						type: item
-					};
-
-					if ( settings.toolbar_items_size ) {
-						item.size = settings.toolbar_items_size;
-					}
-
-					items.push( item );
-					buttonGroup = null;
-				} else {
-					if ( ! buttonGroup || block ) {
-						buttonGroup = {
-							type: 'buttongroup',
-							items: []
-						};
-						items.push( buttonGroup );
-					}
-
-					if ( editor.buttons[ item ] ) {
-						itemName = item;
-						item = editor.buttons[ itemName ];
-
-						if ( typeof( item ) === 'function' ) {
-							item = item();
-						}
-
-						if ( item.icon && item.icon.indexOf( 'dashicons' ) !== -1 ) {
-							item.icon = 'dashicon ' + item.icon;
-						}
-
-						if ( block ) {
-							item.text = item.tooltip;
-							item.tooltip = false;
-						}
-
-						item.type = item.type || 'button';
-
-						if ( settings.toolbar_items_size ) {
-							item.size = settings.toolbar_items_size;
-						}
-
-						if ( itemName === 'link' ) {
-							item.onPostRender = function() {
-								var self = this;
-
-								editor.on( 'NodeChange', function( event ) {
-									self.active( getParent( event.element, 'A' ) );
-								} );
-							};
-						} else if ( itemName === 'unlink' ) {
-							item.onPostRender = function() {
-								var self = this;
-
-								editor.on( 'NodeChange', function( event ) {
-									var disabled = event.element.nodeName !== 'A' && editor.selection.getContent().indexOf( '<a' ) === -1;
-									self.disabled( disabled );
-									DOM.setAttrib( self.getEl(), 'tabindex', disabled ? '0' : '-1' );
-								} );
-							};
-
-							item.onclick = function() {
-								if ( editor.selection.getContent().indexOf( '<a' ) === -1 ) {
-									editor.selection.select( editor.selection.getNode() );
-								}
-
-								editor.execCommand( 'unlink' );
-							};
-						}
-
-						item = Factory.create( item );
-						buttonGroup.items.push( item );
-
-						if ( editor.initialized ) {
-							bindSelectorChanged();
-						} else {
-							editor.on( 'init', bindSelectorChanged );
-						}
-					}
-				}
-			}
-		});
-
-		return items;
-	}
-
-	function createToolbar( items ) {
-		return Factory.create( {
-			type: 'panel',
-			layout: 'stack',
-			classes: 'toolbar-grp',
-			ariaRoot: true,
-			ariaRemember: true,
-			items: [
-				{
-					type: 'toolbar',
-					layout: 'flow',
-					items: toolbarItems( items )
-				}
-			]
-		} );
-	}
-
-	editor.toolbarItems = toolbarItems;
-
+	/**
+	 * Render the UI of the theme
+	 */
 	self.renderUI = function() {
-		var panel, toolbars = {}, hasPlaceholder,
+		var panel,
+			hasPlaceholder,
 			upperMargin = 0;
 
-		settings.content_editable = true;
-
-		function isEmpty() {
-			return editor.getContent( { format: 'raw' } ).replace( /(?:<p[^>]*>)?(?:<br[^>]*>)?(?:<\/p>)?/, '' ) === '';
+		// Bail if we don't have a toolbar in settings
+		if ( ! settings.toolbar || ! settings.toolbar.length ) {
+			return {};
 		}
 
-		editor.on( 'activate focus', function() {
+		// Calculate the upper margin for the entire document
+		if ( DOM.getStyle( document.body, 'position', true ) === 'relative' ) {
+			upperMargin =
+				parseInt( DOM.getStyle( document.body, 'margin-top', true ), 10 ) +
+				parseInt( DOM.getStyle( document.documentElement, 'padding-top', true ), 10 ) +
+				parseInt( DOM.getStyle( document.documentElement, 'margin-top', true ), 10 );
+		}
+
+		// Allow the content within the editor to be adjusted (instead of creating an editor element)
+		settings.content_editable = true;
+
+
+		/*
+		 * TinyMCE Editor Events
+		 */
+
+		// Activate, focus events
+		editor.on( 'activate focus', function( event ) {
+			// Set the focus flag
 			focus = true;
+
+			// Add the focus CSS class
 			DOM.addClass( editor.getBody(), 'mce-edit-focus' );
 		} );
 
-		editor.on( 'deactivate blur hide', function() {
+		// Deactivate, blur, hide events
+		editor.on( 'deactivate blur hide', function( event ) {
+			// Reset the focus flag
 			focus = false;
+
+			// Remove the focus CSS class
 			DOM.removeClass( editor.getBody(), 'mce-edit-focus' );
+
+			// If we have a panel
+			if ( panel ) {
+				// Hide the panel
+				panel.hide();
+			}
 		} );
 
+		// Remove event
 		editor.on( 'remove', function() {
-			panel && panel.remove();
-			panel = null;
+			// If we have a panel
+			if ( panel ) {
+				// Remove the panel
+				panel.remove();
+
+				// Reset the reference to the panel
+				panel = null;
+			}
 		} );
+
+		// Preinit event (once)
+		editor.once( 'preinit', function( event ) {
+			// If the WordPress plugin has been initialized and we can create a toolbar
+			if ( editor.wp && editor.wp._createToolbar ) {
+				/*
+				 * Panel
+				 */
+
+				// Create the panel (no items)
+				panel = self.panel = Factory.create( {
+					type: 'floatpanel',
+					role: 'application',
+					classes: 'tinymce tinymce-inline',
+					layout: 'stack',
+					autohide: true,
+					items: []
+				} );
+
+				/**
+				 * This function repositions a toolbar (name) within the editor.
+				 */
+				panel.reposition = function( name ) {
+					var toolbarEl = this.getEl(),
+						selection = editor.selection.getRng(),
+						boundary = selection.getBoundingClientRect(),
+						boundaryMiddle = ( boundary.left + boundary.right ) / 2,
+						windowWidth = window.innerWidth,
+						toolbarWidth, toolbarHalf,
+						margin = parseInt( DOM.getStyle( toolbarEl, 'margin-bottom', true ), 10 ) + upperMargin,
+						top, left, className;
+
+					toolbarEl.className = ( ' ' + toolbarEl.className + ' ' ).replace( /\smce-arrow-\S+\s/g, ' ' ).slice( 1, -1 );
+
+					// Setup the toolbar
+					name = name || main_toolbar_id;
+
+					// Fallback to the main toolbar if we don't have a reference
+					if ( ! toolbars[name] ) {
+						name = main_toolbar_id;
+					}
+
+					// Loop through toolbars
+					each( toolbars, function( toolbar ) {
+						// Hide this toolbar if the flag is set
+						if ( toolbar.note_hide ) {
+							toolbar.hide();
+						}
+					} );
+
+					// If the editor selection is not hidden
+					if ( ! editor.selection.isCollapsed() ) {
+						// Show this toolbar
+						toolbars[name].show();
+					}
+					// Otherwise just hide the panel
+					else {
+						panel.hide();
+					}
+
+					/*
+					 * Determine the position for this toolbar/panel
+					 */
+
+					toolbarWidth = toolbarEl.offsetWidth;
+					toolbarHalf = toolbarWidth / 2;
+
+					if ( boundary.top < toolbarEl.offsetHeight + adminBarHeight ) {
+						className = ' mce-arrow-up';
+						top = boundary.bottom + margin;
+					}
+					else {
+						className = ' mce-arrow-down';
+						top = boundary.top - toolbarEl.offsetHeight - margin;
+					}
+
+					left = boundaryMiddle - toolbarHalf;
+
+					if ( toolbarWidth >= windowWidth ) {
+						className += ' mce-arrow-full';
+						left = 0;
+					}
+					else if ( ( left < 0 && boundary.left + toolbarWidth > windowWidth ) || ( left + toolbarWidth > windowWidth && boundary.right - toolbarWidth < 0 ) ) {
+						left = ( windowWidth - toolbarWidth ) / 2;
+					}
+					else if ( left < 0 ) {
+						className += ' mce-arrow-left';
+						left = boundary.left;
+					}
+					else if ( left + toolbarWidth > windowWidth ) {
+						className += ' mce-arrow-right';
+						left = boundary.right - toolbarWidth;
+					}
+
+					toolbarEl.className += className;
+
+					DOM.setStyles( toolbarEl, { 'left': left, 'top': top + window.pageYOffset } );
+
+					return this;
+				};
+
+				// Show event
+				panel.on( 'show', function() {
+					setTimeout( function() {
+						// If the panel is visible (checking state)
+						if ( panel.state.get( 'visible' ) ) {
+							// Add the active CSS class
+							DOM.addClass( panel.getEl(), 'mce-inline-toolbar-active' );
+						}
+					}, 100 );
+				} );
+
+				// Hide event
+				panel.on( 'hide', function() {
+					// If we don't have an editor selector
+					if ( ! editor.selection || ( editor.selection && editor.selection.isCollapsed() ) ) {
+						DOM.removeClass( this.getEl(), 'mce-inline-toolbar-active' );
+					}
+
+					// Loop through toolbars
+					each( toolbars, function( toolbar ) {
+						// Loop through the button groups for this toolbar
+						each( toolbar.items(), function ( buttonGroups ) {
+							// Loop through individual button group for this toolbar
+							each( buttonGroups.items(), function ( buttonGroup ) {
+								// Loop through items for this button group
+								each( buttonGroup.items(), function ( item ) {
+									// If this item has a menu
+									if ( item.state.get( 'menu' ) ) {
+										// Hide the menu
+										item.hideMenu();
+									}
+								} );
+							} );
+						} );
+
+						// If this toolbar should be hidden
+						if ( toolbar.note_hide ) {
+							// Hide the toolbar
+							toolbar.hide();
+						}
+					} );
+				} );
+
+				// Cancel event
+				panel.on( 'cancel', function() {
+					// Focus the editor
+					editor.focus();
+				} );
+
+
+				// Render the panel to the body element
+				panel.renderTo( document.body ).reflow().hide();
+
+				/*
+				 * Create the main toolbar.
+				 *
+				 * Because the WordPress TinyMCE plugin renders the toolbar to the DOM for us,
+				 * we need to add it after the panel is rendered so that we can append it to our
+				 * panel 'body' element.
+				 */
+
+				// Setup the main toolbar
+				setupToolbar( editor.wp._createToolbar( settings.toolbar ), 'main', panel, {
+					note_hide: true
+				} );
+			}
+
+			// wptoolbar event (triggered after WordPress' logic)
+			editor.on( 'wptoolbar', function( args ) {
+				// If we have an element and a toolbar
+				if ( args.element && args.toolbar ) {
+					// Switch based on type of element
+					switch ( args.element.nodeName ) {
+						// Images
+						case 'IMG':
+							// If we don't already have a reference to this toolbar
+							if ( ! toolbars['img'] ) {
+								// Setup the toolbar
+								setupToolbar( args.toolbar, 'img', panel, {
+									note_hide: true
+								} );
+							}
+						break;
+
+						// Links
+						case 'A':
+							var href = args.element.getAttribute( 'href' ),
+								$link = editor.$( editor.dom.getParent( args.element, 'a' ) );
+
+							// If we don't already have a reference to this toolbar (editing link)
+							if ( ! toolbars['link_edit'] || ! toolbars['link'] ) {
+								// If this link is being edited (created)
+								if ( ! toolbars['link_edit'] && href === '_wp_link_placeholder' || args.element.getAttribute( 'data-wplink-edit' ) ) {
+									// Setup the toolbar
+									setupToolbar( args.toolbar, 'link_edit', panel, {
+										tempHide: true,
+										note_hide: false
+									} );
+								}
+								// Otherwise if this link was already existing
+								else if ( ! toolbars['link'] && href && href !== '_wp_link_placeholder' && ! $link.find( 'img' ).length ) {
+									// Setup the toolbar
+									setupToolbar( args.toolbar, 'link', panel, {
+										note_hide: true
+									} );
+								}
+							}
+						break;
+					}
+				}
+			} );
+		} );
+
+		// Selectionchange, nodechange events
+		editor.on( 'selectionchange nodechange', function( event ) {
+			var element = event.element || editor.selection.getNode();
+
+			// Bail if we don't have a selection
+			if ( editor.selection.isCollapsed() ) {
+				// Hide the panel
+				panel.hide();
+
+				return;
+			}
+
+			setTimeout( function() {
+				var content, name;
+
+				// Bail if this editor does not have focus or there is an open window
+				if ( ! focus || open_window ) {
+					return;
+				}
+
+				// If the selection isn't collapsed, we have content, and this is not a <hr> element
+				if ( ! editor.selection.isCollapsed() && ( content = editor.selection.getContent() ) && ( content.replace( /<[^>]+>/g, '' ).trim() || content.indexOf( '<' ) === 0 ) && element.nodeName !== 'HR' || WP_Link ) {
+					// Switch based on type of element
+					switch ( element.nodeName ) {
+						// Images
+						case 'IMG':
+							name = 'img';
+						break;
+
+						// Links
+						case 'A':
+							var href = element.getAttribute( 'href' ),
+								$link = editor.$( editor.dom.getParent( element, 'a' ) );
+
+							// Default to link_edit
+							name = 'link_edit';
+
+							// If this link was already existing
+							if ( ! WP_Link && href && href !== '_wp_link_placeholder' && ! $link.find( 'img' ).length ) {
+								name = 'main';
+							}
+						break;
+
+						// Default
+						default:
+							name = 'main';
+						break;
+					}
+
+					// Show the panel and reposition the toolbar
+					panel.show().reposition( name );
+				}
+				// Otherwise hide the panel
+				else {
+					panel.hide();
+				}
+			}, 100 );
+		} );
+
+		// Beforeexeccommand event
+		editor.on( 'beforeexeccommand', function( event ) {
+			// If this is a WP_Link command
+			if ( event.command === 'WP_Link' ) {
+				// Set the flag
+				WP_Link = true;
+			}
+
+			// If this is a wp_link_cancel or wp_link_apply command
+			if ( event.command === 'wp_link_cancel' || event.command === 'wp_link_apply' ) {
+				// Reset the flag
+				WP_Link = false;
+			}
+		} );
+
+		// Openwindow event
+		editor.on( 'openwindow', function( event ) {
+			// Set the flag
+			open_window = true;
+
+			// Hide the panel
+			panel.hide();
+		} );
+
+		// Closewindow event
+		editor.on( 'closewindow', function( event ) {
+			// Reset the flag
+			open_window = false;
+
+			// Show the panel
+			panel.show();
+		} );
+
 
 		// Placeholder
 		if ( settings.placeholder ) {
-			editor.on( 'blur LoadContent deactivate', function() {
-				if ( isEmpty() ) {
-					editor.setContent( settings.placeholder );
-					hasPlaceholder = true;
-					DOM.addClass( editor.getBody(), 'mce-placeholder' );
-				}
-			} );
-
-			editor.on( 'focus activate', function() {
+			// Activate, focus events
+			editor.on( 'activate focus', function() {
 				if ( hasPlaceholder ) {
 					editor.setContent( '' );
 
@@ -248,181 +409,91 @@ tinymce.ThemeManager.add( 'note', function( editor ) {
 				}
 			} );
 
-			editor.on( 'SetContent', function( event ) {
+			// Deactivate, blur, LoadContent events
+			editor.on( 'deactivate blur LoadContent', function() {
+				// If editor content is empty
+				if ( isEmpty() ) {
+					editor.setContent( settings.placeholder );
+					hasPlaceholder = true;
+					DOM.addClass( editor.getBody(), 'mce-placeholder' );
+				}
+			} );
+
+			// Setcontent event
+			editor.on( 'setcontent', function( event ) {
 				if ( hasPlaceholder && ! event.load ) {
 					hasPlaceholder = false;
 					DOM.removeClass( editor.getBody(), 'mce-placeholder' );
 				}
 			} );
 
-			editor.on( 'PostProcess', function( event ) {
+			// Postprocess event
+			editor.on( 'postprocess', function( event ) {
 				if ( hasPlaceholder && event.content ) {
 					event.content = '';
 				}
 			} );
 
-			editor.on( 'BeforeAddUndo', function( event ) {
+			// Beforeaddundo event
+			editor.on( 'beforeaddundo', function( event ) {
 				if ( hasPlaceholder ) {
 					event.preventDefault();
 				}
 			} );
 		}
 
-		if ( ! settings.toolbar || ! settings.toolbar.length || panel ) {
-			return {};
-		}
-
-		if ( DOM.getStyle( document.body, 'position', true ) === 'relative' ) {
-			upperMargin =
-				parseInt( DOM.getStyle( document.body, 'margin-top', true ), 10 ) +
-				parseInt( DOM.getStyle( document.documentElement, 'padding-top', true ), 10 ) +
-				parseInt( DOM.getStyle( document.documentElement, 'margin-top', true ), 10 );
-		}
-
-		toolbars.normal = createToolbar( settings.toolbar );
-		toolbars.img = createToolbar( [ 'imgalignleft', 'imgaligncenter', 'imgalignright', 'imgalignnone', 'edit', 'remove' ] );
-		toolbars.view = createToolbar( [ 'editview', 'removeview' ] );
-
-		panel = self.panel = Factory.create( {
-			type: 'floatpanel',
-			role: 'application',
-			classes: 'tinymce tinymce-inline',
-			layout: 'stack',
-			autohide: true,
-			items: [
-				toolbars.normal,
-				toolbars.img,
-				toolbars.view
-			]
-		} );
-
-		panel.reposition = function( name, view ) {
-			var toolbarEl = this.getEl(),
-				selection = view || editor.selection.getRng(),
-				boundary = selection.getBoundingClientRect(),
-				boundaryMiddle = ( boundary.left + boundary.right ) / 2,
-				windowWidth = window.innerWidth,
-				toolbarWidth, toolbarHalf,
-				margin = parseInt( DOM.getStyle( toolbarEl, 'margin-bottom', true ), 10 ) + upperMargin,
-				top, left, className;
-
-			toolbarEl.className = ( ' ' + toolbarEl.className + ' ' ).replace( /\smce-arrow-\S+\s/g, ' ' ).slice( 1, -1 );
-
-			name = name || 'normal';
-
-			if ( ! toolbars[ name ]._visible ) {
-				each( toolbars, function( toolbar ) {
-					toolbar.hide();
-				} );
-
-				toolbars[ name ].show();
-			}
-
-			toolbarWidth = toolbarEl.offsetWidth;
-			toolbarHalf = toolbarWidth / 2;
-
-			if ( boundary.top < toolbarEl.offsetHeight + adminBarHeight ) {
-				className = ' mce-arrow-up';
-				top = boundary.bottom + margin;
-			} else {
-				className = ' mce-arrow-down';
-				top = boundary.top - toolbarEl.offsetHeight - margin;
-			}
-
-			left = boundaryMiddle - toolbarHalf;
-
-			if ( toolbarWidth >= windowWidth ) {
-				className += ' mce-arrow-full';
-				left = 0;
-			} else if ( ( left < 0 && boundary.left + toolbarWidth > windowWidth ) || ( left + toolbarWidth > windowWidth && boundary.right - toolbarWidth < 0 ) ) {
-				left = ( windowWidth - toolbarWidth ) / 2;
-			} else if ( left < 0 ) {
-				className += ' mce-arrow-left';
-				left = boundary.left;
-			} else if ( left + toolbarWidth > windowWidth ) {
-				className += ' mce-arrow-right';
-				left = boundary.right - toolbarWidth;
-			}
-
-			toolbarEl.className += className;
-
-			DOM.setStyles( toolbarEl, { 'left': left, 'top': top + window.pageYOffset } );
-
-			return this;
-		};
-
-		panel.on( 'show', function() {
-			//var self = this;
-
-			setTimeout( function() {
-				//self._visible && DOM.addClass( self.getEl(), 'mce-inline-toolbar-active' );
-				panel.state.data.visible && DOM.addClass( panel.getEl(), 'mce-inline-toolbar-active' );
-			}, 100 );
-		} );
-
-		panel.on( 'hide', function() {
-			// Only hide the panel if the selection is truly collapsed
-			if ( ! editor.selection || ( editor.selection &&  editor.selection.isCollapsed() ) ) {
-				DOM.removeClass( this.getEl(), 'mce-inline-toolbar-active' );
-			}
-		} );
-
-		panel.on( 'cancel', function() {
-			editor.focus();
-		} );
-
+		// Window resize event
 		DOM.bind( window, 'resize', function() {
+			// Hide the panel
 			panel.hide();
-		} );
-
-		editor.on( 'SelectionChange NodeChange', function( event ) {
-			var element = event.element || editor.selection.getNode(),
-				view = editor.plugins.wpview.getView();
-
-			if ( editor.selection.isCollapsed() && ! view ) {
-				panel.hide();
-				return;
-			}
-
-			setTimeout( function() {
-				var content, name;
-
-				if ( ! focus ) {
-					return;
-				}
-
-				if ( ( ! editor.selection.isCollapsed() &&
-						( content = editor.selection.getContent() ) &&
-						( content.replace( /<[^>]+>/g, '' ).trim() || content.indexOf( '<' ) === 0 ) &&
-						element.nodeName !== 'HR' ) || view ) {
-
-					if ( view ) {
-						name = 'view';
-					} else if ( element.nodeName === 'IMG' ) {
-						name = 'img';
-					} else {
-						name = 'normal';
-					}
-
-					panel.show().reposition( name, view );
-				} else {
-					panel.hide();
-				}
-			}, 100 );
-		} );
-
-		editor.shortcuts.add( 'Alt+F10', '', function() {
-			var item = panel.find( 'toolbar' )[0];
-
-			item && item.focus( true );
-		} );
-
-		panel.renderTo( document.body ).reflow().hide();
-
-		each( toolbars, function( toolbar ) {
-			toolbar.hide();
 		} );
 
 		return {};
 	};
+
+
+	/**********************
+	 * Internal Functions *
+	 **********************/
+
+	/**
+	 * This function determines if the editor content is empty.
+	 */
+	function isEmpty() {
+		return editor.getContent( { format: 'raw' } ).replace( /(?:<p[^>]*>)?(?:<br[^>]*>)?(?:<\/p>)?/, '' ) === '';
+	}
+
+	/**
+	 * This function sets up a toolbar for use in our panel.
+	 */
+	function setupToolbar( toolbar, toolbar_name, panel, args ) {
+		args = args || false;
+
+		// Store a reference to the toolbar
+		toolbars[toolbar_name] = toolbar;
+
+		// If we have arguments to add
+		if ( args ) {
+			// Loop through them
+			for ( var arg in args ) {
+				// hasOwnProperty
+				if ( args.hasOwnProperty( arg ) ) {
+					// Add it to the toolbar
+					toolbars[toolbar_name][arg] = args[arg];
+				}
+			}
+		}
+
+		// Add the toolbar to our panel
+		panel.add( toolbars[toolbar_name] );
+
+		// Append the toolbar to our panel in the DOM (grab the DOMQuery reference)
+		toolbars[toolbar_name].$el.appendTo( panel.getEl( 'body' ) );
+
+		// If this toolbar should be hidden
+		if ( toolbars[toolbar_name].note_hide ) {
+			// Hide the toolbar
+			toolbars[toolbar_name].hide();
+		}
+	}
 } );

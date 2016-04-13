@@ -966,7 +966,6 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 			// Note Widget content
 			$widget_content = isset( $instance['content'] ) ? do_shortcode( $instance['content'] ) : false;
 			$widget_content = apply_filters( 'note_widget_content', $widget_content, $instance, $args, $this );
-
 		?>
 			<div class="widget-content"><?php echo $widget_content; ?></div>
 		<?php

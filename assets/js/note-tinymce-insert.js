@@ -13,9 +13,10 @@
 tinymce.PluginManager.add( 'note_insert', function( editor ) {
 	'use strict';
 
-	var panel,
+	var DOM = tinymce.DOM,
+		Factory = tinymce.ui.Factory,
+		panel,
 		$panel_el,
-		DOM = tinymce.DOM,
 		$ = jQuery,
 		$el = $( editor.getElement() ),
 		panel_client_height = 0, // Panel height
@@ -25,21 +26,29 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 		panel_hover = false, // Flag to determine if the
 		panel_timer,
 		panel_timeout = 400, // ms
-		frame; // TODO: move to image plugin
+		frame,
+		toolbar;
+
 
 	/*
-	 * Editor Pre-Initialization - Before the editor is initialized, Add our panel and
-	 * logic to interact with the panel.
+	 * TinyMCE Editor Events
 	 */
-	editor.on( 'PreInit', function( event ) {
+
+	/*
+	 * Preinit event
+	 */
+	editor.on( 'preinit', function( event ) {
+		/*
+		 * Panel
+		 */
 		// Create the Panel (also store a reference to the panel on the editor)
-		panel = editor.note.insert_panel = tinymce.ui.Factory.create( {
+		panel = editor.note.insert_panel = Factory.create( {
 			type: 'panel',
 			layout: 'flow',
 			classes: 'insert-panel note-insert-panel',
 			ariaRoot: true,
 			ariaRemember: true,
-			items: editor.toolbarItems( editor.settings.blocks )
+			items: []
 		} );
 
 		/*
@@ -66,6 +75,30 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 		// Render the panel to the document body
 		panel.renderTo( document.body );
 
+		// Reference to the panel element
+		$panel_el = $( panel.getEl() );
+
+		/*
+		 * Create the toolbar.
+		 *
+		 * Because the WordPress TinyMCE plugin renders the toolbar to the DOM for us,
+		 * we need to add it after the panel is rendered so that we can append it to our
+		 * panel 'body' element.
+		 */
+
+		// Create the toolbar
+		toolbar = editor.wp._createToolbar( editor.settings.blocks );
+
+		// Add the toolbar to our panel
+		panel.add( toolbar );
+
+		// Append the toolbar to our panel in the DOM (grab the DOMQuery reference)
+		toolbar.$el.appendTo( panel.getEl( 'body' ) );
+
+		// Show the toolbar (WordPress hides it by default)
+		toolbar.show();
+
+
 		// Store the client height of the panel (before it's hidden)
 		panel_client_height = panel.getEl().clientHeight;
 
@@ -74,9 +107,6 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 
 		// Hide the panel
 		panel.hide();
-
-		// Reference to the panel element
-		$panel_el = $( panel.getEl() );
 
 
 		/*
@@ -144,13 +174,27 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 		} );
 	} );
 
-	// TODO: Move to image plugin
+
+	/*
+	 * TinyMCE Editor Buttons
+	 */
+
+	// TODO: Rename?
+	// WordPress Image
 	editor.addButton( 'wp_image', {
 		tooltip: 'Image', // TODO: i18n, l10n
-		icon: 'dashicons-format-image',
+		icon: 'format-image dashicons-format-image',
 		onclick: function( event ) {
+			var frame_menu;
+
+			// If we don't have focus
+			if ( ! DOM.hasClass( editor.getBody(), 'mce-edit-focus' ) ) {
+				// Focus the editor
+				editor.focus();
+			}
+
 			// Attach the frame to the editor
-			editor.note.media.frame = frame = wp.media.editor.open( editor.id, {
+			editor.note.media.frame = frame = wp.media.editor.add( editor.id, {
 				id: 'note-insert', // Unique ID for this frame
 				state: 'note-insert', // Custom Note state
 				frame: 'post', // Select state for frame
@@ -160,7 +204,7 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 					new wp.media.controller.Library( {
 						id: 'note-insert',
 						title: wp.media.view.l10n.insertMediaTitle,
-						priority: 20,
+						priority: 10,
 						filterable: 'all',
 						library: wp.media.query( { type: 'image' } ),
 						multiple: false, // Only allow one selection
@@ -177,16 +221,27 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 				}
 			} );
 
+			// Hide the default states TODO: Fix gallery insertion and then unhide these
+			frame_menu = frame.menu.get();
+			frame_menu.hide( 'embed' ); // Embed
+			frame_menu.hide( 'gallery' ); // Gallery
+			frame_menu.hide( 'insert' ); // Insert (Post)
+			frame_menu.hide( 'playlist' ); // Playlist
+			frame_menu.hide( 'video-playlist' ); // Playlist
+
+			// Open the frame
+			frame.open();
+
 			// Fire an event on the editor (pass an empty array of data and the frame)
 			editor.fire( 'wpLoadImageForm', { data : [], frame: frame } );
 		}
 	} );
 
 
-	// Edit Widget Button
+	// Note Edit Button
 	editor.addButton( 'note_edit', {
 		tooltip: 'Edit', // TODO: i18n, l10n
-		icon: 'dashicons-edit',
+		icon: 'edit dashicons-edit',
 		onclick: function( event ) {
 			// Send data to the Customizer
 			wp.customize.NotePreview.preview.send( 'note-widget-edit', editor.note.widget_data );

@@ -47,7 +47,7 @@
  */
 
 /**
- * WordPress Link Modal CSS - /assets/css/link-modal.css
+ * WordPress wplink CSS - /assets/css/wplink.css
  * License: GPLv2 or later
  * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
  *
@@ -69,24 +69,6 @@
  */
 
 /**
- * Note TinyMCE Image Plugin - /assets/js/note-tinymce-image.js
- * License: GPLv2 or later
- * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
- *
- * @see https://github.com/iseulde/wp-front-end-editor/blob/master/js/tinymce.image.js
- *
- * We've used Janneke Van Dorpe's TinyMCE Image Plugin as a base and modified it to suit our needs.
- */
-
-/**
- * Note TinyMCE Lists Plugin - /assets/js/note-tinymce-lists.js
- * License: LGPL
- * Copyright: Moxiecode Systems AB, http://www.moxiecode.com/
- *
- * @see https://github.com/WordPress/WordPress/blob/master/wp-includes/js/tinymce/plugins/lists/plugin.js
- */
-
-/**
  * Note TinyMCE Theme - /assets/js/note-tinymce-theme.js
  * License: GPLv2 or later
  * Copyright: Janneke Van Dorpe (iseulde), http://iseulde.com/
@@ -99,15 +81,13 @@
  */
 
 /**
- * Note TinyMCE View (TinyMCE wpview plugin) - /assets/js/note-tinymce-view.js
- * License: GPLv2 or later
- * Copyright: WordPress Core (4.0), http://wordpress.org/
- *
- * @see https://github.com/WordPress/WordPress/blob/4.0-branch/wp-includes/js/tinymce/plugins/wpview/plugin.js
- */
-
-/**
  * FitVids - /assets/js/fitvids.js - https://github.com/davatron5000/FitVids.js
  * License: WTFPL
  * Copyright: Chris Coyier - http://css-tricks.com/ & Dave Rupert - http://daverupert.com/
+ */
+
+/**
+ * loading.gif - /assets/images/loading.gif
+ * License: GPL
+ * Copyright: WordPress - http://wordpress.org/
  */

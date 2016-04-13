@@ -199,6 +199,11 @@ div.mce-insert-panel .mce-ico {
 	margin: 0 auto;
 }
 
+div.mce-media-insert-panel .mce-panel {
+	background: transparent;
+	border: none;
+}
+
 div.mce-media-insert-panel .mce-ico {
 	width: 100px;
 	height: 100px;
@@ -950,4 +955,19 @@ div.mce-insert-panel.mce-note-media-insert-panel {
 	position: absolute;
 	top: 0;
 	left: 0;
+}
+
+/**
+ * jQuery Autocomplete
+ */
+.ui-helper-hidden-accessible {
+	position: absolute;
+	margin: -1px;
+	padding: 0;
+	height: 1px;
+	width: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	border: 0;
+	word-wrap: normal !important;
 }

@@ -4,7 +4,7 @@
  *
  * @class Note_Customizer
  * @author Slocum Studio
- * @version 1.3.0
+ * @version 1.4.0
  * @since 1.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.3.0';
+		public $version = '1.4.0';
 
 		/**
 		 * @var array
@@ -245,19 +245,23 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 					// Allow filtering of plugins on an array instead of a space separated string
 					'plugins' => implode( ' ', array_unique( apply_filters( 'note_tinymce_plugins', array(
 						// General
-						'paste',
-						'lists',
-						'hr',
-						'textcolor',
-						'colorpicker',
+						'colorpicker', // TinyMCE Color Picker
+						'hr', // TinyMCE Horizontal Rule
+						'lists', // TinyMCE Lists
+						'media', // TinyMCE Media
+						'paste', // TinyMCE Paste
+						'textcolor', // TinyMCE Text Color
 						// WordPress
-						'wordpress',
-						'wplink',
-						'wpview',
+						'wordpress', // WordPress
+						'wpeditimage', // WordPress Edit Image
+						'wpembed', // WordPress Embed
+						'wpgallery', // WordPress Gallery
+						'wplink', // WordPress Link
+						'wptextpattern', // WordPress Text Pattern
+						'wpview', // WordPress View
 						// Note
-						'note_insert', // Note TinyMCE Insert Plugin
-						'note_image', // Note TinyMCE Image Plugin
-						'note_placeholder', // Note TinyMCE Placeholder Plugin
+						'note_insert', // Note Insert
+						'note_placeholder', // Note Placeholder
 					), $this ) ) ),
 					// Block level elements
 					'blocks' => apply_filters( 'note_tinymce_blocks', array(
@@ -273,7 +277,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 						'bold',
 						'italic',
 						'link',
-						'unlink',
+						'unlink', // TODO: Remove? In WP 4.5 wplink TinyMCE plugin handles removal in toolbar
 						'bullist',
 						'numlist',
 						'outdent',
@@ -622,25 +626,6 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 					switch ( $editor_type ) {
 						// Rich Text Only
 						case 'rich_text_only':
-							// Make plugins an array
-							$settings['plugins'] = explode( ' ', $settings['plugins'] );
-
-							// Search for the 'note_image' TinyMCE plugin in existing settings
-							$note_image = array_search( 'note_image', $settings['plugins'] );
-
-							// If we have an index for the the 'note_image' TinyMCE plugin
-							if ( $note_image !== false ) {
-								// Remove the 'note_image' TinyMCE plugin
-								unset( $settings['plugins'][$note_image] );
-
-								// Reset array keys to ensure JavaScript logic receives an array
-								$settings['plugins'] = array_values( $settings['plugins'] );
-							}
-
-							// Make plugins a string again
-							$settings['plugins'] = implode( ' ', $settings['plugins'] );
-
-
 							// Search for the 'wp_image' TinyMCE block in existing settings
 							$wp_image = array_search( 'wp_image', $settings['blocks'] );
 
@@ -942,7 +927,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 			// TinyMCE Compressed
 			if ( $compress_scripts && $concatenate_scripts && isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && stripos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false )
 				wp_enqueue_script( 'note-tinymce', includes_url( 'js/tinymce' ) . '/wp-tinymce.php?c=1', false, $tinymce_version, true );
-			// TinyMCE Uncompressed
+			// TinyMCE Uncompressed (minified)
 			else {
 				wp_enqueue_script( 'note-tinymce', includes_url( 'js/tinymce' ) . '/tinymce.min.js', false, $tinymce_version, true );
 				wp_enqueue_script( 'note-tinymce-compat3x', includes_url( 'js/tinymce' ) . '/plugins/compat3x/plugin.min.js', array( 'note-tinymce' ), $tinymce_version, true );
@@ -951,23 +936,8 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 			// Localize the Note TinyMCE script information
 			wp_localize_script( 'note-tinymce', 'note_tinymce', $this->note_tinymce_localize );
 
-			// If less than WordPress 4.0
-			if ( version_compare( $wp_version, '4.0', '<' ) ) {
-				// Load our version of 'wpview' plugin
-				wp_enqueue_script( 'note-tinymce-wpview', Note::plugin_url() . '/assets/js/note-tinymce-view.js', array( 'note-tinymce' ), Note::$version, true );
-
-				// Load backwards compatibility 'lists' plugin
-				wp_enqueue_script( 'note-tinymce-lists', Note::plugin_url() . '/assets/js/note-tinymce-lists.js', array( 'note-tinymce' ), Note::$version, true );
-			}
-
-			// Load our version of 'wplink' plugin TODO: Remove if not necessary (check 4.2.4 for backwards compat)
-			//wp_enqueue_script( 'note-tinymce-link', Note::plugin_url() . '/assets/js/note-tinymce-link.js', array( 'note-tinymce' ), Note::$version, true );
-
 			// Note TinyMCE Insert Plugin
 			wp_enqueue_script( 'note-tinymce-insert', Note::plugin_url() . '/assets/js/note-tinymce-insert.js', array( 'note-tinymce' ), Note::$version, true );
-
-			// Note TinyMCE Image Plugin
-			wp_enqueue_script( 'note-tinymce-image', Note::plugin_url() . '/assets/js/note-tinymce-image.js', array( 'note-tinymce' ), Note::$version, true );
 
 			// Note TinyMCE Placeholder Plugin
 			wp_enqueue_script( 'note-tinymce-placeholder', Note::plugin_url() . '/assets/js/note-tinymce-placeholder.js', array( 'note-tinymce' ), Note::$version, true );
@@ -988,22 +958,20 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 
 			// WordPress Links
 			wp_enqueue_script( 'wplink' );
-			wp_localize_script( 'wplink', 'ajaxurl', admin_url( 'admin-ajax.php' ) );
+			wp_localize_script( 'wplink', 'ajaxurl', admin_url( 'admin-ajax.php' ) ); // TODO: Necessary?
+			wp_enqueue_script( 'jquery-ui-autocomplete' ); // jQuery AutoComplete
+			wp_enqueue_style( 'note-wplink' , Note::plugin_url() . '/assets/css/wplink.css', false, Note::$version );
 
 			// WordPress Core/Modal Styles
 			wp_enqueue_style( 'wp-core-ui', Note::plugin_url() . '/assets/css/wp-core-ui.css', false, Note::$version );
 			wp_enqueue_style( 'buttons' );
-			wp_enqueue_style( 'note-modal' , Note::plugin_url() . '/assets/css/modal.css', false, Note::$version );
-			wp_enqueue_style( 'note-link-modal' , Note::plugin_url() . '/assets/css/link-modal.css', false, Note::$version );
+			wp_enqueue_style( 'note-modal' , Note::plugin_url() . '/assets/css/note-modal.css', false, Note::$version );
 
 			// WordPress Media (has to come after WordPress Core/Modal Styles)
 			wp_enqueue_media();
 
 			// TinyMCE Core CSS
 			wp_enqueue_style( 'tinymce-core' , Note::plugin_url() . '/assets/css/tinymce-core.css', false, Note::$version );
-
-			// TinyMCE View CSS
-			wp_enqueue_style( 'tinymce-view' , Note::plugin_url() . '/assets/css/tinymce-view.css', false, Note::$version );
 
 			// Note Theme CSS
 			wp_enqueue_style( 'note' , Note::plugin_url() . '/assets/css/note.css', false, Note::$version );

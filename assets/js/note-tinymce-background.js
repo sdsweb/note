@@ -24,11 +24,11 @@ tinymce.PluginManager.add( 'note_background', function( editor ) {
 		selection;
 
 
-	/***************************
-	 * TinyMCE Event Listeners *
-	 ***************************/
+	/*
+	 * TinyMCE Editor Events
+	 */
 
-	// Editor Init
+	// Init event
 	editor.on( 'init', function( event ) {
 		var widget_number = editor.note.widget_number,
 			widget_settings = note.widgets.settings[widget_number];
@@ -67,7 +67,7 @@ tinymce.PluginManager.add( 'note_background', function( editor ) {
 	editor.addButton( 'note_background', {
 		// id: 'note_background', TODO: Not currently used; TinyMCE doesn't add the tooltips on multiple editors when this is set
 		tooltip: 'Edit Background Image', // TODO: i18n, l10n
-		icon: 'dashicons-format-image',
+		icon: 'format-image dashicons-format-image',
 		onclick: function( event ) {
 			var library, library_comparator;
 			// If we don't have a frame, attach a media frame to the editor now
@@ -255,9 +255,9 @@ tinymce.PluginManager.add( 'note_background', function( editor ) {
 	} );*/
 
 
-	/**********************************
-	 * Internal Functions/Other Logic *
-	 **********************************/
+	/**********************
+	 * Internal Functions *
+	 **********************/
 
 	/**
 	 * This function uses Note Widgets as a transport to send background image data over to the Customizer.

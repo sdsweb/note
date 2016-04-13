@@ -10,16 +10,24 @@
 	width: 100%;
 	margin: auto;
 
-	/* TODO: Likely need to include MS prefixed declaratons here as IE10 doesn't support new flexbox syntax */
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
 	display: -webkit-flex;
 	display: flex;
+	-moz-flex-flow: row wrap;
+	-ms-flex-flow: row wrap;
 	-webkit-flex-flow: row wrap;
 	flex-flow: row wrap;
+	-moz-justify-content: space-around;
+	-ms-justify-content: space-around;
 	-webkit-justify-content: space-around;
 	justify-content: space-around;
+	-moz-align-content: flex-start;
+	-ms-align-content: flex-start;
 	-webkit-align-content: flex-start;
 	align-content: flex-start;
-
+	-ms-flex-pack: end;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }

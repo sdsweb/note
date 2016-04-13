@@ -6,6 +6,7 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 	'use strict';
 
 	var DOM = tinymce.DOM,
+		Factory = tinymce.ui.Factory,
 		prev_node, // Reference to the previous node in the editor
 		$prev_node,
 		$ = jQuery,
@@ -20,28 +21,28 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 		placeholder_el_parent_class = 'note-placeholder-parent',
 		$el_parent = $el.parent(),
 		wp_media_active = false, // Flag to determine if wp.media modal was open
-		media_panel;
+		media_panel,
+		toolbar;
 
 
-	/*******************
-	 * Event Listeners *
-	 *******************/
+	/*
+	 * TinyMCE Editor Events
+	 */
 
-
-	// Editor PreInit
-	editor.on( 'PreInit', function() {
+	// Preinit
+	editor.on( 'preinit', function() {
 		var note_type = editor.getParam( 'note_type' );
 
 		// Only on media editors
 		if ( note_type && note_type === 'media' && editor.settings.hasOwnProperty( 'media_blocks' ) ) {
-			// Create the Panel
-			media_panel = tinymce.ui.Factory.create( {
+			// Create the panel (no items)
+			media_panel = Factory.create( {
 				type: 'panel',
 				layout: 'flow',
 				classes: 'insert-panel note-insert-panel media-insert-panel note-media-insert-panel',
 				ariaRoot: true,
 				ariaRemember: true,
-				items: editor.toolbarItems( editor.settings.media_blocks )
+				items: []
 			} );
 
 			/*
@@ -64,7 +65,7 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 		}
 	} );
 
-	// Editor Init
+	// Init
 	editor.on( 'init', function( event ) {
 		var note_type = editor.getParam( 'note_type' );
 
@@ -79,22 +80,45 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 
 		// Only on media editors
 		if ( note_type && note_type === 'media' ) {
-			// Render the panel to the editor
-			media_panel.renderTo( $el_parent[0] );
+			// If the WordPress plugin has been initialized and we can create a toolbar
+			if ( editor.wp && editor.wp._createToolbar ) {
+				// Render the panel to the editor
+				media_panel.renderTo( $el_parent[0] );
 
-			// Hide the media panel
-			media_panel.hide();
+				// Hide the media panel
+				media_panel.hide();
 
-			// Note Placeholder
-			if ( $el.hasClass( placeholder_class ) ) {
-				// Remove all content
-				editor.setContent( '' );
+				/*
+				 * Create the toolbar.
+				 *
+				 * Because the WordPress TinyMCE plugin renders the toolbar to the DOM for us,
+				 * we need to add it after the panel is rendered so that we can append it to our
+				 * panel 'body' element.
+				 */
 
-				// Add CSS class to parent
-				$el_parent.addClass( 'has-media-placeholder' );
+				// Create the toolbar
+				toolbar = editor.wp._createToolbar( editor.settings.media_blocks );
 
-				// Show the media panel
-				media_panel.show();
+				// Add the toolbar to our panel
+				media_panel.add( toolbar );
+
+				// Append the toolbar to our panel in the DOM (grab the DOMQuery reference)
+				toolbar.$el.appendTo( media_panel.getEl( 'body' ) );
+
+				// Note Placeholder
+				if ( $el.hasClass( placeholder_class ) ) {
+					// Remove all content
+					editor.setContent( '' );
+
+					// Add CSS class to parent
+					$el_parent.addClass( 'has-media-placeholder' );
+
+					// Show the toolbar (WordPress hides it by default)
+					toolbar.show();
+
+					// Show the media panel
+					media_panel.show();
+				}
 			}
 		}
 	} );
@@ -131,7 +155,6 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 		// Determine if this node is different than the previous (ignoring TinyMCE paste bin element)
 		if ( node_editor_id === editor.id && $node.attr( 'id' ) !== 'mcepastebin' && ! compareNodes( node, prev_node ) ) {
 			// Determine if previous node is empty and reset the placeholder
-			// TODO: WP 4.0 doesn't like DOM.isEmpty (DOM.isEmpty( prev_node, { img : true } ) )
 			if ( prev_node && $prev_node.length && ! $prev_node.text() && ! $prev_node.has( 'img' ).length ) {
 				// Previous node placeholder
 				note_data = $prev_node.data( data_key );
@@ -198,6 +221,12 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 
 	// Editor wpLoadImageForm
 	editor.on( 'wpLoadImageForm', function() {
+		// If we don't have focus
+		if ( ! DOM.hasClass( editor.getBody(), 'mce-edit-focus' ) ) {
+			// Focus the editor first
+			editor.focus();
+		}
+
 		// Set the wp.media flag
 		wp_media_active = true;
 	} );
@@ -272,7 +301,6 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 			$body = $( editor.getBody() );
 
 		// Determine if previous node is empty and reset the placeholder
-		// TODO: WP 4.0 doesn't like DOM.isEmpty (DOM.isEmpty( prev_node, { img : true } ) )
 		if ( prev_node && $prev_node.length && ! $prev_node.text() && ! $prev_node.has( 'img' ).length ) {
 			note_data = $prev_node.data( data_key );
 			placeholder = ( note_data && note_data.hasOwnProperty( 'placeholder' ) ) ? note_data.placeholder : false;
