@@ -48,5 +48,5 @@
 		</p>
 	</form>
 
-	<?php include_once( 'html-note-options-sidebar.php' ); ?>
+	<?php include_once 'html-note-options-sidebar.php'; ?>
 </div>

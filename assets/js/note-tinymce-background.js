@@ -17,8 +17,8 @@ tinymce.PluginManager.add( 'note_background', function( editor ) {
 		background_attachment_id,
 		background_attachment_size = 'full', // Default to 'full'
 		note_widget_data,
-		add_background_button,
-		remove_background_button,
+		//add_background_button,
+		//remove_background_button,
 		frame,
 		state,
 		selection;
@@ -70,6 +70,13 @@ tinymce.PluginManager.add( 'note_background', function( editor ) {
 		icon: 'format-image dashicons-format-image',
 		onclick: function( event ) {
 			var library, library_comparator;
+
+			// If we don't have focus
+			if ( ! DOM.hasClass( editor.getBody(), 'mce-edit-focus' ) ) {
+				// Focus the editor (skip focusing and just set the active editor)
+				editor.focus( true );
+			}
+
 			// If we don't have a frame, attach a media frame to the editor now
 			if ( ! frame ) {
 				// Create the media frame
@@ -215,10 +222,16 @@ tinymce.PluginManager.add( 'note_background', function( editor ) {
 					// Re-render the sidebar attachment display view to ensure the display attachment details are populated correctly
 					display.render();
 				} );*/
+
+				// If the frame is not attached
+				if ( ! frame.modal.views.attached ) {
+					// Attach the frame (fixes a bug in FireFox and IE where the $el is initially visible so the rendering process is never completed @see https://github.com/WordPress/WordPress/blob/4.5-branch/wp-includes/js/media-views.js#L6764)
+					frame.attach();
+				}
 			}
 
-			// Open the frame
-			frame.open();
+			// Open the frame (for this editor)
+			frame.open( editor.id );
 
 			// Fire an event on the editor (pass an empty array of data and the frame)
 			editor.fire( 'wpLoadImageForm', { data : [], frame: frame } );

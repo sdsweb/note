@@ -124,7 +124,7 @@
 					// Standard/Default Note Widgets
 					else if ( editor ) {
 						// Focus the editor first
-						editor.focus( false );
+						editor.focus();
 
 						// Move cursor to end of existing content (in the last child element)
 						editor.selection.select( editor.getBody().lastChild, true );
@@ -170,7 +170,7 @@
 						editor.note.focus_event = true;
 
 						// Focus the editor
-						editor.focus( false );
+						editor.focus();
 
 						// Move cursor to correct position
 						editor.selection.setCursorLocation( editor.note.current_element, editor.note.current_offset );

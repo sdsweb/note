@@ -3,8 +3,8 @@ Contributors: slocumstudio
 Donate link: 
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
 Requires at least: 4.3
-Tested up to: 4.5
-Stable tag: 1.4.0
+Tested up to: 4.5.1
+Stable tag: 1.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,27 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 
 == Changelog ==
+
+= 1.4.1 // May 06 2016 =
+* General
+  * Adjusted code comments and formatting
+* Note Sidebars
+  * Removed logic to remove mock Widgets panel in Customizer  (fixes WordPress 4.5 notice)
+  * Adjusted verbiage for Note Sidebars - changed to Note Widget Area(s)
+* Note Widget
+  * Replaced columns defaults reference with rows defaults reference in Note Widget for minimum number of rows
+  * Adjusted wplink logic to fix functionality in IE and Firefox
+  * Fixed a bug in Firefox and IE where an image inside of a link would not be editable after the link was added to the image in a previous edit
+  * Updated wplink TinyMCE plugin CSS
+  * Added logic to focus the editor before media modals (frames) were opened to ensure the media would be inserted into the correct editor on a page
+  * Added logic to attach media frames to the editor (fixes a bug in IE and Firefox where rendering of the frame does not finish due to $el being visible before it is inserted into the DOM)
+  * Removed autohide setting from Note TinyMCE theme float panel config (fixes display in browsers where toolbar would be hidden in some cases when it shouldn't have been)
+  * Added skip focus flag to editor.focus() calls before media modals were displayed
+  * Added logic to allow for some toolbars to remain visible when displaying the Note TinyMCE theme panel
+  * Adjusted logic for Note TinyMCE theme panel repositioning to fallback to the editor boundaries if the current selection boundaries could not be determined (fixes a bug in IE where the image editing toolbar was positioned at the top of the window)
+  * Ensured Note TinyMCE theme panel was hidden if editor selection was collapsed on selectionchange and nodechange events
+  * Ensured the image editing toolbar was displayed if a link was selected in the editor that contained an image
+  * Added logic to hide the Note TinyMCE theme panel on wp_link_cancel or wp_link_apply events (fixes a bug in Firefox where the toolbar remained visible even though the editor selection was collapsed due to the selectionchange event not firing)
 
 = 1.4.0 // April 13 2016 =
 * General

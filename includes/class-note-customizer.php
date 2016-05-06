@@ -4,7 +4,7 @@
  *
  * @class Note_Customizer
  * @author Slocum Studio
- * @version 1.4.0
+ * @version 1.4.1
  * @since 1.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.4.0';
+		public $version = '1.4.1';
 
 		/**
 		 * @var array
@@ -113,8 +113,8 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		 * Include required core files used in admin and on the frontend.
 		 */
 		private function includes() {
-			include_once( 'customizer/class-note-customizer-sidebar-section.php' ); // Note Sidebar Section
-			include_once( 'customizer/class-note-customizer-sidebar-control.php' ); // Note Sidebar Control
+			include_once 'customizer/class-note-customizer-sidebar-section.php'; // Note Sidebar Section
+			include_once 'customizer/class-note-customizer-sidebar-control.php'; // Note Sidebar Control
 		}
 
 		/**
@@ -277,7 +277,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 						'bold',
 						'italic',
 						'link',
-						'unlink', // TODO: Remove? In WP 4.5 wplink TinyMCE plugin handles removal in toolbar
+						'unlink',
 						'bullist',
 						'numlist',
 						'outdent',
@@ -581,18 +581,18 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 				'modals' => array(
 					// Register Sidebar
 					'register_sidebar' => array(
-						'title' => __( 'Add Note Sidebar', 'note' ),
+						'title' => __( 'Add Note Widget Area', 'note' ),
 						'content' => sprintf( '%1$s <div class="inputs"><input type="checkbox" name="ignore-register-sidebar" id="note-ignore-register-sidebar" class="ignore-register-sidebar ignore-register-sidebar-modal" value="true" /> <label for="note-ignore-register-sidebar">%2$s</label></div>',
-							__( 'Are you sure you want to add a sidebar to this location?', 'note' ),
+							__( 'Are you sure you want to add a widget area to this location?', 'note' ),
 							__( 'Don\'t display this confirmation in the future', 'note' )
 						),
-						'submit_label' => __( 'Add Note Sidebar', 'note' )
+						'submit_label' => __( 'Add Note Widget Area', 'note' )
 					),
 					// Unregister (Remove) Sidebar
 					'unregister_sidebar' => array(
-						'title' => __( 'Remove Note Sidebar', 'note' ),
+						'title' => __( 'Remove Note Widget Area', 'note' ),
 						'content' => sprintf( '%1$s',
-							__( 'Are you sure you want to remove this sidebar?', 'note' )
+							__( 'Are you sure you want to remove this widget area?', 'note' )
 						),
 						// TODO
 						/*'content' => sprintf( '%1$s <div class="inputs"><input type="checkbox" name="remove-note-widgets" class="remove-note-widgets" value="true" /> <label for="remove-note-widgets">%2$s</label> <span class="description">%3$s</span></div>',
@@ -600,7 +600,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 							__( 'Remove all widgets in this sidebar', 'note' ),
 							__( 'Widgets that are not removed will be placed in the Inactive Sidebar.', 'note' )
 						),*/
-						'submit_label' => __( 'Remove Note Sidebar', 'note' )
+						'submit_label' => __( 'Remove Note Widget Area', 'note' )
 					)
 				)
 			) );
@@ -757,7 +757,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 					$wp_customize,
 					'note_sidebars',
 					array(
-						'title' => __( 'Note Sidebars', 'note' ),
+						'title' => __( 'Note Widget Areas', 'note' ),
 						'priority' => 999
 					)
 				)
@@ -769,7 +769,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 					$wp_customize,
 					'note_sidebars',
 					array(
-						'label' => __( 'Note Sidebars', 'note' ),
+						'label' => __( 'Note Widget Areas', 'note' ),
 						'section' => 'note_sidebars',
 						'settings' => 'note[sidebars]',
 						'input_attrs' => array(
@@ -806,7 +806,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 					'sidebar-widgets-note-temporary-inactive-sidebar',
 					array(
 						'title' => __( 'Note Temporary Inactive Sidebar', 'note' ),
-						'description' => __( 'This is a temporary sidebar registered by Note in the Customizer only. It will hold inactive Note Sidebar widgets during a session', 'note' ),
+						'description' => __( 'This is a temporary sidebar registered by Note in the Customizer only. It will hold inactive Note Widget Area widgets during a session', 'note' ),
 						'priority' => 999,
 						'panel' => 'widgets',
 						'sidebar_id' => 'note-temporary-inactive-sidebar',
@@ -998,7 +998,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 				$widget_after .= '<input type="hidden" name="sidebar_name" class="sidebar-name" value="' . esc_attr( $params[0]['name'] ) . '" />'; // Sidebar Name
 				$widget_after .= '<input type="hidden" name="sidebar_id" class="sidebar-id" value="' . esc_attr( $params[0]['id'] ) . '" />'; // Sidebar ID
 
-				// Modify the 'after_widget' param to include data we'll  send to Customizer
+				// Modify the 'after_widget' param to include data we'll send to Customizer
 				$params[0]['after_widget'] = $widget_after . $params[0]['after_widget'];
 			}
 
@@ -1086,7 +1086,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 				array(
 				 	'id' => 'remove-note-sidebar',
 					'label' => '<span class="dashicons dashicons-no-alt"></span>',
-					'title' => __( 'Remove Note Sidebar', 'note' )
+					'title' => __( 'Remove Note Widget Area', 'note' )
 				)
 			) );
 

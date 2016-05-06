@@ -4,7 +4,7 @@
  *
  * @class Note_Admin_Options
  * @author Slocum Studio
- * @version 1.0.0
+ * @version 1.4.1
  * @since 1.2.0
  */
 
@@ -17,7 +17,7 @@ if( ! class_exists( 'Note_Admin_Options' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.0.0';
+		public $version = '1.4.1';
 
 		/**
 		 * @var string
@@ -61,7 +61,7 @@ if( ! class_exists( 'Note_Admin_Options' ) ) {
 		 * Include required core files used in admin and on the frontend.
 		 */
 		private function includes() {
-			include_once( 'class-note-admin-options-views.php' ); // Note Admin Options View Controller TODO
+			include_once 'class-note-admin-options-views.php'; // Note Admin Options View Controller TODO
 		}
 
 		/**

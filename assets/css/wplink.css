@@ -601,10 +601,15 @@ input.ui-autocomplete-input.open {
 	line-height: 1.5em;
 	clear: both;
 	white-space: normal;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 }
 
-.ui-autocomplete.wplink-autocomplete li .alignright {
+.ui-autocomplete.wplink-autocomplete li .alignright,
+.ui-autocomplete.wplink-autocomplete li .wp-editor-float-right {
 	margin: 0;
+	float: right;
 }
 
 .ui-autocomplete.wplink-autocomplete li.ui-state-focus {

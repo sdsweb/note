@@ -223,8 +223,8 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 	editor.on( 'wpLoadImageForm', function() {
 		// If we don't have focus
 		if ( ! DOM.hasClass( editor.getBody(), 'mce-edit-focus' ) ) {
-			// Focus the editor first
-			editor.focus();
+			// Focus the editor first (skip focusing and just set the active editor)
+			editor.focus( true );
 		}
 
 		// Set the wp.media flag

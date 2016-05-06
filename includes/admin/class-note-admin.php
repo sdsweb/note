@@ -4,7 +4,7 @@
  *
  * @class Note_Admin
  * @author Slocum Studio
- * @version 1.0.0
+ * @version 1.4.1
  * @since 1.2.0
  */
 
@@ -17,7 +17,7 @@ if( ! class_exists( 'Note_Admin' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.0.0';
+		public $version = '1.4.1';
 
 		/**
 		 * @var Note, Instance of the class
@@ -48,8 +48,8 @@ if( ! class_exists( 'Note_Admin' ) ) {
 		 * Include required core files used in admin and on the frontend.
 		 */
 		private function includes() {
-			include_once( 'class-note-admin-options.php' ); // Note Admin Options
-			//include_once( 'class-note-admin-help.php' ); // Note Admin Help TODO
+			include_once 'class-note-admin-options.php'; // Note Admin Options
+			//include_once 'class-note-admin-help.php'; // Note Admin Help TODO
 		}
 	}
 }

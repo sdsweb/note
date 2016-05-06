@@ -4,7 +4,7 @@
  *
  * @class Note_Sidebars
  * @author Slocum Studio
- * @version 1.3.0
+ * @version 1.4.1
  * @since 1.2.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.0.0';
+		public $version = '1.4.1';
 
 		/**
 		 * @var array
@@ -225,7 +225,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 				register_sidebar( array(
 					'name'          => __( 'Note Temporary Inactive Sidebar', 'note' ),
 					'id'            => 'note-temporary-inactive-sidebar',
-					'description'   => __( 'This is a temporary sidebar registered by Note in the Customizer only. It will hold inactive Note Sidebar widgets during a Customizer session only.', 'note' )
+					'description'   => __( 'This is a temporary sidebar registered by Note in the Customizer only. It will hold inactive Note Widget Area widgets during a Customizer session only.', 'note' )
 				) );
 
 			// Register Note Sidebars
@@ -697,10 +697,6 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 					// Store a reference to the sidebar arguments
 					$note_sidebars->sidebar_args[$sidebar_id] = $sidebar_args;
 				}
-
-			// Remove the "mock" Widgets panel (it will be added by WordPress core on the "wp" action)
-			if ( $remove_widgets_panel )
-				$wp_customize->remove_panel( 'widgets' );
 
 			return $note_sidebars->sidebar_args;
 		}

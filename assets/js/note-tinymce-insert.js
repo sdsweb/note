@@ -189,48 +189,57 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 
 			// If we don't have focus
 			if ( ! DOM.hasClass( editor.getBody(), 'mce-edit-focus' ) ) {
-				// Focus the editor
-				editor.focus();
+				// Focus the editor (skip focusing and just set the active editor)
+				editor.focus( true );
 			}
 
-			// Attach the frame to the editor
-			editor.note.media.frame = frame = wp.media.editor.add( editor.id, {
-				id: 'note-insert', // Unique ID for this frame
-				state: 'note-insert', // Custom Note state
-				frame: 'post', // Select state for frame
-				// States attached to this frame
-				states: [
-					// Note Insert State
-					new wp.media.controller.Library( {
-						id: 'note-insert',
-						title: wp.media.view.l10n.insertMediaTitle,
-						priority: 10,
-						filterable: 'all',
-						library: wp.media.query( { type: 'image' } ),
-						multiple: false, // Only allow one selection
-						editable: false,
-						display: true, // TODO: Necessary?
-						displaySettings: true,
-						displayUserSettings: true
-					} )
-				],
-				// Frame button configuration
-				button: {
-					text: 'Insert Into Widget', // Button label // TODO: I18n & l10n - move to Note Customizer
-					event: 'insert' // Trigger the insert event on click
+			// If we don't have a frame
+			if ( ! frame ) {
+				// Attach the frame to the editor
+				editor.note.media.frame = frame = wp.media.editor.add( editor.id, {
+					id: 'note-insert', // Unique ID for this frame
+					state: 'note-insert', // Custom Note state
+					frame: 'post', // Select state for frame
+					// States attached to this frame
+					states: [
+						// Note Insert State
+						new wp.media.controller.Library( {
+							id: 'note-insert',
+							title: wp.media.view.l10n.insertMediaTitle,
+							priority: 10,
+							filterable: 'all',
+							library: wp.media.query( { type: 'image' } ),
+							multiple: false, // Only allow one selection
+							editable: false,
+							display: true, // TODO: Necessary?
+							displaySettings: true,
+							displayUserSettings: true
+						} )
+					],
+					// Frame button configuration
+					button: {
+						text: 'Insert Into Widget', // Button label // TODO: I18n & l10n - move to Note Customizer
+						event: 'insert' // Trigger the insert event on click
+					}
+				} );
+
+				// Hide the default states TODO: Fix gallery insertion and then unhide these
+				frame_menu = frame.menu.get();
+				frame_menu.hide( 'embed' ); // Embed
+				frame_menu.hide( 'gallery' ); // Gallery
+				frame_menu.hide( 'insert' ); // Insert (Post)
+				frame_menu.hide( 'playlist' ); // Playlist
+				frame_menu.hide( 'video-playlist' ); // Playlist
+
+				// If the frame is not attached
+				if ( ! frame.modal.views.attached ) {
+					// Attach the frame (fixes a bug in FireFox and IE where the $el is initially visible so the rendering process is never completed @see https://github.com/WordPress/WordPress/blob/4.5-branch/wp-includes/js/media-views.js#L6764)
+					frame.attach();
 				}
-			} );
+			}
 
-			// Hide the default states TODO: Fix gallery insertion and then unhide these
-			frame_menu = frame.menu.get();
-			frame_menu.hide( 'embed' ); // Embed
-			frame_menu.hide( 'gallery' ); // Gallery
-			frame_menu.hide( 'insert' ); // Insert (Post)
-			frame_menu.hide( 'playlist' ); // Playlist
-			frame_menu.hide( 'video-playlist' ); // Playlist
-
-			// Open the frame
-			frame.open();
+			// Open the frame (for this editor)
+			frame.open( editor.id );
 
 			// Fire an event on the editor (pass an empty array of data and the frame)
 			editor.fire( 'wpLoadImageForm', { data : [], frame: frame } );

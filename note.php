@@ -3,11 +3,11 @@
  * Plugin Name: Note - A live edit text widget
  * Plugin URI: http://www.conductorplugin.com/note/
  * Description: Note is a simple and easy to use widget for editing bits of text, live, in your WordPress Customizer
- * Version: 1.4.0
+ * Version: 1.4.1
  * Author: Slocum Studio
  * Author URI: http://www.slocumstudio.com/
  * Requires at least: 4.3
- * Tested up to: 4.5
+ * Tested up to: 4.5.1
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -26,7 +26,7 @@ if ( ! class_exists( 'Note' ) ) {
 		/**
 		 * @var string
 		 */
-		public static $version = '1.4.0';
+		public static $version = '1.4.1';
 
 		/**
 		 * @var Note, Instance of the class
@@ -61,17 +61,17 @@ if ( ! class_exists( 'Note' ) ) {
 		 */
 		private function includes() {
 			// All
-			include_once( 'includes/class-note-options.php' ); // Note Options Class
-			include_once( 'includes/class-note-sidebars.php' ); // Note Sidebars Class
-			include_once( 'includes/class-note-customizer.php' ); // Note Customizer Class
-			include_once( 'includes/class-note-scripts-styles.php' ); // Note Scripts & Styles Class
-			include_once( 'includes/admin/class-note-admin.php' ); // Core/Main Note Admin Class
-			include_once( 'includes/note-template-functions.php' ); // Note Template Functions
+			include_once 'includes/class-note-options.php'; // Note Options Class
+			include_once 'includes/class-note-sidebars.php'; // Note Sidebars Class
+			include_once 'includes/class-note-customizer.php'; // Note Customizer Class
+			include_once 'includes/class-note-scripts-styles.php'; // Note Scripts & Styles Class
+			include_once 'includes/admin/class-note-admin.php'; // Core/Main Note Admin Class
+			include_once 'includes/note-template-functions.php'; // Note Template Functions
 
 			// Admin Only
 			if ( is_admin() ) {
 				if ( ! ( $note_option = get_option( Note_Options::$option_name ) ) )
-					include_once( 'includes/admin/class-note-admin-install.php' ); // Note Install Class
+					include_once 'includes/admin/class-note-admin-install.php'; // Note Install Class
 
 			}
 
@@ -83,7 +83,7 @@ if ( ! class_exists( 'Note' ) ) {
 		 * This function includes and initializes Note widgets.
 		 */
 		function widgets_init() {
-			include_once( 'includes/widgets/class-note-widget.php' );
+			include_once 'includes/widgets/class-note-widget.php';
 		}
 
 		/********************

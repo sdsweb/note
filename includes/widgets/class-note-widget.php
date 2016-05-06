@@ -4,7 +4,7 @@
  *
  * @class Note_Widget
  * @author Slocum Studio
- * @version 1.3.1
+ * @version 1.4.1
  * @since 1.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.3.1';
+		public $version = '1.4.1';
 
 		/**
 		 * @var string
@@ -606,7 +606,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 				<?php // Widget Rows ?>
 				<label for="<?php echo $this->get_field_id( 'rows' ); ?>"><strong><?php _e( 'Number of Rows', 'note' ); ?></strong></label>
 				<br />
-				<input type="range" min="<?php echo esc_attr( $this->defaults['columns'] ); ?>" max="<?php echo esc_attr( $this->max_rows ); ?>" class="note-input note-range-input-range note-rows-range" id="<?php echo $this->get_field_id( 'rows' ); ?>" name="<?php echo $this->get_field_name( 'rows' ); ?>" value="<?php echo esc_attr( $instance['rows'] ); ?>" />
+				<input type="range" min="<?php echo esc_attr( $this->defaults['rows'] ); ?>" max="<?php echo esc_attr( $this->max_rows ); ?>" class="note-input note-range-input-range note-rows-range" id="<?php echo $this->get_field_id( 'rows' ); ?>" name="<?php echo $this->get_field_name( 'rows' ); ?>" value="<?php echo esc_attr( $instance['rows'] ); ?>" />
 				<span class="note-range-value note-rows-value"><?php echo $instance['rows']; ?></span>
 				<small class="description note-description"><?php _e( 'Select the number of rows to display (zero will honor the current template configuration defaults).', 'note' ); // TODO: Adjust description ?></small>
 			</div>
