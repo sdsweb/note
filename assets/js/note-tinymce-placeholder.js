@@ -225,6 +225,9 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 		if ( ! DOM.hasClass( editor.getBody(), 'mce-edit-focus' ) ) {
 			// Focus the editor first (skip focusing and just set the active editor)
 			editor.focus( true );
+
+			// Since we're skipping the DOM focusing, we need to set the global wpActiveEditor ID, which is used as a fallback when WordPress is determining the active TinyMCE editor (@see https://github.com/WordPress/WordPress/blob/4.5-branch/wp-includes/js/tinymce/plugins/wordpress/plugin.js#L89)
+			window.wpActiveEditor = editor.id;
 		}
 
 		// Set the wp.media flag

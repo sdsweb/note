@@ -204,7 +204,7 @@
 						self.editors.push( editor );
 
 						// Editor initialization
-						editor.on( 'init', function( event ) {
+						editor.on( 'init', function() {
 							var $el = $( editor.getElement() ),
 								$note_widget = $el.parents( '.note-widget' );
 
@@ -249,7 +249,7 @@
 						} );
 
 						// Editor focus
-						editor.on( 'focus', function( event ) {
+						editor.on( 'focus', function() {
 							var content = editor.getContent(),
 								data = $.extend( true, editor.note.widget_data, { widget: { content: content } } ); // Deep copy
 
@@ -261,7 +261,7 @@
 						} );
 
 						// Editor Note Widget focus
-						editor.on( 'note-editor-focus', function( data ) {
+						editor.on( 'note-editor-focus', function() {
 							// Add transition and Note edit focus CSS classes
 							self.tinymce.DOM.addClass( editor.getBody(), 'mce-edit-focus-transition mce-note-edit-focus' );
 
@@ -277,7 +277,7 @@
 						} );
 
 						// Editor blur
-						editor.on( 'blur', function( event ) {
+						editor.on( 'blur', function() {
 							var content = editor.getContent(),
 								data = $.extend( true, editor.note.widget_data, { widget: { content: content } } ); // Deep copy
 
@@ -290,9 +290,8 @@
 
 						// A change within the editor content has occurred
 						// TODO: Create a function that can send updated data to the Customizer based on parameters that sits outside of this logic so that other developers and plugins can hook into Note easier (adjust widget_content to element in Customizer logic for this functionality; optimized functionality/logic)
-						editor.on( 'keyup change NodeChange SetAttrib', _.debounce( function( event ) {
-							var $el = $( editor.getElement() ),
-								content = editor.getContent(),
+						editor.on( 'keyup change NodeChange SetAttrib', _.debounce( function() {
+							var content = editor.getContent(),
 								data = {};
 
 							// Content within the editor has changed or this is an initial Previewer load

@@ -29,7 +29,7 @@ tinymce.PluginManager.add( 'note_background', function( editor ) {
 	 */
 
 	// Init event
-	editor.on( 'init', function( event ) {
+	editor.on( 'init', function() {
 		var widget_number = editor.note.widget_number,
 			widget_settings = note.widgets.settings[widget_number];
 
@@ -68,13 +68,16 @@ tinymce.PluginManager.add( 'note_background', function( editor ) {
 		// id: 'note_background', TODO: Not currently used; TinyMCE doesn't add the tooltips on multiple editors when this is set
 		tooltip: 'Edit Background Image', // TODO: i18n, l10n
 		icon: 'format-image dashicons-format-image',
-		onclick: function( event ) {
+		onclick: function() {
 			var library, library_comparator;
 
 			// If we don't have focus
 			if ( ! DOM.hasClass( editor.getBody(), 'mce-edit-focus' ) ) {
 				// Focus the editor (skip focusing and just set the active editor)
 				editor.focus( true );
+
+				// Since we're skipping the DOM focusing, we need to set the global wpActiveEditor ID, which is used as a fallback when WordPress is determining the active TinyMCE editor (@see https://github.com/WordPress/WordPress/blob/4.5-branch/wp-includes/js/tinymce/plugins/wordpress/plugin.js#L89)
+				window.wpActiveEditor = editor.id;
 			}
 
 			// If we don't have a frame, attach a media frame to the editor now
@@ -230,8 +233,8 @@ tinymce.PluginManager.add( 'note_background', function( editor ) {
 				}
 			}
 
-			// Open the frame (for this editor)
-			frame.open( editor.id );
+			// Open the frame for this editor (wp.media.editor.open() fixes a bug where images could be inserted into the wrong editor due to the active editor reference being incorrect; @see https://github.com/WordPress/WordPress/blob/703d5bdc8deb17781e9c6d8f0dd7e2c6b6353885/wp-includes/js/media-editor.js#L1062)
+			wp.media.editor.open( editor.id );
 
 			// Fire an event on the editor (pass an empty array of data and the frame)
 			editor.fire( 'wpLoadImageForm', { data : [], frame: frame } );

@@ -37,7 +37,7 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 	/*
 	 * Preinit event
 	 */
-	editor.on( 'preinit', function( event ) {
+	editor.on( 'preinit', function() {
 		/*
 		 * Panel
 		 */
@@ -184,13 +184,16 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 	editor.addButton( 'wp_image', {
 		tooltip: 'Image', // TODO: i18n, l10n
 		icon: 'format-image dashicons-format-image',
-		onclick: function( event ) {
+		onclick: function() {
 			var frame_menu;
 
 			// If we don't have focus
 			if ( ! DOM.hasClass( editor.getBody(), 'mce-edit-focus' ) ) {
 				// Focus the editor (skip focusing and just set the active editor)
 				editor.focus( true );
+
+				// Since we're skipping the DOM focusing, we need to set the global wpActiveEditor ID, which is used as a fallback when WordPress is determining the active TinyMCE editor (@see https://github.com/WordPress/WordPress/blob/4.5-branch/wp-includes/js/tinymce/plugins/wordpress/plugin.js#L89)
+				window.wpActiveEditor = editor.id;
 			}
 
 			// If we don't have a frame
@@ -238,8 +241,8 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 				}
 			}
 
-			// Open the frame (for this editor)
-			frame.open( editor.id );
+			// Open the frame for this editor (wp.media.editor.open() fixes a bug where images could be inserted into the wrong editor due to the active editor reference being incorrect; @see https://github.com/WordPress/WordPress/blob/703d5bdc8deb17781e9c6d8f0dd7e2c6b6353885/wp-includes/js/media-editor.js#L1062)
+			wp.media.editor.open( editor.id );
 
 			// Fire an event on the editor (pass an empty array of data and the frame)
 			editor.fire( 'wpLoadImageForm', { data : [], frame: frame } );
@@ -251,7 +254,7 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 	editor.addButton( 'note_edit', {
 		tooltip: 'Edit', // TODO: i18n, l10n
 		icon: 'edit dashicons-edit',
-		onclick: function( event ) {
+		onclick: function() {
 			// Send data to the Customizer
 			wp.customize.NotePreview.preview.send( 'note-widget-edit', editor.note.widget_data );
 		}

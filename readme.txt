@@ -3,8 +3,8 @@ Contributors: slocumstudio
 Donate link: 
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
 Requires at least: 4.3
-Tested up to: 4.5.1
-Stable tag: 1.4.1
+Tested up to: 4.5.2
+Stable tag: 1.4.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,11 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 
 == Changelog ==
+
+= 1.4.2 // May 23 2016 =
+* Transitioned to wp.media.editor.open() instead of wp.media.view.MediaFrame.open() to ensure the active TinyMCE editor references were setup properly when media modals were opened (fixes a bug where media was inserted into the wrong TinyMCE editor); Thanks Lisa Snyder
+* Adjusted logic to better ensure the Customizer Previewer would refresh upon various setting changes
+* Removed some unused variables in various event callback functions
 
 = 1.4.1 // May 06 2016 =
 * General

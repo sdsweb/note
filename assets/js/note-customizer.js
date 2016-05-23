@@ -58,6 +58,21 @@ var note = note || {};
 			// Store a jQuery reference to the Widgets Panel
 			self.$widgets_panel = $( '#accordion-panel-widgets' );
 
+			// Listen for click events on the Customizer Sidebar header/content elements and reset the focus/active flags to help ensure the Previewer will refresh on setting changes made by the user
+			self.$customize_sidebar_header.add( self.$customize_sidebar_content ).click( function() {
+				// If the focus flag is set
+				if ( self.is_widget_focused ) {
+					// Reset the focus flag
+					self.is_widget_focused = false;
+				}
+
+				// If the active flag is set
+				if ( self.is_widget_modal_active ) {
+					// Reset the active flag
+					self.is_widget_modal_active = false;
+				}
+			} );
+
 			// Listen for the "note-widget-update" event from the Previewer
 			previewer.bind( 'note-widget-update', function( data ) {
 				// Allow jQuery selectors to be overwritten if passed

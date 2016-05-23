@@ -2,9 +2,17 @@
 Plugin: Note
 Author: Slocum Design Studio
 Author URI: https://slocumstudio.com/
-Current Version: 1.4.1
+Current Version: 1.4.2
 ==========================================
 
+
+1.4.2 // May 23 2016
+--------------------
+- Transitioned to wp.media.editor.open() instead of wp.media.view.MediaFrame.open() to ensure the active TinyMCE editor
+  references were setup properly when media modals were opened (fixes a bug where media was inserted into the wrong
+  TinyMCE editor); Thanks Lisa Snyder
+- Adjusted logic to better ensure the Customizer Previewer would refresh upon various setting changes
+- Removed some unused variables in various event callback functions
 
 1.4.1 // May 06 2016
 --------------------

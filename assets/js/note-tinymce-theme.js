@@ -228,7 +228,7 @@ tinymce.ThemeManager.add( 'note', function( editor ) {
 					}
 
 					// Loop through toolbars
-					each( toolbars, function( toolbar, toolbar_name ) {
+					each( toolbars, function( toolbar ) {
 						// Loop through the button groups for this toolbar
 						each( toolbar.items(), function ( buttonGroups ) {
 							// Loop through individual button group for this toolbar
