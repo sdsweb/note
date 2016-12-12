@@ -13,6 +13,10 @@
 	max-width: 100%;
 }
 
+.customize-control select.note-select {
+	max-width: 100%;
+}
+
 .note-hidden {
 	display: none;
 }

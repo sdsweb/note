@@ -3,8 +3,8 @@ Contributors: slocumstudio
 Donate link: 
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
 Requires at least: 4.3
-Tested up to: 4.5.2
-Stable tag: 1.4.2
+Tested up to: 4.7.0
+Stable tag: 1.4.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,12 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 
 == Changelog ==
+
+= 1.4.3 // December 12 2016 =
+* WordPress 4.7 Fixes
+  * Fixed display issue where Note Widget <select> HTML elements were not 100% width
+  * Added logic to override isLinkPreviewable() JavaScript Customizer function to ensure links within Note Widgets did not inherit Customizer changeset/preview query strings
+* Added logic to attempt to keep cursor in last active Note Widget within the editor upon instantiation to prevent the Note TinyMCE theme toolbar from appearing outside of Note Widgets
 
 = 1.4.2 // May 23 2016 =
 * Transitioned to wp.media.editor.open() instead of wp.media.view.MediaFrame.open() to ensure the active TinyMCE editor references were setup properly when media modals were opened (fixes a bug where media was inserted into the wrong TinyMCE editor); Thanks Lisa Snyder

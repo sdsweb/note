@@ -2,9 +2,18 @@
 Plugin: Note
 Author: Slocum Design Studio
 Author URI: https://slocumstudio.com/
-Current Version: 1.4.2
+Current Version: 1.4.3
 ==========================================
 
+
+1.4.3 // December 12 2016
+-------------------------
+- WordPress 4.7 Fixes
+-- Fixed display issue where Note Widget <select> HTML elements were not 100% width
+-- Added logic to override isLinkPreviewable() JavaScript Customizer function to ensure links within Note Widgets did
+   not inherit Customizer changeset/preview query strings
+- Added logic to attempt to keep cursor in last active Note Widget within the editor upon instantiation to prevent the
+  Note TinyMCE theme toolbar from appearing outside of Note Widgets
 
 1.4.2 // May 23 2016
 --------------------

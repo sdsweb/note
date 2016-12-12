@@ -2,6 +2,10 @@
  * Note Widget Stylesheet
  */
 
+.note-widget a.customize-unpreviewable {
+	cursor: pointer !important;
+}
+
 
 /**
  * Note Flexbox Row

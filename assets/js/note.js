@@ -10,7 +10,7 @@
 		return;
 	}
 
-	var api = wp.customize, OldPreview;
+	var api = wp.customize, OldPreview, isLinkPreviewable;
 
 	// Note Preview
 	api.NotePreview = {
@@ -22,6 +22,7 @@
 		tinyMCE: window.tinyMCE,
 		tinymce_config: {},
 		note: window.note,
+		note_tinymce: window.note_tinymce,
 		default_note_template_config_type: 'default',
 		widget_settings: ( window.note.hasOwnProperty( 'widgets' ) && window.note.widgets.hasOwnProperty( 'settings' ) ) ? window.note.widgets.settings : false,
 		widget_templates: ( window.note.hasOwnProperty( 'widgets' ) && window.note.widgets.hasOwnProperty( 'templates' ) ) ? window.note.widgets.templates : false,
@@ -181,6 +182,8 @@
 				self.tinymce_config = {
 					// TinyMCE Setup
 					setup: function( editor ) {
+						var contentMutationObserver;
+
 						// Add a Note object to the editor
 						editor.note = {
 							widget_data: {}, // Reference to widget data
@@ -287,6 +290,47 @@
 							// Send data to the Customizer
 							self.preview.send( 'note-widget-blur', data );
 						} );
+
+						/*
+						 * In WordPress 4.7, logic was added to determine if links in the Previewer
+						 * are considered previewable. Since we're over-riding the isLinkPreviewable() function
+						 * below, we need to make sure that the "customize-unpreviewable" CSS class is removed
+						 * from link elements within Note Widgets as this CSS class will affect Note Widgets
+						 * in negative ways. The "customize-unpreviewable" CSS class is added to any link that
+						 * WordPress considers to be unpreviewable.
+						 */
+						if ( parseFloat( self.note_tinymce.wp_version ) >= 4.7 ) {
+							// Create a new MutationObserver
+							contentMutationObserver = new MutationObserver( function( mutations ) {
+								// Loop through mutations
+								_.each( mutations, function( mutation ) {
+									// Switch based on type of mutation
+									switch ( mutation.type ) {
+										// Attributes (we're only monitoring the class attribute via the attributeFilter config property)
+										case 'attributes':
+											var $el = $( mutation.target );
+
+											// If we don't have an old value and the customize-unpreviewable CSS class exists
+											if ( ! mutation.oldValue || $el.hasClass( 'customize-unpreviewable' ) ) {
+												// Remove the customize-unpreviewable CSS class
+												$el.removeClass( 'customize-unpreviewable' );
+											}
+										break;
+									}
+								} );
+							} );
+
+							// Observe
+							contentMutationObserver.observe( editor.getElement(), {
+								childList: true, // TODO: Is this necessary?
+								attributes: true,
+								subtree: true,
+								attributeOldValue: true,
+								attributeFilter: [
+									'class'
+								]
+							} );
+						}
 
 						// A change within the editor content has occurred
 						// TODO: Create a function that can send updated data to the Customizer based on parameters that sits outside of this logic so that other developers and plugins can hook into Note easier (adjust widget_content to element in Customizer logic for this functionality; optimized functionality/logic)
@@ -1223,6 +1267,30 @@
 			OldPreview.prototype.initialize.call( this, params, options );
 		}
 	} );
+
+	/**
+	 * Grab the isLinkPreviewable() function since it is private
+	 */
+	isLinkPreviewable = api.isLinkPreviewable;
+
+	// If the isLinkPreviewable() function exists
+	if ( isLinkPreviewable ) {
+		// Add our own isLinkPreviewable() function
+		api.isLinkPreviewable = function( element, options ) {
+			var $this = $( element ),
+				$note_widget = $this.parents( '.note-widget' );
+
+			// If this is a Note Widget, don't allow previewable links
+			if ( $note_widget.length ) {
+				// TODO: Do we need to remove the existing Customizer query arguments here?
+
+				return false;
+			}
+
+			// Otherwise let WordPress determine if this element is previewable
+			return isLinkPreviewable.call( this, element, options );
+		};
+	}
 
 	/**
 	 * Document Ready

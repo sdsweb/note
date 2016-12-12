@@ -110,6 +110,7 @@ var note = note || {};
 					// Set the content value
 					$widget_content.val( data.widget.content );
 
+					// TODO: In WordPres 4.7 ensure this doesn't trigger the API save state (it may be triggered due to the add/remove class calls for customize-unpreviewable?)
 					// Update the API saved state (content has been updated, API data is not saved)
 					api.state( 'saved' ).set( false );
 					api.state.trigger( 'change', api.state.create( 'saved' ) ); // trigger the saved flag

@@ -621,12 +621,29 @@ tinymce.ThemeManager.add( 'note', function( editor ) {
 			} );
 
 			// Deactivate, blur, LoadContent events
-			editor.on( 'deactivate blur LoadContent', function() {
+			editor.on( 'deactivate blur LoadContent', function( event ) {
 				// If editor content is empty
 				if ( isEmpty() ) {
-					editor.setContent( settings.placeholder );
+					// Set the placeholder (no events)
+					editor.setContent( settings.placeholder, {
+						no_events: true
+					} );
+
 					has_placeholder = true;
 					DOM.addClass( editor.getBody(), 'mce-placeholder' );
+
+					// If this is the loadcontent event
+					if ( event.type === 'loadcontent' ) {
+						// Focus the editor
+						editor.focus();
+
+						// New thread
+						setTimeout( function() {
+							// Make sure the cursor appears in editor
+							editor.selection.select( editor.getBody() );
+							editor.selection.collapse( false );
+						}, 1 );
+					}
 				}
 
 				// If WP_Link or the wplink toolbar is visible

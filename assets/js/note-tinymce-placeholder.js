@@ -70,7 +70,7 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 		var note_type = editor.getParam( 'note_type' );
 
 		// Note Placeholder
-		setupNotePlaceholder( true );
+		setupNotePlaceholder();
 
 		// Remove the note-placeholder data attributes
 		/*$el.find( '*[data-note-placeholder]' ).each( function() {
