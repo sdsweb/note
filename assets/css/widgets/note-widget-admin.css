@@ -13,6 +13,10 @@
 	max-width: 100%;
 }
 
+.customize-control select.note-select {
+	max-width: 100%;
+}
+
 .note-hidden {
 	display: none;
 }
@@ -57,4 +61,96 @@
 
 .note-widget-title .note-hide-widget-title input:checked + label {
 	color: #ccc;
+}
+
+/**
+ * Range Inputs (Columns & Rows)
+ */
+.note-range-input .note-range-input-range {
+	width: 78%;
+	margin: 1em 0;
+	background: transparent;
+	outline: none;
+	-webkit-appearance: none;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.note-range-input .note-range-input-range::-webkit-slider-runnable-track {
+	height: 10px;
+	background: #ddd;
+}
+
+.note-range-input-range::-moz-range-track {
+	width: 100%;
+	height: 10px;
+	background: #ddd;
+	border: 0;
+}
+
+.note-range-input .note-range-input-range::-ms-track {
+	width: 100%;
+	height: 10px;
+	outline: none;
+	color: transparent;
+	background: transparent;
+	border-color: transparent;
+	border-width: 8px 0;
+	-webkit-appearance: none;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.note-range-input .note-range-input-range::-ms-fill-lower {
+	background: #1e8cbe;
+}
+
+.note-range-input .note-range-input-range::-ms-fill-upper {
+	background: #ddd;
+}
+
+.note-range-input .note-range-input-range::-webkit-slider-thumb {
+	width: 10px;
+	height: 20px;
+	margin-top: -4px;
+	background: #fff;
+	cursor: pointer;
+	box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+	-webkit-appearance: none;
+}
+
+.note-range-input .note-range-input-range::-moz-range-thumb {
+	width: 10px;
+	height: 20px;
+	background: #fff;
+	cursor: pointer;
+	box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+	border: none;
+	border-radius: 0;
+}
+
+.note-range-input .note-range-input-range::-ms-thumb {
+	width: 10px;
+	height: 20px;
+	background: #fff;
+	cursor: pointer;
+	box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);;
+	border: none;
+	border-radius: 0;
+}
+
+.note-range-input .note-range-value {
+	width: 17%;
+	margin-left: 5px;
+	padding: 3px 0;
+	color: #fff;
+	background: #1e8cbe;
+	text-align: center;
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.note-range-input-range::-moz-focus-inner {
+	border: 0;
 }

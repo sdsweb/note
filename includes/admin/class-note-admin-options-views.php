@@ -4,7 +4,7 @@
  *
  * @class Note_Admin_Options_Views
  * @author Slocum Studio
- * @version 1.0.0
+ * @version 1.4.1
  * @since 1.2.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Admin_Options_Views' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.0.0';
+		public $version = '1.4.1';
 
 		/**
 		 * @var array
@@ -53,21 +53,21 @@ if ( ! class_exists( 'Note_Admin_Options_Views' ) ) {
 		 * This function renders the Note General Settings Section.
 		 */
 		public static function note_general_section() {
-			include_once( 'views/html-note-options-general-section.php' );
+			include_once 'views/html-note-options-general-section.php';
 		}
 
 		/**
 		 * This function renders the Note Uninstall Settings Section.
 		 */
 		public static function note_uninstall_section() {
-			include_once( 'views/html-note-options-uninstall-section.php' );
+			include_once 'views/html-note-options-uninstall-section.php';
 		}
 
 		/**
 		 * This function renders the Note Uninstall Data Settings Field.
 		 */
 		public static function note_uninstall_data_field() {
-			include_once( 'views/html-note-options-uninstall-data-field.php' );
+			include_once 'views/html-note-options-uninstall-data-field.php';
 		}
 
 		/**
@@ -75,7 +75,7 @@ if ( ! class_exists( 'Note_Admin_Options_Views' ) ) {
 		 */
 		public static function render() {
 			// Render the main view
-			include_once( 'views/html-note-options.php' );
+			include_once 'views/html-note-options.php';
 		}
 	}
 }

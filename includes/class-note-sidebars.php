@@ -4,7 +4,7 @@
  *
  * @class Note_Sidebars
  * @author Slocum Studio
- * @version 1.0.0
+ * @version 1.4.4
  * @since 1.2.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.0.0';
+		public $version = '1.4.4';
 
 		/**
 		 * @var array
@@ -181,7 +181,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 					'before' => 'post-thumbnail-before',
 					'after' => 'post-thumbnail-after'
 				),*/
-				// Title// Title TODO: Should we allow this? Most of the time, the title is wrapped in a Heading (<h1>-<h6>) tag
+				// Title TODO: Should we allow this? Most of the time, the title is wrapped in a Heading (<h1>-<h6>) tag
 				/*'title' => array(
 					'before' => 'title-before',
 					'after' => 'title-after'
@@ -225,7 +225,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 				register_sidebar( array(
 					'name'          => __( 'Note Temporary Inactive Sidebar', 'note' ),
 					'id'            => 'note-temporary-inactive-sidebar',
-					'description'   => __( 'This is a temporary sidebar registered by Note in the Customizer only. It will hold inactive Note Sidebar widgets during a Customizer session only.', 'note' )
+					'description'   => __( 'This is a temporary sidebar registered by Note in the Customizer only. It will hold inactive Note Widget Area widgets during a Customizer session only.', 'note' )
 				) );
 
 			// Register Note Sidebars
@@ -291,6 +291,10 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		 * that query).
 		 */
 		function loop_start( $query ) {
+			// Bail if this isn't the main query
+			if ( ! $query->is_main_query() )
+				return;
+
 			// Store the reference to the query
 			$this->current_wp_query = $query;
 		}
@@ -298,7 +302,11 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		/**
 		 * This function removes the current WP_Query reference from this class after The Loop has finished.
 		 */
-		function loop_end() {
+		function loop_end( $query ) {
+			// Bail if this isn't the main query
+			if ( ! $query->is_main_query() )
+				return;
+
 			// Remove the reference to the query
 			$this->current_wp_query = null;
 		}
@@ -526,7 +534,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		/**
 		 * This function creates Note sidebar arguments based on parameters.
 		 */
-		public static function note_sidebar_args( $sidebar_id, $post_id = false ) {
+		public static function note_sidebar_args( $sidebar_id, $post_id = false, $store_sidebar_args_reference = true ) {
 			// Grab the Note Sidebars instance
 			$note_sidebars = Note_Sidebars();
 
@@ -550,7 +558,8 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 			$sidebar_args = apply_filters( 'note_sidebar_args', $sidebar_args, $sidebar_id, $post_id );
 
 			// Store Note Sidebar arguments for this sidebar
-			$note_sidebars->sidebar_args[$sidebar_id] = $sidebar_args;
+			if ( $store_sidebar_args_reference )
+				$note_sidebars->sidebar_args[$sidebar_id] = $sidebar_args;
 
 			return $sidebar_args;
 		}
@@ -601,16 +610,30 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 			if ( ! is_a( $wp_customize, 'WP_Customize_Manager' ) )
 				return $note_sidebars->sidebar_args;
 
-			// Setup post ID and section prefix
+			// Setup post ID, section prefix, and widgets panel flag
 			$post_id = ( ! empty( $post ) && is_a( $post, 'WP_Post' ) ) ? $post->ID : false;
+			$post_id = apply_filters( 'note_customizer_sidebar_args_post_id', $post_id, $previewer, $note_sidebars );
 			$section_prefix = 'sidebar-widgets-';
+			$remove_widgets_panel = false;
+
+			// If the widgets panel doesn't exist yet, create a mock one now with a title for the json() methods used below
+			if ( ! $wp_customize->get_panel( 'widgets' ) ) {
+				// Widgets Panel
+				$wp_customize->add_panel( 'widgets', array(
+					'type' => 'widgets',
+					'title' => __( 'Widgets', 'note' )
+				) );
+
+				// Set the flag
+				$remove_widgets_panel = true;
+			}
 
 			// Format sidebar locations for localizations
 			foreach ( $note_sidebars->sidebar_locations as $sidebar_location )
 				// Loop through each sidebar within this location
 				foreach ( $sidebar_location as $sidebar_id ) {
 					// Note Sidebar arguments for this sidebar
-					$note_sidebars->sidebar_args[$sidebar_id] = $sidebar_args = self::note_sidebar_args( $sidebar_id, $post_id );
+					$sidebar_args = self::note_sidebar_args( $sidebar_id, $post_id );
 
 					// Get the sidebar ID
 					$customizer_sidebar_id = self::get_sidebar_arg( 'id', $sidebar_args );
@@ -629,11 +652,14 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 						'id' => $section_id,
 						'title' => self::get_sidebar_arg( 'name', $sidebar_args ),
 						'description' => self::get_sidebar_arg( 'description', $sidebar_args ),
+						'sidebar_id' => $customizer_sidebar_id,
+						'panel' => 'widgets'
 					) );
 					$wp_customize->add_section( $customizer_section );
 
 					// Create a mock Customizer Control
 					$customizer_control = new Note_Customizer_Sidebar_Control( $wp_customize, $setting_id, array(
+						'description' => self::get_sidebar_arg( 'description', $sidebar_args ),
 						'section' => $section_id,
 						'sidebar_id' => $customizer_sidebar_id,
 						'priority' => 0 // No active widgets
@@ -641,7 +667,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 					$wp_customize->add_control( $customizer_control );
 
 					// Customizer data
-					$note_sidebars->sidebar_args[$sidebar_id]['customizer'] = array(
+					$sidebar_args['customizer'] = array(
 						// Setting
 						'setting' => array(
 							'id' => $setting_id,
@@ -649,41 +675,35 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 							'value' => ( isset( $sidebars_widgets[$customizer_sidebar_id] ) ) ? $sidebars_widgets[$customizer_sidebar_id] : array()
 						),
 						// Section
-						'section' => array(
-							'id' => $section_id,
-							'title' => self::get_sidebar_arg( 'name', $sidebar_args ),
-							'description' => self::get_sidebar_arg( 'description', $sidebar_args ),
-							'sidebarId' => $customizer_sidebar_id,
-							'panel' => 'widgets',
-							'active' => true, // Activate this section within the Customizer when it is created
-							'content' => $customizer_section->get_content(), // Grab the section HTML
-							'type' => 'sidebar'
-						),
+						'section' => ( $customizer_section && method_exists( $customizer_section, 'json' ) ) ? $customizer_section->json() : array(),
 						// Control
-						'control' => array(
-							'id' => $setting_id,
-							'section' => $section_id,
-							'sidebar_id' => $customizer_sidebar_id,
-							'priority' => 0, // No active widgets
-							'settings' => array(
-								'default' => $setting_id
-							),
-							'active' => true,
-							'content' => $customizer_control->get_content(), // Grab the control HTML
-							'type' => 'sidebar_widgets'
-
-							//description: ""
-							//label: ""
-						)
+						'control' => ( $customizer_control && method_exists( $customizer_control, 'json' ) ) ? $customizer_control->json() : array()
 					);
 
-					// If we're not in the Previewer, leave the mock Settings, Sections, and Controls active
+					/*
+					 * Adjust section data
+					 */
+					$sidebar_args['customizer']['section']['active'] = true; // Activate this section within the Customizer when it is created
+					unset( $sidebar_args['customizer']['section']['instanceNumber'] ); // Remove instance number
+
+					/*
+					 * Adjust control data
+					 */
+					$sidebar_args['customizer']['control']['id'] = $setting_id; // ID
+					$sidebar_args['customizer']['control']['active'] = true; // Activate this control within the Customizer when it is created
+					$sidebar_args['customizer']['control']['priority'] = 0; // No active widgets
+					unset( $sidebar_args['customizer']['control']['instanceNumber'] ); // Remove instance number
+
+					// If we're not in the Previewer, remove the mock Settings, Sections, and Controls active
 					if ( ! $previewer ) {
 						// Remove Customizer mock setting, section, and control
 						$wp_customize->remove_setting( $setting_id );
 						$wp_customize->remove_section( $section_id );
 						$wp_customize->remove_control( $setting_id );
 					}
+
+					// Store a reference to the sidebar arguments
+					$note_sidebars->sidebar_args[$sidebar_id] = $sidebar_args;
 				}
 
 			return $note_sidebars->sidebar_args;
@@ -702,10 +722,12 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 				// Loop through Note sidebars
 				foreach ( $input as $post_id => &$value )
 					// If the post was not found
-					if ( ! get_post_status( $post_id ) )
+					// TODO: What if the $post_id is an int for a category (i.e. category ID)?
+					if ( is_int( $post_id ) && ! get_post_status( $post_id ) )
 						unset( $input[$post_id] );
 					// Otherwise, we have a valid post, sanitize the values
 					else
+						// TODO: Sanitize $post_id key here
 						// Loop through sidebars
 						foreach ( $value as $note_sidebar_id ) {
 							$valid_sidebar = false; // Flag

@@ -1,0 +1,110 @@
+/**
+ * Note Widget Stylesheet
+ */
+
+.note-widget a.customize-unpreviewable {
+	cursor: pointer !important;
+}
+
+
+/**
+ * Note Flexbox Row
+ */
+.note-flex {
+	width: 100%;
+	margin: auto;
+
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;
+	-moz-flex-flow: row wrap;
+	-ms-flex-flow: row wrap;
+	-webkit-flex-flow: row wrap;
+	flex-flow: row wrap;
+	-moz-justify-content: space-around;
+	-ms-justify-content: space-around;
+	-webkit-justify-content: space-around;
+	justify-content: space-around;
+	-moz-align-content: flex-start;
+	-ms-align-content: flex-start;
+	-webkit-align-content: flex-start;
+	align-content: flex-start;
+	-ms-flex-pack: end;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+/**
+ * Note Flexbox Columns
+ */
+.note-flex .note-col {
+	width: 100%;
+	padding: 0 1em;
+	position: relative;
+
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.note-flex-1-columns .note-col {
+	width: 100%;
+}
+
+.note-flex-2-columns .note-col {
+	width: 50%;
+}
+
+.note-flex-3-columns .note-col {
+	width: 33.333%;
+}
+
+.note-flex-4-columns .note-col {
+	width: 25%;
+}
+
+.note-flex-5-columns .note-col {
+	width: 20%;
+}
+
+.note-flex-6-columns .note-col {
+	width: 16.6665%;
+}
+
+/* Responsive Structure */
+@media only screen and (max-width : 768px) {
+	.note-flex-2-columns .note-col {
+		width: 100%;
+	}
+
+	.note-flex-4-columns .note-col {
+		width: 50%;
+	}
+
+	.note-flex-5-columns .note-col {
+		width: 33%;
+	}
+
+	.note-flex-6-columns .note-col {
+		width: 33%;
+	}
+}
+
+@media only screen and (max-width : 568px) {
+	.note-flex-3-columns .note-col {
+		width: 100%;
+	}
+
+	.note-flex-4-columns .note-col {
+		width: 100%;
+	}
+
+	.note-flex-5-columns .note-col {
+		width: 100%;
+	}
+
+	.note-flex-6-columns .note-col {
+		width: 100%;
+	}
+}

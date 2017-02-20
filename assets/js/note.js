@@ -10,14 +10,22 @@
 		return;
 	}
 
-	var api = wp.customize, OldPreview;
+	var api = wp.customize, OldPreview, isLinkPreviewable;
 
 	// Note Preview
 	api.NotePreview = {
 		preview: null, // Instance of the Previewer
-		editors: [],
+		editors: [], // TinyMCE Editors
+		editor_config: [],  // TinyMCE Editor configurations
+		editor_selectors: [], // TinyMCE Editor selectors
 		tinymce: window.tinymce,
+		tinyMCE: window.tinyMCE,
+		tinymce_config: {},
 		note: window.note,
+		note_tinymce: window.note_tinymce,
+		default_note_template_config_type: 'default',
+		widget_settings: ( window.note.hasOwnProperty( 'widgets' ) && window.note.widgets.hasOwnProperty( 'settings' ) ) ? window.note.widgets.settings : false,
+		widget_templates: ( window.note.hasOwnProperty( 'widgets' ) && window.note.widgets.hasOwnProperty( 'templates' ) ) ? window.note.widgets.templates : false,
 		modal_commands: ( window.note.hasOwnProperty( 'modal_commands' ) ) ? window.note.modal_commands : false,
 		modal_command_listeners: {
 			// Activate
@@ -84,24 +92,56 @@
 					var editor = _.find( self.editors, function( editor ) {
 						// TODO: Check hasOwnProperty()
 						return editor.note.widget_data.widget.id === data.widget.id;
-					} );
+					} ),
+						body = ( editor ) ? editor.getBody() : false,
+						$body = ( body ) ? $( body ) : false,
+						$note_wrapper = ( body ) ? $body.parents( '.note-wrapper' ) : false,
+						$editor,
+						editor_top,
+						editor_bottom,
+						$window,
+						window_height,
+						window_scroll_top,
+						window_bottom;
 
-					// If we have an editor
-					if ( editor ) {
-						var $editor = $( editor.getBody() ),
-							editor_top = $editor.offset().top,
-							editor_bottom = editor_top + $editor.height(),
-							$window = $( window ),
-							window_height = $window.height(),
-							window_scroll_top,
-							window_bottom;
+					// Note Template Widgets (Note Widgets that have a template selected; possibly rows/columns)
+					if ( editor && $note_wrapper.length && $note_wrapper.hasClass( 'note-template-wrapper' ) ) {
+						// Loop through editors
+						$note_wrapper.find( '.editor' ).each( function() {
+							var $this = $( this ),
+								id = $this.attr( 'id' ),
+								the_editor;
 
+							// Find the TinyMCE Editor associated with this element
+							the_editor = self.tinyMCE.get( id );
+
+							// If we have an editor
+							if ( the_editor ) {
+								// Trigger our custom focus event
+								the_editor.fire( 'note-editor-focus', data );
+							}
+						} );
+					}
+					// Standard/Default Note Widgets
+					else if ( editor ) {
 						// Focus the editor first
-						editor.focus( false );
+						editor.focus();
 
 						// Move cursor to end of existing content (in the last child element)
 						editor.selection.select( editor.getBody().lastChild, true );
 						editor.selection.collapse( false );
+
+						// Trigger our custom focus event
+						editor.fire( 'note-editor-focus', data );
+					}
+
+					// If we have an original editor (scroll the Previewer)
+					if ( editor ) {
+						$editor = $( editor.getBody() );
+						editor_top = $editor.offset().top;
+						editor_bottom = editor_top + $editor.height();
+						$window = $( window );
+						window_height = $window.height();
 
 						// Get the window scroll top and bottom
 						window_scroll_top = $window.scrollTop();
@@ -112,13 +152,11 @@
 							// Scroll the editor to the middle of the Previewer
 							$window.scrollTop( editor_top - ( window_height / 2 ) );
 						}
-
-						// Trigger our custom focus event
-						editor.fire( 'note-editor-focus', data );
 					}
 				} );
 
 				// Listen for the "note-widget-focus" event from the Customizer
+				// TODO: Not currently in use
 				self.preview.bind( 'note-widget-focus', function( data ) {
 					var editor;
 
@@ -133,17 +171,19 @@
 						editor.note.focus_event = true;
 
 						// Focus the editor
-						editor.focus( false );
+						editor.focus();
 
 						// Move cursor to correct position
 						editor.selection.setCursorLocation( editor.note.current_element, editor.note.current_offset );
 					}
 				} );
 
-				// Init TinyMCE
-				self.tinymce.init( _.extend( self.note.tinymce, {
+				// Base TinyMCE Configuration
+				self.tinymce_config = {
 					// TinyMCE Setup
 					setup: function( editor ) {
+						var contentMutationObserver;
+
 						// Add a Note object to the editor
 						editor.note = {
 							widget_data: {}, // Reference to widget data
@@ -151,14 +191,23 @@
 							focus_event: false, // Flag
 							current_element: false,
 							current_offset: 0,
-							media: {}
+							media: {},
+							widget_id: false,
+							widget_number: false,
+							background_image_css: self.note.widgets.background_image_css
 						};
+
+						// Determine if we have a column TinyMCE editor and adjust selectors as necessary
+						if ( editor.getParam( 'note_column_editor' ) ) {
+							// Set the parent CSS selector for note_insert plugin
+							editor.note.parent = '.note-col-has-editor';
+						}
 
 						// Add this editor reference to the list of editors
 						self.editors.push( editor );
 
 						// Editor initialization
-						editor.on( 'init', function( event ) {
+						editor.on( 'init', function() {
 							var $el = $( editor.getElement() ),
 								$note_widget = $el.parents( '.note-widget' );
 
@@ -171,8 +220,21 @@
 								sidebar: {
 									name: $note_widget.find( '.sidebar-name' ).val(),
 									id: $note_widget.find( '.sidebar-id' ).val()
+								},
+								// Pass default selectors to allow note-widget-update to be modified externally
+								selectors: {
+									widget_content: '.note-content', // Widget Content
+									widget_content_data: 'note' // Widget Content Data Slug
 								}
 							};
+							editor.note.widget_id = editor.note.widget_data.widget.id;
+							editor.note.widget_number = editor.note.widget_data.widget.number;
+
+							// Determine if we have a column TinyMCE editor and adjust selectors as necessary
+							if ( editor.getParam( 'note_column_editor' ) ) {
+								// Adjust the widget content selector
+								editor.note.widget_data.selectors.widget_content = '.note-content-' + editor.getParam( 'note_column_editor' );
+							}
 
 							// Stop propagation to other callbacks on links to prevent Previewer refreshes
 							$note_widget.on( 'click.note-widget', function( event ) {
@@ -190,7 +252,7 @@
 						} );
 
 						// Editor focus
-						editor.on( 'focus', function( event ) {
+						editor.on( 'focus', function() {
 							var content = editor.getContent(),
 								data = $.extend( true, editor.note.widget_data, { widget: { content: content } } ); // Deep copy
 
@@ -202,7 +264,7 @@
 						} );
 
 						// Editor Note Widget focus
-						editor.on( 'note-editor-focus', function( data ) {
+						editor.on( 'note-editor-focus', function() {
 							// Add transition and Note edit focus CSS classes
 							self.tinymce.DOM.addClass( editor.getBody(), 'mce-edit-focus-transition mce-note-edit-focus' );
 
@@ -218,7 +280,7 @@
 						} );
 
 						// Editor blur
-						editor.on( 'blur', function( event ) {
+						editor.on( 'blur', function() {
 							var content = editor.getContent(),
 								data = $.extend( true, editor.note.widget_data, { widget: { content: content } } ); // Deep copy
 
@@ -229,10 +291,51 @@
 							self.preview.send( 'note-widget-blur', data );
 						} );
 
+						/*
+						 * In WordPress 4.7, logic was added to determine if links in the Previewer
+						 * are considered previewable. Since we're over-riding the isLinkPreviewable() function
+						 * below, we need to make sure that the "customize-unpreviewable" CSS class is removed
+						 * from link elements within Note Widgets as this CSS class will affect Note Widgets
+						 * in negative ways. The "customize-unpreviewable" CSS class is added to any link that
+						 * WordPress considers to be unpreviewable.
+						 */
+						if ( parseFloat( self.note_tinymce.wp_version ) >= 4.7 ) {
+							// Create a new MutationObserver
+							contentMutationObserver = new MutationObserver( function( mutations ) {
+								// Loop through mutations
+								_.each( mutations, function( mutation ) {
+									// Switch based on type of mutation
+									switch ( mutation.type ) {
+										// Attributes (we're only monitoring the class attribute via the attributeFilter config property)
+										case 'attributes':
+											var $el = $( mutation.target );
+
+											// If we don't have an old value and the customize-unpreviewable CSS class exists
+											if ( ! mutation.oldValue || $el.hasClass( 'customize-unpreviewable' ) ) {
+												// Remove the customize-unpreviewable CSS class
+												$el.removeClass( 'customize-unpreviewable' );
+											}
+										break;
+									}
+								} );
+							} );
+
+							// Observe
+							contentMutationObserver.observe( editor.getElement(), {
+								childList: true, // TODO: Is this necessary?
+								attributes: true,
+								subtree: true,
+								attributeOldValue: true,
+								attributeFilter: [
+									'class'
+								]
+							} );
+						}
+
 						// A change within the editor content has occurred
-						editor.on( 'keyup change NodeChange', _.debounce( function( event ) {
-							var $el = $( editor.getElement() ),
-								content = editor.getContent(),
+						// TODO: Create a function that can send updated data to the Customizer based on parameters that sits outside of this logic so that other developers and plugins can hook into Note easier (adjust widget_content to element in Customizer logic for this functionality; optimized functionality/logic)
+						editor.on( 'keyup change NodeChange SetAttrib', _.debounce( function() {
+							var content = editor.getContent(),
 								data = {};
 
 							// Content within the editor has changed or this is an initial Previewer load
@@ -270,7 +373,87 @@
 							} );
 						}
 					}
-				} ) );
+				};
+
+				// Merge TinyMCE config data with default configuration data
+				self.note.tinymce[self.default_note_template_config_type] = _.extend( self.note.tinymce[self.default_note_template_config_type], self.tinymce_config );
+
+
+				// Loop through widgets/settings
+				if ( ! _.isEmpty( self.widget_settings ) ) {
+					// Loop through widget settings
+					_.each( self.widget_settings, function( settings ) {
+						var template = ( ! _.isEmpty( self.widget_templates ) && self.widget_templates.hasOwnProperty( settings.template ) ) ? self.widget_templates[settings.template] : false,
+							template_config = ( template && template.hasOwnProperty( 'config' ) ) ? template.config : {},
+							template_config_type = ( template_config && template_config.hasOwnProperty( 'type' ) ) ? template_config.type : self.default_note_template_config_type,
+							// TODO: Is there a more efficient way to find the correct widget element?
+							$widget = $( _.find( self.$note_widgets, function( widget ) {
+								return $( widget ).find( '.widget-id' ).val() === settings.widget_id;
+							} ) ),
+							widget_id = ( $widget ) ? $widget.attr( 'id' ) : false,
+							$editors = ( $widget.length ) ? $widget.find( '.editor-content' ) : false;
+
+						// If we have a widget and a template
+						if ( $widget.length && template ) {
+							// If we have editor elements and template columns
+							if ( $editors.length && template_config.hasOwnProperty( 'columns' ) ) {
+								var template_columns = template_config.columns;
+
+								// Loop through editors
+								$editors.each( function() {
+									var $this = $( this ),
+										$parent = $this.parent(),
+										note_column = $parent.data( 'note-column' ),
+										note_editor_id = $parent.data( 'note-editor-id' );
+
+									// Reset the template config data
+									template_config = ( template && template.hasOwnProperty( 'config' ) ) ? template.config : {};
+
+									// Adjust the column configuration accordingly
+									if ( note_column && template_columns.hasOwnProperty( note_column ) ) {
+										template_config = _.defaults( _.clone( template_columns[note_column] ), _.clone( template_config ) );
+									}
+
+									// Determine the more specific template type (if set)
+									template_config_type = template_config.type || self.default_note_template_config_type;
+
+									// Initialize TinyMCE
+									self.initTinyMCE( {
+										// Adjust the selector to match this particular widget and editor
+										selector: '#' + widget_id + ' .editor-' + note_editor_id,
+										note_column_editor: note_editor_id
+									}, template_config, template_config_type );
+								} );
+							}
+							// Otherwise just setup one editor
+							else {
+								// Bail if the editor content element doesn't exist
+								if ( ! $( '#' + widget_id + ' .editor-content' ).length ) {
+									return;
+								}
+
+								self.initTinyMCE( {
+									// Adjust the selector to match this particular widget and editor
+									selector: '#' + widget_id + ' .editor-content'
+								}, template_config, template_config_type );
+							}
+						}
+					} );
+
+
+					/*
+					 * Now we have to initialize all default Note Widgets just one time (this all add TinyMCE to each widget)
+					 */
+
+					// Add the selector to array
+					self.editor_selectors.push( self.note.tinymce[self.default_note_template_config_type].selector );
+
+					// Add this editor config to array (will be populated with self.note.tinymce[self.default_note_template_config_type] data after TinyMCE init)
+					self.editor_config.push( self.note.tinymce[self.default_note_template_config_type] );
+
+					// Init TinyMCE
+					self.tinymce.init( self.note.tinymce[self.default_note_template_config_type] );
+				}
 
 				/*
 				 * Determine if we have any modal commands that should set the active
@@ -411,6 +594,79 @@
 					} );
 				}
 			} );
+		},
+		/**
+		 * Initialize a TinyMCE instance.
+		 */
+		initTinyMCE: function( editor_config_defaults, template_config, config_type ) {
+			// Editor configuration
+			var self = this,
+				editor_config = _.defaults( editor_config_defaults, self.tinymce_config ),
+				editor_tinymce_config;
+
+			// Add the selector to array
+			self.editor_selectors.push( editor_config.selector );
+
+			// Add this editor config to array (will be populated with self.note.tinymce[self.default_note_template_config_type] data after TinyMCE init)
+			self.editor_config.push( editor_config );
+
+			// Setup TinyMCE config based on type
+			if ( self.note.tinymce.hasOwnProperty( config_type ) && !_.isEmpty( self.note.tinymce[config_type] ) ) {
+				editor_tinymce_config = self.note.tinymce[config_type];
+
+				// TODO: Allow plugins?, blocks, and toolbar items to be spliced in at certain areas in the data
+
+				// If there are any plugins that should added to this editor from the template config data
+				if ( template_config.hasOwnProperty( 'plugins' ) && editor_tinymce_config.hasOwnProperty( 'plugins' ) ) {
+					// Loop through plugins
+					_.each( template_config.plugins, function( plugin ) {
+						// Split the plugins into an array
+						if ( ! editor_tinymce_config.hasOwnProperty( 'plugins_arr' ) ) {
+							editor_tinymce_config.plugins_arr = editor_tinymce_config.plugins.split( ' ' );
+						}
+
+						// If we have plugins in the plugins array and this plugin doesn't already exist
+						if ( editor_tinymce_config.plugins_arr.length && editor_tinymce_config.plugins_arr.indexOf( plugin ) === -1 ) {
+							// Add this plugin to the array of existing plugins
+							editor_tinymce_config.plugins_arr.push( plugin );
+
+							// Append this plugin to the list of existing plugins
+							editor_tinymce_config.plugins += ' ' + plugin;
+						}
+					} );
+				}
+
+				// If there are any blocks that should added to this editor from the template config data
+				if ( template_config.hasOwnProperty( 'blocks' ) && editor_tinymce_config.hasOwnProperty( 'blocks' ) ) {
+					// Loop through plugins
+					_.each( template_config.blocks, function( block ) {
+						// If this block doesn't already exist
+						if ( editor_tinymce_config.blocks.indexOf( block ) === -1 ) {
+							// Add this block to the list of existing blocks
+							editor_tinymce_config.blocks.push( block );
+						}
+					} );
+				}
+
+				// If there are any toolbar items that should added to this editor from the template config data
+				if ( template_config.hasOwnProperty( 'toolbar' ) && editor_tinymce_config.hasOwnProperty( 'toolbar' ) ) {
+					// Loop through plugins
+					_.each( template_config.toolbar, function( item ) {
+						// If this toolbar item doesn't already exist
+						if ( editor_tinymce_config.toolbars.indexOf( item ) === -1 ) {
+							// Add this toolbar item to the list of existing toolbars
+							editor_tinymce_config.toolbars.push( item );
+						}
+					} );
+				}
+			}
+			// Otherwise fallback to the default setup
+			else {
+				editor_tinymce_config = self.note.tinymce[self.default_note_template_config_type];
+			}
+
+			// Init TinyMCE (using _.defaults() instead of _.extend() to make sure we're not altering default Note data)
+			self.tinymce.init( _.defaults( editor_config, editor_tinymce_config ) );
 		},
 		/**
 		 * Setup modal commands.
@@ -1011,6 +1267,30 @@
 			OldPreview.prototype.initialize.call( this, params, options );
 		}
 	} );
+
+	/**
+	 * Grab the isLinkPreviewable() function since it is private
+	 */
+	isLinkPreviewable = api.isLinkPreviewable;
+
+	// If the isLinkPreviewable() function exists
+	if ( isLinkPreviewable ) {
+		// Add our own isLinkPreviewable() function
+		api.isLinkPreviewable = function( element, options ) {
+			var $this = $( element ),
+				$note_widget = $this.parents( '.note-widget' );
+
+			// If this is a Note Widget, don't allow previewable links
+			if ( $note_widget.length ) {
+				// TODO: Do we need to remove the existing Customizer query arguments here?
+
+				return false;
+			}
+
+			// Otherwise let WordPress determine if this element is previewable
+			return isLinkPreviewable.call( this, element, options );
+		};
+	}
 
 	/**
 	 * Document Ready

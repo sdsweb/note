@@ -43,7 +43,7 @@ if( ! class_exists( 'Note_Customizer_Sidebar_Control' ) ) {
 					// Loop through Note Sidebar IDs
 					foreach ( $note_sidebar_ids as $sidebar_id ) {
 						// Note Sidebar arguments for this sidebar
-						$sidebar_args = Note_Sidebars::note_sidebar_args( $sidebar_id, $post_id );
+						$sidebar_args = Note_Sidebars::note_sidebar_args( $sidebar_id, $post_id, false );
 
 						// Generate a section ID
 						$section_id = $this->section_prefix . Note_Sidebars::get_sidebar_arg( 'id', $sidebar_args );

@@ -200,6 +200,7 @@ h3.note-nav-tab-wrapper {
 }
 
 /* Ads */
+/* Upgrade to Conductor */
 .note-ad {
 	margin: 0;
 	padding: 1em 0;
@@ -237,6 +238,16 @@ h3.note-nav-tab-wrapper {
 .note-upgrade-ad ul {
 	padding-left: 1em;
 	list-style: disc;
+}
+.note-ad {
+	margin: 0;
+	padding: 1em 0;
+	border-bottom: 1px dashed #ccc;
+}
+/* Signup PWW Course */
+
+.note-pwcc-ad-dark-blue a {
+	background: #00478c;
 }
 
 /* Buttons */

@@ -14,10 +14,10 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) )
 /**
  * Includes
  */
-include_once( 'note.php' ); // Note Plugin
-include_once( 'includes/class-note-options.php' ); // Note Options
-include_once( 'includes/class-note-sidebars.php' ); // Note Template Functions
-include_once( 'includes/widgets/class-note-widget.php' ); // Note Widget
+include_once 'note.php'; // Note Plugin
+include_once 'includes/class-note-options.php'; // Note Options
+include_once 'includes/class-note-sidebars.php'; // Note Template Functions
+include_once 'includes/widgets/class-note-widget.php'; // Note Widget
 
 
 /**
