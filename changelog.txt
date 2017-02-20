@@ -2,9 +2,14 @@
 Plugin: Note
 Author: Slocum Design Studio
 Author URI: https://slocumstudio.com/
-Current Version: 1.4.3
+Current Version: 1.4.4
 ==========================================
 
+
+1.4.4 // February 20 2017
+-------------------------
+- Fixed a bug where Note Widget Areas would not render properly if there was a WP_Query() within
+  "The Loop"; Thanks Lisa Snyder
 
 1.4.3 // December 12 2016
 -------------------------

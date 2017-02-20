@@ -198,6 +198,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 			 * TODO: Placeholder/default content could be set in the template possibly
 			 * TODO: Allow for different columns to specify a template?
 			 */
+			// TODO: i18n, l10n on placeholders
 			$this->templates = apply_filters( 'note_widget_templates', array(
 				// 2 Columns
 				'2-col' => array(
@@ -1061,6 +1062,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 		/**
 		 * This function generates CSS classes for widget template output based on context.
 		 */
+		// TODO: Allow for extra CSS classes to be passed via a parameter like post_class()
 		public function get_template_css_class( $context, $instance, $number = 0 ) {
 			$classes = array();
 			$template = ( isset( $instance['template'] ) && $this->is_valid_template( $instance['template'] ) ) ? $this->templates[$instance['template']] : false; // Fetch the current template

@@ -4,7 +4,7 @@
  *
  * @class Note_Sidebars
  * @author Slocum Studio
- * @version 1.4.1
+ * @version 1.4.4
  * @since 1.2.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.4.1';
+		public $version = '1.4.4';
 
 		/**
 		 * @var array
@@ -291,6 +291,10 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		 * that query).
 		 */
 		function loop_start( $query ) {
+			// Bail if this isn't the main query
+			if ( ! $query->is_main_query() )
+				return;
+
 			// Store the reference to the query
 			$this->current_wp_query = $query;
 		}
@@ -298,7 +302,11 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		/**
 		 * This function removes the current WP_Query reference from this class after The Loop has finished.
 		 */
-		function loop_end() {
+		function loop_end( $query ) {
+			// Bail if this isn't the main query
+			if ( ! $query->is_main_query() )
+				return;
+
 			// Remove the reference to the query
 			$this->current_wp_query = null;
 		}
