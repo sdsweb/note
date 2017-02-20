@@ -11,7 +11,7 @@
 /*global tinymce:true */
 /*eslint consistent-this:0 */
 
-tinymce.PluginManager.add('lists', function(editor) {
+tinymce.PluginManager.add( 'lists', function(editor) {
 	var self = this;
 
 	function isListNode(node) {
