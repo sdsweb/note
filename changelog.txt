@@ -2,9 +2,16 @@
 Plugin: Note
 Author: Slocum Design Studio
 Author URI: https://slocumstudio.com/
-Current Version: 1.4.4
+Current Version: 1.4.5
 ==========================================
 
+
+1.4.5 // June 16 2017
+---------------------
+- Fixed a bug where a possible fatal PHP error would occur when a query object did not have
+  the is_main_query() method
+- Fixed incorrect remove_action() usage (too many arguments)
+- Added missing PHP visibility declarations to various PHP classes
 
 1.4.4 // February 20 2017
 -------------------------

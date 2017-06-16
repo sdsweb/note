@@ -883,7 +883,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		/**
 		 * This function runs after the WP and WP_Query objects are set up.
 		 */
-		function wp() {
+		public function wp() {
 			// Bail if lower than WordPress 4.1
 			if ( Note::wp_version_compare( '4.1', '<' ) )
 				return;
@@ -987,7 +987,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		 * This function prepends input elements to Note widgets for use in the Previewer JS scripts.
 		 */
 		// TODO: Search to see if these elements have already been added to the wrapper <input[ a-zA-Z0-9=\"\'-_]+(class)
-		function dynamic_sidebar_params( $params ) {
+		public function dynamic_sidebar_params( $params ) {
 			$note_widget = Note_Widget();
 
 			// Only on Note Widgets

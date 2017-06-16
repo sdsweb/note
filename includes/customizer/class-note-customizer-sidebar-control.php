@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) )
 if ( ! class_exists( 'WP_Customize_Control' ) || ! class_exists( 'WP_Widget_Area_Customize_Control' ) )
 	return;
 
-if( ! class_exists( 'Note_Customizer_Sidebar_Control' ) ) {
+if ( ! class_exists( 'Note_Customizer_Sidebar_Control' ) ) {
 	final class Note_Customizer_Sidebar_Control extends WP_Widget_Area_Customize_Control {
 		/**
 		 * @var string
