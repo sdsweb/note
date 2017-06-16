@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) )
 if ( ! class_exists( 'WP_Customize_Section' ) )
 	return;
 
-if( ! class_exists( 'Note_Customizer_Sidebar_Section' ) ) {
+if ( ! class_exists( 'Note_Customizer_Sidebar_Section' ) ) {
 	final class Note_Customizer_Sidebar_Section extends WP_Customize_Sidebar_Section {
 		/**
 		 * @var string

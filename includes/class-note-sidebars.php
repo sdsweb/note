@@ -4,7 +4,7 @@
  *
  * @class Note_Sidebars
  * @author Slocum Studio
- * @version 1.4.4
+ * @version 1.4.5
  * @since 1.2.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.4.4';
+		public $version = '1.4.5';
 
 		/**
 		 * @var array
@@ -237,7 +237,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		 * This function adds new Note Sidebar locations if they were registered using note_register_sidebar_location().
 		 */
 		// TODO: More robust checking to see if a "sub"-location exists and if not merge the data
-		function note_sidebar_locations( $sidebar_locations ) {
+		public function note_sidebar_locations( $sidebar_locations ) {
 			// First check to see if we have any registered sidebar locations
 			if ( empty( $this->registered_sidebar_locations ) )
 				return $sidebar_locations;
@@ -255,7 +255,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		/**
 		 * This function runs after the WP and WP_Query objects are set up.
 		 */
-		function wp() {
+		public function wp() {
 			// Bail if lower than WordPress 4.1
 			if ( Note::wp_version_compare( '4.1', '<' ) )
 				return;
@@ -290,9 +290,9 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		 * This reference is used to verify that we are truly in the main query (and not a query within
 		 * that query).
 		 */
-		function loop_start( $query ) {
+		public function loop_start( $query ) {
 			// Bail if this isn't the main query
-			if ( ! $query->is_main_query() )
+			if ( ( is_a( $query, 'WP_Query' ) || method_exists( $query, 'is_main_query' ) ) && ! $query->is_main_query() )
 				return;
 
 			// Store the reference to the query
@@ -302,9 +302,9 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		/**
 		 * This function removes the current WP_Query reference from this class after The Loop has finished.
 		 */
-		function loop_end( $query ) {
+		public function loop_end( $query ) {
 			// Bail if this isn't the main query
-			if ( ! $query->is_main_query() )
+			if ( ( is_a( $query, 'WP_Query' ) || method_exists( $query, 'is_main_query' ) ) && ! $query->is_main_query() )
 				return;
 
 			// Remove the reference to the query
@@ -314,7 +314,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		/**
 		 * This function prepends elements to sidebars for use in the Previewer JS scripts.
 		 */
-		function dynamic_sidebar_before( $sidebar_id, $has_widgets ) {
+		public function dynamic_sidebar_before( $sidebar_id, $has_widgets ) {
 			// Bail if we're not in the Customizer Preview
 			if ( ! is_customize_preview() || is_admin() || ! $has_widgets )
 				return;
@@ -343,7 +343,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		/**
 		 * This function appends elements to sidebars for use in the Previewer JS scripts.
 		 */
-		function dynamic_sidebar_after( $sidebar_id, $has_widgets ) {
+		public function dynamic_sidebar_after( $sidebar_id, $has_widgets ) {
 			// Bail if we're not in the Customizer Preview
 			if ( ! is_customize_preview() || is_admin() || ! $has_widgets )
 				return;
@@ -492,7 +492,7 @@ if ( ! class_exists( 'Note_Sidebars' ) ) {
 		/**
 		 * This function removes the "Remove Note Sidebar" button from the Note Sidebar UI Buttons.
 		 */
-		function note_sidebar_ui_buttons( $buttons ) {
+		public function note_sidebar_ui_buttons( $buttons ) {
 			// Loop through each button
 			foreach ( $buttons as $index => $button ) {
 				// Find the "Remove Note Sidebar" button

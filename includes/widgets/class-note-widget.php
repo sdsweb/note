@@ -4,7 +4,7 @@
  *
  * @class Note_Widget
  * @author Slocum Studio
- * @version 1.4.1
+ * @version 1.4.5
  * @since 1.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.4.1';
+		public $version = '1.4.5';
 
 		/**
 		 * @var string
@@ -480,7 +480,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 				remove_filter( 'note_tinymce_toolbar', array( $conductor_note_widget, 'note_tinymce_toolbar' ) ); // Note TinyMCE Toolbar
 				remove_filter( 'note_widget_widget_options', array( $conductor_note_widget, 'note_widget_widget_options' ) ); // Note Widget Options
 				remove_action( 'note_widget_defaults', array( $conductor_note_widget, 'note_widget_defaults' ) ); // Note Widget Defaults
-				remove_action( 'note_widget_settings_content_before', array( $conductor_note_widget, 'note_widget_settings_content_before' ), 10, 2 ); // Note Widget Settings before content
+				remove_action( 'note_widget_settings_content_before', array( $conductor_note_widget, 'note_widget_settings_content_before' ) ); // Note Widget Settings before content
 				remove_filter( 'note_widget_update', array( $conductor_note_widget, 'note_widget_update' ) ); // Note Widget Update
 				remove_filter( 'note_widget_instance', array( $conductor_note_widget, 'note_widget_instance' ) ); // Note Widget Instance
 
@@ -1403,7 +1403,7 @@ if ( ! class_exists( 'Note_Widget' ) ) {
 		/**
 		 * This function determines if we're currently in the Customizer.
 		 */
-		function is_customizer() {
+		public function is_customizer() {
 			return did_action( 'customize_controls_init' );
 		}
 

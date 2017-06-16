@@ -135,7 +135,7 @@ if( ! class_exists( 'Note_Admin_Options' ) ) {
 		/*
 		 * This function appends the hash for the current tab based on POST data.
 		 */
-		function wp_redirect( $location ) {
+		public function wp_redirect( $location ) {
 			// Append tab "hash" to end of URL
 			if ( strpos( $location, Note_Options::$option_name ) !== false && isset( $_POST['note_options_tab'] ) && $_POST['note_options_tab'] )
 				$location .= esc_url( $_POST['note_options_tab'] );

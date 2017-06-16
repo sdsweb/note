@@ -3,8 +3,8 @@ Contributors: slocumstudio
 Donate link: 
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
 Requires at least: 4.3
-Tested up to: 4.7.2
-Stable tag: 1.4.4
+Tested up to: 4.8
+Stable tag: 1.4.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,11 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 
 == Changelog ==
+
+= 1.4.5 // June 16 2017 =
+* Fixed a bug where a possible fatal PHP error would occur when a query object did not have the is_main_query() method
+* Fixed incorrect remove_action() usage (too many arguments)
+* Added missing PHP visibility declarations to various PHP classes
 
 = 1.4.4 // February 20 2017 =
 * Fixed a bug where Note Widget Areas would not render properly if there was a WP_Query() within "The Loop"; Thanks Lisa Snyder
