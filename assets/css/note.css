@@ -10,68 +10,14 @@
  * We've used Janneke Van Dorpe's stylesheet as a base and modified it to suit our needs.
  */
 
+/* TODO: Remove unused CSS */
+
 .mce-placeholder, .note-placeholder {
 	opacity: 0.5;
 }
 
-.dashicons,
-.dashicons-before:before {
-	display: inline-block;
-	width: 20px;
-	height: 20px;
-	font-size: 20px;
-	line-height: 1;
-	font-family: "dashicons";
-	text-decoration: inherit;
-	font-weight: normal;
-	font-style: normal;
-	vertical-align: top;
-	text-align: center;
-	color: inherit;
-	-webkit-transition: color .1s ease-in 0s;
-	transition: color .1s ease-in 0s;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.button-large .dashicons,
-.button-large .dashicons-before:before {
-	height: 26px;
-	line-height: 26px;
-}
-
-/* Content */
-.notification-dialog {
-	position: fixed;
-	top: 30%;
-	left: 50%;
-	width: 450px;
-	margin-left: -225px;
-	background: #fff;
-	line-height: 1.5;
-	z-index: 1000005;
-}
-
-.notification-dialog-background {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background: #000;
-	opacity: 0.5;
-	filter: alpha(opacity=50);
-	z-index: 1000000;
-}
-
 .hidden {
 	display: none;
-}
-
-.wp-core-ui div.updated,
-.wp-core-ui div.error {
-	padding: 0 20px 0 0.6em;
-	margin: 5px 15px 2px;
 }
 
 .wp-core-ui .button,
@@ -87,7 +33,8 @@
 	outline: none;
 }
 
-.media-frame .uploader-inline *, .media-frame .uploader-window * {
+.media-frame .uploader-inline *,
+.media-frame .uploader-window * {
 	text-align: center;
 }
 
@@ -188,16 +135,7 @@ div.mce-insert.open .dashicons {
 	transition: all 0.2s;
 }
 
-div.mce-insert-panel .mce-ico {
-	width: 20px;
-	height: 20px;
-	font-size: 20px;
-	line-height: 20px;
-	text-align: center;
-	display: block;
-	text-shadow: none;
-	margin: 0 auto;
-}
+
 
 div.mce-media-insert-panel .mce-panel {
 	background: transparent;
@@ -211,19 +149,6 @@ div.mce-media-insert-panel .mce-ico {
 	line-height: 100px;
 }
 
-div.mce-insert-panel .mce-btn {
-	border: 1px solid transparent;
-	position: relative;
-	display: inline-block;
-	background: none;
-	border-radius: 2px;
-	box-shadow: none;
-	margin: 2px;
-	color: #777;
-	height: 24px;
-	line-height: 24px;
-}
-
 div.mce-media-insert-panel .mce-btn {
 	height: 100px;
 	line-height: 64px;
@@ -233,91 +158,10 @@ div.mce-media-insert-panel .mce-btn {
 	left: 50%;
 }
 
-div.mce-insert-panel .mce-btn:hover,
-div.mce-insert-panel .mce-btn:focus {
-	color: #222;
-	background-color: #fafafa;
-	border-color: #999;
-	-webkit-box-shadow: inset 0 1px 0 #fff, 0 1px 0 rgba( 0, 0, 0, 0.08 );
-	box-shadow: inset 0 1px 0 #fff, 0 1px 0 rgba( 0, 0, 0, 0.08 );
-}
-
-
-div.mce-insert-panel .mce-btn.mce-active,
-div.mce-insert-panel .mce-btn:active {
-	background-color: #ebebeb;
-	border-color: #999;
-	-webkit-box-shadow: inset 0 2px 5px -3px rgba( 0, 0, 0, 0.3 );
-	box-shadow: inset 0 2px 5px -3px rgba( 0, 0, 0, 0.3 );
-}
-
-div.mce-insert-panel .mce-btn.mce-active:hover {
-	border-color: #555;
-}
-
-div.mce-insert-panel .mce-btn button {
-	padding: 2px 3px;
-	font-size: 14px;
-	font-weight: bold;
-	line-height: 20px;
-	cursor: pointer;
-	color: #777;
-	text-align: center;
-	overflow: visible;
-	-webkit-appearance: none;
-	display: block;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	box-sizing: border-box;
-}
-
-div.mce-insert-panel .mce-btn button i {
-	line-height: 20px;
-}
-
 div.mce-media-insert-panel .mce-btn button i {
 	line-height: 100px;
 }
 
-div.mce-insert-panel .mce-btn.mce-disabled:not(:focus),
-div.mce-panel .mce-menu-item.mce-disabled:not(:focus) {
-	position: absolute;
-	margin: -1px;
-	padding: 0;
-	height: 1px;
-	width: 1px;
-	overflow: hidden;
-	clip: rect(0 0 0 0);
-	border: 0;
-}
-
-div.mce-tinymce-inline,
-div.mce-insert-panel {
-	position: absolute;
-	z-index: 9998;
-	background: #f5f5f5;
-	padding: 3px;
-	color: black;
-	margin-bottom: 8px;
-	box-shadow: 0 1px 1px rgba( 0, 0, 0, 0.04 );
-	border: 1px solid #dedede;
-	border-radius: 3px;
-	top: 0;
-	left: 0;
-	opacity: 1;
-	-moz-user-select: none;
-	-webkit-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-}
-
-div.mce-insert-panel {
-	opacity: 1;
-	background: rgba(245, 245, 245, 0.85);
-}
 
 div.mce-media-insert-panel {
 	margin: 0;
@@ -329,10 +173,6 @@ div.mce-media-insert-panel {
 	padding: 1px;
 }
 
-.mce-tinymce-inline .mce-toolbar-grp {
-	background: #f5f5f5;
-}
-
 div.mce-tinymce-inline.mce-inline-toolbar-active {
 	transition:
 		top 0.1s ease-out,
@@ -341,77 +181,9 @@ div.mce-tinymce-inline.mce-inline-toolbar-active {
 	opacity: 1;
 }
 
-div.mce-tinymce-inline:before,
-div.mce-tinymce-inline:after,
-div.mce-insert-panel:before,
-div.mce-insert-panel:after {
-	position: absolute;
-	left: 50%;
-	display: block;
-	width: 0;
-	height: 0;
-	border-style: solid;
-	border-color: transparent;
-	content: '';
-}
-
 div.mce-media-insert-panel:before,
 div.mce-media-insert-panel:after {
 	display: none;
-}
-
-div.mce-tinymce-inline.mce-arrow-up:before {
-	top: -18px;
-	border-bottom-color: #dedede;
-	border-width: 9px;
-	margin-left: -9px;
-}
-
-div.mce-tinymce-inline.mce-arrow-down:before,
-div.mce-insert-panel:before {
-	bottom: -18px;
-	border-top-color: #dedede;
-	border-width: 9px;
-	margin-left: -9px;
-}
-
-div.mce-tinymce-inline.mce-arrow-up:after {
-	top: -16px;
-	border-bottom-color: #f5f5f5;
-	border-width: 8px;
-	margin-left: -8px;
-}
-
-div.mce-tinymce-inline.mce-arrow-down:after,
-div.mce-insert-panel:after {
-	bottom: -16px;
-	border-top-color: #f5f5f5;
-	border-width: 8px;
-	margin-left: -8px;
-}
-
-div.mce-insert-panel:after {
-	border-top-color: rgba(245, 245, 245, 0.85);
-}
-
-div.mce-tinymce-inline.mce-arrow-left:before,
-div.mce-tinymce-inline.mce-arrow-left:after {
-	left: 20px;
-}
-
-div.mce-tinymce-inline.mce-arrow-right:before,
-div.mce-tinymce-inline.mce-arrow-right:after {
-	right: 11px;
-	left: auto;
-}
-
-div.mce-tinymce-inline.mce-arrow-full {
-	right: 0;
-}
-
-div.mce-tinymce-inline.mce-arrow-full > div {
-	width: 100%;
-	overflow-x: auto;
 }
 
 .mce-toolbar .mce-btn-group .mce-btn.mce-active:hover i.mce-ico {
@@ -486,7 +258,9 @@ div.mce-tinymce-inline.mce-arrow-full > div {
 }
 
 
-/* Note */
+/**
+ * Note
+ */
 .mce-note-edit-focus {
 	background: #ffa !important;
 }
@@ -500,6 +274,10 @@ div.mce-tinymce-inline.mce-arrow-full > div {
 .note-cf:after {
 	content: ' ';
 	display: table;
+}
+
+.note-hidden {
+	display: none !important;
 }
 
 /* Note Sidebars */
@@ -938,7 +716,7 @@ div.mce-tinymce-inline.mce-arrow-full > div {
 .note-media-placeholder .note-placeholder,
 .note-media-placeholder div.mce-media-insert-panel,
 .note-editor-media div.mce-media-insert-panel,
-div.mce-insert-panel.mce-note-media-insert-panel {
+div.mce-note-insert-panel.mce-note-media-insert-panel {
 	min-height: 400px;
 	background: #f6f6f6;
 	border: 2px dashed #ddd;
@@ -950,7 +728,7 @@ div.mce-insert-panel.mce-note-media-insert-panel {
 	box-sizing: border-box;
 }
 
-div.mce-insert-panel.mce-note-media-insert-panel {
+div.mce-note-insert-panel.mce-note-media-insert-panel {
 	width: 100%;
 	position: absolute;
 	top: 0;
@@ -970,4 +748,220 @@ div.mce-insert-panel.mce-note-media-insert-panel {
 	clip: rect(0 0 0 0);
 	border: 0;
 	word-wrap: normal !important;
+}
+
+
+
+
+
+
+
+
+
+
+/**
+ * Note TinyMCE
+ */
+.note-widget.note-tinymce .note-wrapper:not(.note-template-wrapper),
+.note-widget.note-tinymce .note-wrapper .note-col,
+.note-widget.note-tinymce .note-wrapper.note-template-wrapper .note-content {
+	margin: -1.5rem;
+}
+
+.note-widget.note-tinymce .note-wrapper .widget-content,
+.note-widget.note-tinymce .note-wrapper .note-col .note-content,
+.note-widget.note-tinymce .note-wrapper.note-template-wrapper,
+.note-widget.note-tinymce .note-wrapper.note-template-wrapper .note-content {
+	padding: 1.5rem;
+}
+
+.note-widget.note-tinymce .widget-content.mce-content-body {
+	line-height: inherit;
+}
+
+div.mce-panel.mce-tinymce-inline,
+div.mce-panel.note-toolbar {
+	padding: 3px;
+	background: #f5f5f5;
+	box-shadow: 0 1px 1px rgba( 0, 0, 0, 0.04 );
+	border: 1px solid #dedede;
+	border-radius: 3px;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+div.mce-panel.mce-tinymce-inline:not(.mce-arrow-right):not(.mce-arrow-center):not(.mce-arrow-left):not(.mce-tooltip-arrow-n):not(.mce-tooltip-arrow-s):not(.mce-tooltip-arrow-e):not(.mce-tooltip-arrow-w),
+div.mce-panel.note-toolbar:not(.mce-arrow-right):not(.mce-arrow-center):not(.mce-arrow-left):not(.mce-tooltip-arrow-n):not(.mce-tooltip-arrow-s):not(.mce-tooltip-arrow-e):not(.mce-tooltip-arrow-w) {
+	margin-top: 1.5rem;
+}
+
+div.mce-panel.mce-tinymce-inline.mce-arrow-up,
+div.mce-panel.note-toolbar.mce-arrow-up {
+	margin-top: 12px !important;
+}
+
+div.mce-panel.mce-tinymce-inline.mce-arrow-down,
+div.mce-panel.note-toolbar.mce-arrow-down {
+	margin-top: -12px !important;
+}
+
+div.mce-panel.mce-tinymce-inline .mce-toolbar .mce-ico,
+div.mce-panel.note-toolbar .mce-toolbar .mce-ico{
+	color: #555d66;
+}
+
+div.mce-panel.mce-tinymce-inline .mce-container-body,
+div.mce-panel.note-toolbar .mce-container-body {
+	margin: -1.5px;
+	padding: 3px;
+}
+
+div.mce-panel.mce-tinymce-inline .mce-btn.mce-active button,
+div.mce-panel.mce-tinymce-inline .mce-btn.mce-active:hover button,
+div.mce-panel.mce-tinymce-inline .mce-btn.mce-active i,
+div.mce-panel.mce-tinymce-inline .mce-btn.mce-active:hover i,
+div.mce-panel.note-toolbar .mce-btn.mce-active button,
+div.mce-panel.note-toolbar .mce-btn.mce-active:hover button,
+div.mce-panel.note-toolbar .mce-btn.mce-active i,
+div.mce-panel.note-toolbar .mce-btn.mce-active:hover i {
+	color: #555d66;
+}
+
+
+
+
+
+
+/**
+ * Note Insert Panel
+ */
+div.mce-panel.mce-note-insert-panel {
+	margin-bottom: -1.5rem;
+	padding: 3px;
+	color: black;
+	background: rgba(245, 245, 245, 0.85);
+	border: 1px solid #dedede;
+	border-radius: 3px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	position: absolute;
+	z-index: 9998;
+	top: 0;
+	left: 0;
+	opacity: 1;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+div.mce-note-insert-panel:before,
+div.mce-note-insert-panel:after {
+	position: absolute;
+	left: 50%;
+	display: block;
+	width: 0;
+	height: 0;
+	border-style: solid;
+	border-color: transparent;
+	content: '';
+}
+
+div.mce-note-insert-panel:before {
+	bottom: -18px;
+	border-top-color: #dedede;
+	border-width: 9px;
+	margin-left: -9px;
+}
+
+div.mce-note-insert-panel:after {
+	bottom: -14px;
+	border-top-color: rgba(245, 245, 245, 0.85);
+	border-width: 7px;
+	margin-left: -7px;
+}
+
+div.mce-note-insert-panel .mce-panel {
+	margin: 0;
+	max-width: none;
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	position: relative;
+}
+
+div.mce-note-insert-panel .mce-toolbar .mce-btn-group > div {
+	white-space: nowrap;
+}
+
+div.mce-note-insert-panel .mce-btn {
+	border: 1px solid transparent;
+	position: relative;
+	display: inline-block;
+	background: none;
+	border-radius: 2px;
+	box-shadow: none;
+	margin: 2px;
+	color: #777;
+	height: 24px;
+	line-height: 24px;
+}
+
+div.mce-note-insert-panel .mce-ico {
+	width: 20px;
+	height: 20px;
+	font-size: 20px;
+	line-height: 20px;
+	text-align: center;
+	display: block;
+	text-shadow: none;
+	margin: 0 auto;
+}
+
+div.mce-note-insert-panel .mce-btn:hover,
+div.mce-note-insert-panel .mce-btn:focus {
+	color: #222;
+	background-color: #fafafa;
+	border-color: #999;
+	-webkit-box-shadow: inset 0 1px 0 #fff, 0 1px 0 rgba( 0, 0, 0, 0.08 );
+	box-shadow: inset 0 1px 0 #fff, 0 1px 0 rgba( 0, 0, 0, 0.08 );
+}
+
+div.mce-note-insert-panel .mce-btn.mce-active,
+div.mce-note-insert-panel .mce-btn:active {
+	background-color: #ebebeb;
+	border-color: #999;
+	-webkit-box-shadow: inset 0 2px 5px -3px rgba( 0, 0, 0, 0.3 );
+	box-shadow: inset 0 2px 5px -3px rgba( 0, 0, 0, 0.3 );
+}
+
+div.mce-note-insert-panel .mce-btn.mce-active:hover {
+	border-color: #555;
+}
+
+div.mce-note-insert-panel .mce-btn button {
+	padding: 2px 3px;
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 20px;
+	cursor: pointer;
+	color: #777;
+	text-align: center;
+	overflow: visible;
+	-webkit-appearance: none;
+	display: block;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+div.mce-note-insert-panel .mce-btn button i {
+	line-height: 20px;
 }

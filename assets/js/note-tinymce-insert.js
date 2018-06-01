@@ -183,7 +183,7 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 	// WordPress Image
 	editor.addButton( 'wp_image', {
 		tooltip: 'Image', // TODO: i18n, l10n
-		icon: 'format-image dashicons-format-image',
+		icon: 'dashicon dashicons-format-image',
 		onclick: function() {
 			var frame_menu;
 
@@ -253,7 +253,7 @@ tinymce.PluginManager.add( 'note_insert', function( editor ) {
 	// Note Edit Button
 	editor.addButton( 'note_edit', {
 		tooltip: 'Edit', // TODO: i18n, l10n
-		icon: 'edit dashicons-edit',
+		icon: 'dashicon dashicons-edit',
 		onclick: function() {
 			// Send data to the Customizer
 			wp.customize.NotePreview.preview.send( 'note-widget-edit', editor.note.widget_data );

@@ -2,9 +2,22 @@
 Plugin: Note
 Author: Slocum Design Studio
 Author URI: https://slocumstudio.com/
-Current Version: 1.4.5
+Current Version: 1.4.6
 ==========================================
 
+
+1.4.6 // June 01 2018
+---------------------
+- Transitioned to the "inline" TinyMCE theme (TinyMCE version 4.7 moved most of the TinyMCE UI logic into the
+  theme instead of TinyMCE core)
+- Adjusted icons in Note Insert and Note Backgroud TinyMCE plugins
+- Added Note TinyMCE theme placeholder logic to the Note Placeholder TinyMCE plugin
+- Adjusted logic to load Note TinyMCE plugins (moved to "wp_print_footer_scripts" action)
+- Adjusted Note TinyMCE configuration (using insert_toolbar and selection_toolbar for "inline" TinyMCE theme,
+  removed the menubar, removed wpembed TinyMCE plugin)
+- Added logic to hide the "inlite" TinyMCE image context toolbar when an image node was selected
+- Added logic to enqueue WordPress editor styles for use in Note
+- Adjusted various Note TinyMCE CSS styles
 
 1.4.5 // June 16 2017
 ---------------------

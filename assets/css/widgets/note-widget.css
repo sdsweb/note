@@ -31,7 +31,7 @@
 	-ms-align-content: flex-start;
 	-webkit-align-content: flex-start;
 	align-content: flex-start;
-	-ms-flex-pack: end;
+	-ms-flex-pack: start;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
