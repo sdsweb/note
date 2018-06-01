@@ -3,8 +3,8 @@ Contributors: slocumstudio
 Donate link: 
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
 Requires at least: 4.3
-Tested up to: 4.8
-Stable tag: 1.4.5
+Tested up to: 4.9.6
+Stable tag: 1.4.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,16 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 
 == Changelog ==
+
+= 1.4.6 // June 01 2018 =
+* Transitioned to the "inline" TinyMCE theme (TinyMCE version 4.7 moved most of the TinyMCE UI logic into the theme instead of TinyMCE core)
+* Adjusted icons in Note Insert and Note Backgroud TinyMCE plugins
+* Added Note TinyMCE theme placeholder logic to the Note Placeholder TinyMCE plugin
+* Adjusted logic to load Note TinyMCE plugins (moved to "wp_print_footer_scripts" action)
+* Adjusted Note TinyMCE configuration (using insert_toolbar and selection_toolbar for "inline" TinyMCE theme, removed the menubar, removed wpembed TinyMCE plugin)
+* Added logic to hide the "inlite" TinyMCE image context toolbar when an image node was selected
+* Added logic to enqueue WordPress editor styles for use in Note
+* Adjusted various Note TinyMCE CSS styles
 
 = 1.4.5 // June 16 2017 =
 * Fixed a bug where a possible fatal PHP error would occur when a query object did not have the is_main_query() method

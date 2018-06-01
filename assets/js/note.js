@@ -63,13 +63,19 @@
 				self.$note_widgets.each( function() {
 					var $el = $( this );
 
-					// Widget Number
+					// Add the "note-tinymce" CSS class
+					$el.addClass( 'note-tinymce' );
+
+					// Add the widget number HTML5 data attribute
 					$el.attr( 'data-widget-number', $el.find( '.widget-number' ).val() );
-					// Widget ID
+
+					// Add the widget ID HTML5 data attribute
 					$el.attr( 'data-widget-id', $el.find( '.widget-id' ).val() );
-					// Sidebar Name
+
+					// Add the sidebar name HTML5 data attribute
 					$el.attr( 'data-sidebar-name', $el.find( '.sidebar-name' ).val() );
-					// Sidebar ID
+
+					// Add the sidebar ID HTML5 data attribute
 					$el.attr( 'data-sidebar-id', $el.find( '.sidebar-id' ).val() );
 
 					// Attempt to keep our theme panel/toolbar visible when the mouse leaves editors but is pressed
@@ -205,6 +211,107 @@
 
 						// Add this editor reference to the list of editors
 						self.editors.push( editor );
+
+						/**
+						 * This function runs when the editor skin is loaded.
+						 */
+						editor.on( 'SkinLoaded', function() {
+							/**
+							 * This function runs when the node in the editor is changed.
+							 *
+							 * Note: This is essentially the only method that we could use,
+							 * short of creating our own TinyMCE 4 theme (which there is little to
+							 * no documentation for), to remove the "inline" TinyMCE theme image toolbar.
+							 *
+							 * As of 06/01/18, TinyMCE does not currently provide us with a way
+							 * to grab a reference of panels or toolbars which belong to an editor.
+							 */
+							editor.on( 'NodeChange', function() {
+								var is_img = editor.dom.is( editor.selection.getNode(), 'img' ),
+									$mce_tinymce_inline = self.$body.find( '.mce-tinymce-inline' ),
+									$mce_toolbars,
+									image_toolbar_icon_css_classes = [
+										'mce-i-alignleft',
+										'mce-i-aligncenter',
+										'mce-i-alignright'
+									],
+									found_image_toolbar_icon_css_classes = [],
+									is_image_toolbar = false;
+
+								// If this is an image and we have the TinyMCE inline toolbar
+								if ( is_img && $mce_tinymce_inline.length ) {
+									// Grab the TinyMCE toolbars
+									$mce_toolbars = $mce_tinymce_inline.find( '.mce-toolbar' );
+
+									// If we have TinyMCE toolbars
+									if ( $mce_toolbars ) {
+										// Loop through the TinyMCE toolbars
+										$mce_toolbars.each( function() {
+											var $toolbar = $( this ),
+												$toolbar_icons = $toolbar.find( '.mce-ico' );
+
+											// If we don't have the image toolbar
+											if ( ! is_image_toolbar ) {
+												// If we have three toolbar icons
+												if ( $toolbar_icons.length === 3 ) {
+													// Loop through the toolbar icons
+													$toolbar_icons.each( function() {
+														var $toolbar_icon = $( this ),
+															css_classes = $toolbar_icon.attr( 'class' ).split( ' ' );
+
+														// Loop through the CSS classes
+														$.each( css_classes, function( index, css_class ) {
+															// If this CSS class exists in the image toolbar icons CSS classes
+															if ( image_toolbar_icon_css_classes.indexOf( css_class ) !== -1 ) {
+																// Add this CSS class to the found image toolbar icon CSS classes
+																found_image_toolbar_icon_css_classes.push ( css_class );
+															}
+														} );
+													} );
+
+													// If we have all of he found image toolbar icon CSS classes
+													if ( found_image_toolbar_icon_css_classes.length === image_toolbar_icon_css_classes.length ) {
+														// Set the image toolbar flag
+														is_image_toolbar = true;
+													}
+
+													// If we have the image toolbar
+													if ( is_image_toolbar ) {
+														// Add the "note-hidden" CSS class to the image toolbar
+														$toolbar.addClass( 'note-hidden' );
+
+														// Hide the TinyMCE inline toolbar
+														$mce_tinymce_inline.css( 'display', 'none' );
+
+														// Start a new thread; delay 1ms
+														setTimeout( function() {
+															// Add the "note-hidden" CSS class to the TinyMCE inline toolbar
+															$mce_tinymce_inline.addClass( 'note-hidden' );
+														}, 1 );
+													}
+												}
+											}
+										} );
+									}
+								}
+								// Otherwise if we have the TinyMCE inline toolbar
+								else if ( $mce_tinymce_inline.length ) {
+									// If the TinyMCE inline toolbar doesn't have the "note-toolbar" CSS class
+									if ( ! $mce_tinymce_inline.hasClass( 'note-toolbar' ) ) {
+										// Add the "note-toolbar" CSS class to the TinyMCE inline toolbar
+										$mce_tinymce_inline.addClass( 'note-toolbar' );
+									}
+
+									// If the TinyMCE inline toolbar has the "note-hidden" CSS class
+									if ( $mce_tinymce_inline.hasClass( 'note-hidden' ) ) {
+										// Remove the "note-hidden" CSS class from the TinyMCE inline toolbar
+										$mce_tinymce_inline.removeClass( 'note-hidden' );
+									}
+								}
+							} );
+						} );
+
+
 
 						// Editor initialization
 						editor.on( 'init', function() {
@@ -379,7 +486,7 @@
 				self.note.tinymce[self.default_note_template_config_type] = _.extend( self.note.tinymce[self.default_note_template_config_type], self.tinymce_config );
 
 
-				// Loop through widgets/settings
+				// If we have widget settings
 				if ( ! _.isEmpty( self.widget_settings ) ) {
 					// Loop through widget settings
 					_.each( self.widget_settings, function( settings ) {
@@ -439,7 +546,6 @@
 							}
 						}
 					} );
-
 
 					/*
 					 * Now we have to initialize all default Note Widgets just one time (this all add TinyMCE to each widget)

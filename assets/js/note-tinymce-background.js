@@ -67,7 +67,7 @@ tinymce.PluginManager.add( 'note_background', function( editor ) {
 	editor.addButton( 'note_background', {
 		// id: 'note_background', TODO: Not currently used; TinyMCE doesn't add the tooltips on multiple editors when this is set
 		tooltip: 'Edit Background Image', // TODO: i18n, l10n
-		icon: 'format-image dashicons-format-image',
+		icon: 'dashicon dashicons-format-image',
 		onclick: function() {
 			var library, library_comparator;
 

@@ -4,7 +4,7 @@
  *
  * @class Note_Customizer
  * @author Slocum Studio
- * @version 1.4.1
+ * @version 1.4.6
  * @since 1.0.0
  */
 
@@ -17,12 +17,16 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.4.1';
+		public $version = '1.4.6';
 
 		/**
 		 * @var array
 		 */
-		public $note_editor_types = array( 'default', 'media', 'rich_text_only' );
+		public $note_editor_types = array(
+			'default',
+			'media',
+			'rich_text_only'
+		);
 
 		/**
 		 * @var array
@@ -211,6 +215,25 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 			// Note Widget Editor Types
 			$this->note_editor_types = apply_filters( 'note_tinymce_editor_types', $this->note_editor_types, $this );
 
+			// Note TinyMCE toolbar
+			$note_tinymce_toolbar = apply_filters( 'note_tinymce_toolbar', array(
+				'formatselect',
+				'styleselect',
+				'forecolor',
+				'backcolor',
+				'bold',
+				'italic',
+				'link',
+				'unlink',
+				'bullist',
+				'numlist',
+				'outdent',
+				'indent',
+				'alignleft',
+				'aligncenter',
+				'alignright',
+				'alignjustify'
+			), $this );
 
 			// Setup Customizer localization
 			$this->note_customizer_localize = apply_filters( 'note_customizer_localize', array(
@@ -254,7 +277,6 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 						// WordPress
 						'wordpress', // WordPress
 						'wpeditimage', // WordPress Edit Image
-						'wpembed', // WordPress Embed
 						'wpgallery', // WordPress Gallery
 						'wplink', // WordPress Link
 						'wptextpattern', // WordPress Text Pattern
@@ -268,25 +290,12 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 						'wp_image',
 						'note_edit'
 					), $this ),
-					// Custom TinyMCE theme expects separate "rows"
-					'toolbar' => apply_filters( 'note_tinymce_toolbar', array(
-						'formatselect',
-						'styleselect',
-						'forecolor',
-						'backcolor',
-						'bold',
-						'italic',
-						'link',
-						'unlink',
-						'bullist',
-						'numlist',
-						'outdent',
-						'indent',
-						'alignleft',
-						'aligncenter',
-						'alignright',
-						'alignjustify'
-					), $this ),
+					// Insert toolbar (specifically for the inlite TinyMCE theme)
+					'insert_toolbar' => implode( ' ' , apply_filters( 'note_tinymce_insert_toolbar', $note_tinymce_toolbar, $this ) ),
+					// Selection toolbar (specifically for the inlite TinyMCE theme)
+					'selection_toolbar' => implode( ' ' , apply_filters( 'note_tinymce_selection_toolbar', $note_tinymce_toolbar, $this ) ),
+					// Menu Bar
+					'menubar' => false,
 					// Alignment Formats
 					'formats' => array(
 						// Align Left
@@ -485,7 +494,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 							)
 						)
 					), $this ),
-					'theme' => 'note',
+					'theme' => 'inlite', // TODO: Deprecate "note" theme
 					'inline' => true,
 					'relative_urls' => false,
 					'convert_urls' => false,
@@ -654,12 +663,15 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 						break;
 					}
 
+					// Note TinyMCE editor toolbar
+					$note_tinymce_editor_toolbar = apply_filters( 'note_tinymce_editor_toolbar', $note_tinymce_toolbar, $editor_type, $this );
+
 					// Allow filtering of plugins, toolbar items, and placeholder
 					$settings['plugins'] = explode( ' ', $settings['plugins'] );
 					$settings['plugins'] = implode( ' ', array_unique( apply_filters( 'note_tinymce_editor_plugins', $settings['plugins'], $editor_type, $this ) ) );
 					$settings['blocks'] = apply_filters( 'note_tinymce_editor_blocks', $settings['blocks'], $editor_type, $this );
-					$settings['toolbar'] = apply_filters( 'note_tinymce_editor_toolbar', $settings['toolbar'], $editor_type, $this );
-					//$settings['block_formats'] = apply_filters( 'note_tinymce_editor_block_formats', $settings['block_formats'], $editor_type, $this );
+					$settings['insert_toolbar'] = implode( ' ', array_unique( apply_filters( 'note_tinymce_editor_insert_toolbar', $note_tinymce_editor_toolbar, $editor_type, $this ) ) );
+					$settings['selection_toolbar'] = implode( ' ', array_unique( apply_filters( 'note_tinymce_editor_selection_toolbar', $note_tinymce_editor_toolbar, $editor_type, $this ) ) );
 					$settings['preview_styles'] = explode( ' ', $settings['preview_styles'] );
 					$settings['preview_styles'] = implode( ' ', array_unique( apply_filters( 'note_tinymce_editor_preview_styles', $settings['preview_styles'], $editor_type, $this ) ) );
 					$settings['style_formats'] = apply_filters( 'note_tinymce_editor_style_formats', $settings['style_formats'], $editor_type, $this );
@@ -878,6 +890,8 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 			add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) ); // Previewer Scripts/Styles
 			add_action( 'dynamic_sidebar_params', array( $this, 'dynamic_sidebar_params' ) ); // Filter Dynamic Sidebar Parameters (Note Widgets)
 			add_action( 'wp_footer', array( $this, 'wp_footer' ) ); // Output WordPress Link Dialog Template
+			add_action( 'wp_print_footer_scripts', array( '_WP_Editors', 'editor_js' ), 50 ); // _WP_Editors WP Print Footer Scripts
+			add_action( 'wp_print_footer_scripts', array( $this, 'wp_print_footer_scripts' ), 60 ); // WP Print Footer Scripts (after _WP_Editors)
 		}
 
 		/**
@@ -930,14 +944,15 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 			// TinyMCE Uncompressed (minified)
 			else {
 				wp_enqueue_script( 'note-tinymce', includes_url( 'js/tinymce' ) . '/tinymce.min.js', false, $tinymce_version, true );
-				wp_enqueue_script( 'note-tinymce-compat3x', includes_url( 'js/tinymce' ) . '/plugins/compat3x/plugin.min.js', array( 'note-tinymce' ), $tinymce_version, true );
+				wp_enqueue_script( 'note-tinymce-compat3x', includes_url( 'js/tinymce' ) . '/plugins/compat3x/plugin.js', array( 'note-tinymce' ), $tinymce_version, true );
 			}
 
 			// Localize the Note TinyMCE script information
 			wp_localize_script( 'note-tinymce', 'note_tinymce', $this->note_tinymce_localize );
 
+			// TODO: Remove
 			// Note TinyMCE Insert Plugin
-			wp_enqueue_script( 'note-tinymce-insert', Note::plugin_url() . '/assets/js/note-tinymce-insert.js', array( 'note-tinymce' ), Note::$version, true );
+			/*wp_enqueue_script( 'note-tinymce-insert', Note::plugin_url() . '/assets/js/note-tinymce-insert.js', array( 'note-tinymce' ), Note::$version, true );
 
 			// Note TinyMCE Placeholder Plugin
 			wp_enqueue_script( 'note-tinymce-placeholder', Note::plugin_url() . '/assets/js/note-tinymce-placeholder.js', array( 'note-tinymce' ), Note::$version, true );
@@ -946,7 +961,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 			wp_enqueue_script( 'note-tinymce-background', Note::plugin_url() . '/assets/js/note-tinymce-background.js', array( 'note-tinymce' ), Note::$version, true );
 
 			// Note TinyMCE Theme
-			wp_enqueue_script( 'note-tinymce-theme', Note::plugin_url() . '/assets/js/note-tinymce-theme.js', array( 'note-tinymce' ), Note::$version, true );
+			wp_enqueue_script( 'note-tinymce-theme', Note::plugin_url() . '/assets/js/note-tinymce-theme.js', array( 'note-tinymce' ), Note::$version, true );*/
 
 			// Note Core
 			wp_enqueue_script( 'note', Note::plugin_url() . '/assets/js/note.js', array( 'note-tinymce', 'wp-util', 'editor', 'wp-lists', 'customize-preview-widgets', 'jquery-ui-core', 'underscore', 'wp-backbone' ), Note::$version, true );
@@ -981,6 +996,9 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 
 			// Open Sans
 			wp_enqueue_style( 'open-sans' );
+
+			// WordPress Editor
+			wp_enqueue_editor();
 		}
 
 		/**
@@ -1017,6 +1035,43 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 
 			// Note Modal Templates
 			self::note_modal_templates();
+		}
+
+		/**
+		 * This function prints WordPress footer scripts.
+		 */
+		public function wp_print_footer_scripts() {
+			// External TinyMCE plugins
+			$external_tinymce_plugins = array(
+				'note_background' => Note::plugin_url() . '/assets/js/note-tinymce-background.js',
+				'note_insert' => Note::plugin_url() . '/assets/js/note-tinymce-insert.js',
+				'note_placeholder' => Note::plugin_url() . '/assets/js/note-tinymce-placeholder.js'
+			);
+
+			// External TinyMCE plugin script
+			$external_tinymce_plugins_script = '';
+
+			// Loop through the external TinyMCE plugins
+			foreach ( $external_tinymce_plugins as $name => $url ) {
+				// Append the "tinyMCEPreInit.load_ext()" declaration to the external TinyMCE plugins script
+				$external_tinymce_plugins_script .= 'tinyMCEPreInit.load_ext("' . dirname( $url ) . '", "' . _WP_Editors::get_mce_locale() . '");' . "\n";
+
+				// Append the "tinymce.PluginManager.load()" declaration to the external TinyMCE plugins script
+				$external_tinymce_plugins_script .= 'tinymce.PluginManager.load("' . $name . '", "' . $url . '");' . "\n";
+			}
+		?>
+			<script type="text/javascript">
+				// <![CDATA[
+					<?php echo $external_tinymce_plugins_script; ?>
+				// ]]>
+			</script>
+
+			<?php // TODO: Remove ?>
+			<!-- script type="text/javascript" src="<?php echo esc_url( Note::plugin_url() . '/assets/js/note-tinymce-insert.js' ); ?>"></script>
+			<script type="text/javascript" src="<?php echo esc_url( Note::plugin_url() . '/assets/js/note-tinymce-placeholder.js' ); ?>"></script>
+			<script type="text/javascript" src="<?php echo esc_url( Note::plugin_url() . '/assets/js/note-tinymce-background.js' ); ?>"></script>
+			<script type="text/javascript" src="<?php echo esc_url( Note::plugin_url() . '/assets/js/note-tinymce-theme.js' ); ?>"></script -->
+		<?php
 		}
 
 

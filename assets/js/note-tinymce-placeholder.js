@@ -13,8 +13,10 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 		api = wp.customize, // Customizer API
 		NotePreview = api.NotePreview, // NotePreview
 		$el = $( editor.getElement() ),
+		settings = editor.settings,
 		data_key = 'note',
 		content_class = 'note-content',
+		has_placeholder,
 		placeholder_class = 'note-has-placeholder',
 		mixed_content_class = 'note-has-mixed-content',// Some placeholder content, some normal content
 		placeholder_el_class = 'note-placeholder',
@@ -23,6 +25,72 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 		wp_media_active = false, // Flag to determine if wp.media modal was open
 		media_panel,
 		toolbar;
+
+
+	/*
+	 * Placeholder
+	 */
+	if ( settings.placeholder ) {
+		// Activate, focus events
+		editor.on( 'activate focus', function() {
+			if ( has_placeholder ) {
+				editor.setContent( '' );
+
+				// Make sure the cursor appears in editor
+				editor.selection.select( editor.getBody(), true );
+				editor.selection.collapse( false );
+			}
+		} );
+
+		// Deactivate, blur, LoadContent events
+		editor.on( 'deactivate blur LoadContent', function( event ) {
+			// If editor content is empty
+			if ( isEmpty() ) {
+				// Set the placeholder (no events)
+				editor.setContent( settings.placeholder, {
+					no_events: true
+				} );
+
+				has_placeholder = true;
+				DOM.addClass( editor.getBody(), 'mce-placeholder' );
+
+				// If this is the loadcontent event
+				if ( event.type === 'loadcontent' ) {
+					// Focus the editor
+					editor.focus();
+
+					// New thread
+					setTimeout( function() {
+						// Make sure the cursor appears in editor
+						editor.selection.select( editor.getBody() );
+						editor.selection.collapse( false );
+					}, 1 );
+				}
+			}
+		} );
+
+		// Setcontent event
+		editor.on( 'setcontent', function( event ) {
+			if ( has_placeholder && ! event.load ) {
+				has_placeholder = false;
+				DOM.removeClass( editor.getBody(), 'mce-placeholder' );
+			}
+		} );
+
+		// Postprocess event
+		editor.on( 'postprocess', function( event ) {
+			if ( has_placeholder && event.content ) {
+				event.content = '';
+			}
+		} );
+
+		// Beforeaddundo event
+		editor.on( 'beforeaddundo', function( event ) {
+			if ( has_placeholder ) {
+				event.preventDefault();
+			}
+		} );
+	}
 
 
 	/*
@@ -196,17 +264,6 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 		}
 	} );
 
-	// TODO: Editor undo/redo (placeholder doesn't always return on undo/redo events)
-	/*editor.on( 'undo', function( event ) {
-		var node = editor.selection.getNode(),
-			$node = $( node );
-
-		// Setup Note Placeholder (setTimeout ensures default placeholder data exists before re-init)
-		setTimeout( function() {
-			setupNotePlaceholder();
-		}, 20 );
-	} );*/
-
 	// Editor paste (post-process)
 	editor.on( 'PastePostProcess', function( event ) {
 		// If the editor placeholder element flag is set
@@ -348,6 +405,13 @@ tinymce.PluginManager.add( 'note_placeholder', function( editor ) {
 	/**********************
 	 * Internal Functions *
 	 **********************/
+
+	/**
+	 * This function determines if the editor content is empty.
+	 */
+	function isEmpty() {
+		return editor.getContent( { format: 'raw' } ).replace( /(?:<p[^>]*>)?(?:<br[^>]*>)?(?:<\/p>)?/, '' ) === '';
+	}
 
 	/**
 	 * This function sets up Note Placeholder logic.

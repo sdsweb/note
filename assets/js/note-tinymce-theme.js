@@ -10,6 +10,8 @@
  * We've used Janneke Van Dorpe's TinyMCE theme as a base and modified it to suit our needs.
  */
 
+// TODO: Remove
+
 /* global tinymce */
 
 tinymce.ThemeManager.add( 'note', function( editor ) {
@@ -381,8 +383,8 @@ tinymce.ThemeManager.add( 'note', function( editor ) {
 		editor.on( 'selectionchange nodechange', function( event ) {
 			var element = event.element || editor.selection.getNode();
 
-			// Bail if we don't have a selection
-			if ( editor.selection.isCollapsed() ) {
+			// Bail if we have a panel and we don't have a selection
+			if ( panel && editor.selection.isCollapsed() ) {
 				// Hide the panel
 				panel.hide();
 
@@ -392,8 +394,8 @@ tinymce.ThemeManager.add( 'note', function( editor ) {
 			setTimeout( function() {
 				var content, name;
 
-				// Bail if this editor does not have focus or there is an open window
-				if ( ! focus || open_window ) {
+				// Bail if we don't have a panel, this editor does not have focus, or there is an open window
+				if ( ! panel || ! focus || open_window ) {
 					return;
 				}
 
@@ -580,7 +582,7 @@ tinymce.ThemeManager.add( 'note', function( editor ) {
 			// If this is a wp_link_cancel or wp_link_apply command
 			if ( event.command === 'wp_link_cancel' || event.command === 'wp_link_apply' ) {
 				// If the panel is visible and the editor selection is collapsed hide it (fixes bug in Firefox where selectionchange isn't triggered in some cases)
-				if ( ! WP_Link && panel.state.get( 'visible' ) && ( editor.selection.isCollapsed() || ( toolbars[wp_toolbar_names.link_edit] && toolbars[wp_toolbar_names.link_edit].state.get( 'visible' ) ) ) ) {
+				if ( panel && ! WP_Link && panel.state.get( 'visible' ) && ( editor.selection.isCollapsed() || ( toolbars[wp_toolbar_names.link_edit] && toolbars[wp_toolbar_names.link_edit].state.get( 'visible' ) ) ) ) {
 					panel.hide();
 				}
 			}
@@ -591,8 +593,11 @@ tinymce.ThemeManager.add( 'note', function( editor ) {
 			// Set the flag
 			open_window = true;
 
-			// Hide the panel
-			panel.hide();
+			// If we have a panel
+			if ( panel ) {
+				// Hide the panel
+				panel.hide();
+			}
 		} );
 
 		// Closewindow event
@@ -682,8 +687,11 @@ tinymce.ThemeManager.add( 'note', function( editor ) {
 
 		// Window resize event
 		DOM.bind( window, 'resize', function() {
-			// Hide the panel
-			panel.hide();
+			// If we have a panel
+			if ( panel ) {
+				// Hide the panel
+				panel.hide();
+			}
 		} );
 
 		return {};

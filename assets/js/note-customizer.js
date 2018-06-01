@@ -106,11 +106,11 @@ var note = note || {};
 
 				// Compare the content to make sure it's actually changed
 				// TODO: Might need to account for "processing" API state here?
-				if ( widget_content_data.updateCount > 0 && data.widget.content !== widget_content_data.content ) {
+				if ( data.widget.content !== widget_content_data.content ) {
 					// Set the content value
 					$widget_content.val( data.widget.content );
 
-					// TODO: In WordPres 4.7 ensure this doesn't trigger the API save state (it may be triggered due to the add/remove class calls for customize-unpreviewable?)
+					// TODO: In WordPress 4.7 ensure this doesn't trigger the API save state (it may be triggered due to the add/remove class calls for customize-unpreviewable?)
 					// Update the API saved state (content has been updated, API data is not saved)
 					api.state( 'saved' ).set( false );
 					api.state.trigger( 'change', api.state.create( 'saved' ) ); // trigger the saved flag
@@ -867,7 +867,6 @@ var note = note || {};
 			}
 		}
 	};
-
 
 
 	/**
