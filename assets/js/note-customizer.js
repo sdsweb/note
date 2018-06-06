@@ -30,24 +30,38 @@ var note = note || {};
 		wp_version: 0,
 		// Reference to the current major WordPress version (int, i.e. 4 or 5)
 		wp_major_version: 0,
+		// jQuery reference to the Customizer save button element
+		$customize_save_button: false,
 		// jQuery reference to the Customizer Sidebar header element
 		$customize_sidebar_header: false,
 		// jQuery reference to the Customizer Sidebar content element
 		$customize_sidebar_content: false,
 		// jQuery Reference to the Widgets Panel element
 		$widgets_panel: false,
+		// Total Note Widget update count
+		total_update_count: 0,
+		// Flag to determine if this is a Note Widget update
+		is_note_widget_update: false,
+		// Note Widget update data
+		note_widget_update_data: {},
 		// Initialization
 		init: function( previewer ) {
+			// Defaults
 			previewer = ( previewer === undefined ) ? this.previewer : previewer;
 
 			// Store a reference to "this"
-			var self = this;
+			var self = this,
+				default_changeset_status = api.state( 'changesetStatus' )(),
+				default_selected_changeset_status = api.settings.changeset.currentUserCanPublish ? 'publish' : 'draft';
 
 			// Store a reference to the current major WordPress version (major version number only)
 			self.wp_major_version = parseInt( note.wp_version, 10 );
 
 			// Store a reference to the current WordPress version (major and minor version numbers only)
 			self.wp_version = parseFloat( note.wp_version );
+
+			// Store a jQuery reference to the Customizer save button element
+			self.$customize_save_button = $( '#save' );
 
 			// Store a jQuery reference the Customizer Sidebar header element
 			self.$customize_sidebar_header = $( '.wp-full-overlay-header' );
@@ -73,25 +87,100 @@ var note = note || {};
 				}
 			} );
 
+			// Listen for "change" events on the Custmizer API
+			api.state.bind( 'change', function() {
+				// If the current changeset status is the Note changeset status
+				if ( api.state( 'changesetStatus' )() === 'note' ) {
+					// If the Customizer API is saved
+					if ( api.state( 'saved' )() ) {
+						// If the current user can publish
+						if ( api.settings.changeset.currentUserCanPublish ) {
+							// Set the Customizer save button value
+							self.$customize_save_button.val( api.l10n.published );
+						}
+						// Otherwise the current user can't publish
+						else {
+							// Set the Customizer save button value
+							self.$customize_save_button.val( api.l10n.saved );
+						}
+					}
+					// Otherwise the Customizer API isn't saved
+					else {
+						// Reset the changeset status
+						api.state( 'changesetStatus' ).set( default_changeset_status );
+
+						// Reset the selected changeset status
+						api.state( 'selectedChangesetStatus' ).set( default_selected_changeset_status );
+
+						// Adjust the save button CSS classes
+						self.$customize_save_button.removeClass( 'note-has-next-sibling' ).addClass( 'has-next-sibling' );
+					}
+				}
+			} );
+
+			// Listen for "change" events on the changeset status Customizer setting
+			api.state( 'changesetStatus' ).bind( function ( to, from ) {
+				// If the changeset status is the Note changeset status
+				if ( to === 'note' ) {
+					// Add the "note-has-next-sibling" CSS class to the save button
+					self.$customize_save_button.addClass( 'note-has-next-sibling' );
+
+					// If the Customizer API is saved
+					if ( api.state( 'saved' )() ) {
+						// If the current user can publish
+						if ( api.settings.changeset.currentUserCanPublish ) {
+							// Set the Customizer save button value
+							self.$customize_save_button.val( api.l10n.published );
+						}
+						// Otherwise the current user can't publish
+						else {
+							// Set the Customizer save button value
+							self.$customize_save_button.val( api.l10n.saved );
+						}
+					}
+
+					// Start a new thread; delay 1000ms
+					setTimeout( function() {
+						// Remove the "has-next-sibling" CSS class from the save button
+						self.$customize_save_button.removeClass( 'has-next-sibling' );
+					}, 1000 );
+				}
+			} );
+
+			// Listen to the "change" event on the Customizer saved setting
+			api.state( 'saved' ).bind( function ( to, from ) {
+				// If the Customizer is saved, the changeset status is set to the default changeset status, and the selected changeset status is set to the default selected changeset status
+				if ( to && api.state( 'changesetStatus' )() === default_changeset_status && api.state( 'selectedChangesetStatus' )() === default_selected_changeset_status ) {
+					// Set the customizer changeset status
+					api.state( 'changesetStatus' ).set( 'note' );
+				}
+			} );
+
+			/*
+			 * Set the customizer changeset status
+			 *
+			 * Due to recent updates in the Customizer, we have to set the changeset status
+			 * to a custom Note status here. This is because, when we send Note widget updates
+			 * to the Customizer from the Customizer Previewer, WordPress activates the publish
+			 * settings section. This activation causes the active Note widget to lose focus due
+			 * to the main window receiving focus.
+			 */
+			api.state( 'changesetStatus' ).set( 'note' );
+
 			// Listen for the "note-widget-update" event from the Previewer
 			previewer.bind( 'note-widget-update', function( data ) {
-				// Allow jQuery selectors to be overwritten if passed
-				var selectors = ( data.hasOwnProperty( 'selectors' ) ) ? data.selectors : {};
-
-				_.defaults( selectors, {
-					widget_root: '.widget:first', // Widget Root
-					widget_content_container: '.widget-content:first', // Widget Content Container
-					widget_content: '.note-content', // Widget Content
-					widget_content_data: 'note' // Widget Content Data Slug
-				} );
-
-				var form_control = api.Widgets.getWidgetFormControlForWidget( data.widget.id ),
+				var selectors = _.defaults( ( data.hasOwnProperty( 'selectors' ) ) ? data.selectors : {}, {
+						widget_root: '.widget:first', // Widget Root
+						widget_content_container: '.widget-content:first', // Widget Content Container
+						widget_content: '.note-content', // Widget Content
+						widget_content_data: 'note' // Widget Content Data Slug
+					} ),
+					form_control = api.Widgets.getWidgetFormControlForWidget( data.widget.id ),
 					$widget_root = form_control.container.find( selectors.widget_root ),
 					$widget_content_container = $widget_root.find( selectors.widget_content_container ),
 					$widget_content = $widget_content_container.find( selectors.widget_content ),
 					widget_content_data = $widget_content.data( selectors.widget_content_data ), // We need to store data instead of checking the textarea value due to the way that $.text() and $.val() function in jQuery
 					saved;
-
 
 				// Store the data on this widget
 				$widget_root.data( selectors.widget_content_data, data );
@@ -107,6 +196,12 @@ var note = note || {};
 				// Compare the content to make sure it's actually changed
 				// TODO: Might need to account for "processing" API state here?
 				if ( data.widget.content !== widget_content_data.content ) {
+					// Set the Note Widget update flag
+					self.is_note_widget_update = true;
+
+					// Set the Note Widget update data
+					self.note_widget_update_data = data;
+
 					// Set the content value
 					$widget_content.val( data.widget.content );
 
@@ -114,6 +209,9 @@ var note = note || {};
 					// Update the API saved state (content has been updated, API data is not saved)
 					api.state( 'saved' ).set( false );
 					api.state.trigger( 'change', api.state.create( 'saved' ) ); // trigger the saved flag
+
+					// Adjust the save button CSS classes
+					self.$customize_save_button.removeClass( 'note-has-next-sibling' ).addClass( 'has-next-sibling' );
 
 					// Unbind the preview refresh before saving
 					form_control.setting.unbind( form_control.setting.preview );
@@ -138,6 +236,9 @@ var note = note || {};
 							}
 						}
 					} );
+
+					// Increase the total Note Widget update count
+					self.total_update_count++;
 				}
 
 				// Increase widget update count
@@ -148,6 +249,12 @@ var note = note || {};
 
 				// Store this data on the widget content element
 				$widget_content.data( selectors.widget_content_data, widget_content_data );
+
+				// Reset the Note Widget update flag
+				self.is_note_widget_update = false;
+
+				// Reset the Note Widget update data
+				self.note_widget_update_data = {};
 			} );
 
 			// Listen for the "note-widget-focus" event from the Previewer

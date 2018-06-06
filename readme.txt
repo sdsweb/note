@@ -4,7 +4,7 @@ Donate link:
 Tags: note, widget, customizer, live edit, wysiwyg, text, text widget, plugin, sidebar
 Requires at least: 4.3
 Tested up to: 4.9.6
-Stable tag: 1.4.6
+Stable tag: 1.4.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,12 @@ See the video in our [Description](https://wordpress.org/plugins/note/) for a li
 
 
 == Changelog ==
+
+= 1.4.7 // June 06 2018 =
+* Fixed a bug where Note Widgets would lose focus while typing if the Customizer was not saved prior to editing
+* Adjusted CSS for Note TinyMCE insert media panel button (button now appears in the center of the toolbar)
+* Removed extra margin/padding CSS styles on Note Widget editors
+* Fixed a bug where non-standard Note Widget editors were not focused when the "Edit Content" button was clicked during a Customizer session
 
 = 1.4.6 // June 01 2018 =
 * Transitioned to the "inline" TinyMCE theme (TinyMCE version 4.7 moved most of the TinyMCE UI logic into the theme instead of TinyMCE core)
