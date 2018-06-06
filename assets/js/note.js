@@ -40,6 +40,7 @@
 		$note_widgets: false,
 		$document: false,
         $body: false,
+		total_note_widget_update_count: 0,
 		transition_duration: 400, // CSS transition is 400ms
 		// Initialization
 		init: function () {
@@ -94,11 +95,10 @@
 
 				// Listen for the "note-widget-edit" event from the Customizer
 				self.preview.bind( 'note-widget-edit', function( data ) {
-					// Find the correct editor
 					var editor = _.find( self.editors, function( editor ) {
-						// TODO: Check hasOwnProperty()
-						return editor.note.widget_data.widget.id === data.widget.id;
-					} ),
+							// TODO: Check hasOwnProperty()
+							return editor.note.widget_data.widget.id === data.widget.id;
+						} ),
 						body = ( editor ) ? editor.getBody() : false,
 						$body = ( body ) ? $( body ) : false,
 						$note_wrapper = ( body ) ? $body.parents( '.note-wrapper' ) : false,
@@ -111,7 +111,7 @@
 						window_bottom;
 
 					// Note Template Widgets (Note Widgets that have a template selected; possibly rows/columns)
-					if ( editor && $note_wrapper.length && $note_wrapper.hasClass( 'note-template-wrapper' ) ) {
+					if ( ! editor && $note_wrapper.length && $note_wrapper.hasClass( 'note-template-wrapper' ) ) {
 						// Loop through editors
 						$note_wrapper.find( '.editor' ).each( function() {
 							var $this = $( this ),
@@ -123,6 +123,13 @@
 
 							// If we have an editor
 							if ( the_editor ) {
+								// Focus the editor first
+								the_editor.focus();
+
+								// Move cursor to end of existing content (in the last child element)
+								the_editor.selection.select( editor.getBody().lastChild, true );
+								the_editor.selection.collapse( false );
+
 								// Trigger our custom focus event
 								the_editor.fire( 'note-editor-focus', data );
 							}
@@ -221,7 +228,7 @@
 							 *
 							 * Note: This is essentially the only method that we could use,
 							 * short of creating our own TinyMCE 4 theme (which there is little to
-							 * no documentation for), to remove the "inline" TinyMCE theme image toolbar.
+							 * no documentation for), to remove the "inlite" TinyMCE theme image toolbar.
 							 *
 							 * As of 06/01/18, TinyMCE does not currently provide us with a way
 							 * to grab a reference of panels or toolbars which belong to an editor.
@@ -310,8 +317,6 @@
 								}
 							} );
 						} );
-
-
 
 						// Editor initialization
 						editor.on( 'init', function() {

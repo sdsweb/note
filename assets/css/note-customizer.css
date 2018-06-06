@@ -1,0 +1,11 @@
+/**
+ * Note Customizer
+ */
+
+#customize-save-button-wrapper .save.note-has-next-sibling {
+	border-radius: 3px !important;
+}
+
+#customize-save-button-wrapper .save.note-has-next-sibling + #publish-settings {
+	display: none !important;
+}

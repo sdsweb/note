@@ -136,39 +136,6 @@ div.mce-insert.open .dashicons {
 }
 
 
-
-div.mce-media-insert-panel .mce-panel {
-	background: transparent;
-	border: none;
-}
-
-div.mce-media-insert-panel .mce-ico {
-	width: 100px;
-	height: 100px;
-	font-size: 60px;
-	line-height: 100px;
-}
-
-div.mce-media-insert-panel .mce-btn {
-	height: 100px;
-	line-height: 64px;
-	margin: -54px 0 0 -51px;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-}
-
-div.mce-media-insert-panel .mce-btn button i {
-	line-height: 100px;
-}
-
-
-div.mce-media-insert-panel {
-	margin: 0;
-	background: transparent;
-	border: none;
-}
-
 .mce-tinymce-inline {
 	padding: 1px;
 }
@@ -179,11 +146,6 @@ div.mce-tinymce-inline.mce-inline-toolbar-active {
 		left 0.1s ease-out,
 		opacity 0.1s ease-in-out;
 	opacity: 1;
-}
-
-div.mce-media-insert-panel:before,
-div.mce-media-insert-panel:after {
-	display: none;
 }
 
 .mce-toolbar .mce-btn-group .mce-btn.mce-active:hover i.mce-ico {
@@ -713,28 +675,6 @@ div.mce-media-insert-panel:after {
 	display: none;
 }
 
-.note-media-placeholder .note-placeholder,
-.note-media-placeholder div.mce-media-insert-panel,
-.note-editor-media div.mce-media-insert-panel,
-div.mce-note-insert-panel.mce-note-media-insert-panel {
-	min-height: 400px;
-	background: #f6f6f6;
-	border: 2px dashed #ddd;
-
-	position: relative;
-
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-}
-
-div.mce-note-insert-panel.mce-note-media-insert-panel {
-	width: 100%;
-	position: absolute;
-	top: 0;
-	left: 0;
-}
-
 /**
  * jQuery Autocomplete
  */
@@ -762,7 +702,8 @@ div.mce-note-insert-panel.mce-note-media-insert-panel {
 /**
  * Note TinyMCE
  */
-.note-widget.note-tinymce .note-wrapper:not(.note-template-wrapper),
+/* TODO: Adjust/Remove accordingly */
+/*.note-widget.note-tinymce .note-wrapper:not(.note-template-wrapper),
 .note-widget.note-tinymce .note-wrapper .note-col,
 .note-widget.note-tinymce .note-wrapper.note-template-wrapper .note-content {
 	margin: -1.5rem;
@@ -773,17 +714,19 @@ div.mce-note-insert-panel.mce-note-media-insert-panel {
 .note-widget.note-tinymce .note-wrapper.note-template-wrapper,
 .note-widget.note-tinymce .note-wrapper.note-template-wrapper .note-content {
 	padding: 1.5rem;
-}
+}*/
 
-.note-widget.note-tinymce .widget-content.mce-content-body {
+.note-widget.note-tinymce .widget-content.mce-content-body,
+.note-widget.note-tinymce .note-content.mce-content-body {
 	line-height: inherit;
 }
 
 div.mce-panel.mce-tinymce-inline,
 div.mce-panel.note-toolbar {
+	margin-bottom: 1rem;
 	padding: 3px;
 	background: #f5f5f5;
-	box-shadow: 0 1px 1px rgba( 0, 0, 0, 0.04 );
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
 	border: 1px solid #dedede;
 	border-radius: 3px;
 	-moz-user-select: none;
@@ -795,7 +738,8 @@ div.mce-panel.note-toolbar {
 	box-sizing: border-box;
 }
 
-div.mce-panel.mce-tinymce-inline:not(.mce-arrow-right):not(.mce-arrow-center):not(.mce-arrow-left):not(.mce-tooltip-arrow-n):not(.mce-tooltip-arrow-s):not(.mce-tooltip-arrow-e):not(.mce-tooltip-arrow-w),
+/* TODO: Adjust/Remove accordingly */
+/*div.mce-panel.mce-tinymce-inline:not(.mce-arrow-right):not(.mce-arrow-center):not(.mce-arrow-left):not(.mce-tooltip-arrow-n):not(.mce-tooltip-arrow-s):not(.mce-tooltip-arrow-e):not(.mce-tooltip-arrow-w),
 div.mce-panel.note-toolbar:not(.mce-arrow-right):not(.mce-arrow-center):not(.mce-arrow-left):not(.mce-tooltip-arrow-n):not(.mce-tooltip-arrow-s):not(.mce-tooltip-arrow-e):not(.mce-tooltip-arrow-w) {
 	margin-top: 1.5rem;
 }
@@ -808,10 +752,10 @@ div.mce-panel.note-toolbar.mce-arrow-up {
 div.mce-panel.mce-tinymce-inline.mce-arrow-down,
 div.mce-panel.note-toolbar.mce-arrow-down {
 	margin-top: -12px !important;
-}
+}*/
 
 div.mce-panel.mce-tinymce-inline .mce-toolbar .mce-ico,
-div.mce-panel.note-toolbar .mce-toolbar .mce-ico{
+div.mce-panel.note-toolbar .mce-toolbar .mce-ico {
 	color: #555d66;
 }
 
@@ -841,10 +785,10 @@ div.mce-panel.note-toolbar .mce-btn.mce-active:hover i {
  * Note Insert Panel
  */
 div.mce-panel.mce-note-insert-panel {
-	margin-bottom: -1.5rem;
+	margin-bottom: 1rem;
 	padding: 3px;
 	color: black;
-	background: rgba(245, 245, 245, 0.85);
+	background: rgba(245, 245, 245, 0.90);
 	border: 1px solid #dedede;
 	border-radius: 3px;
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
@@ -964,4 +908,90 @@ div.mce-note-insert-panel .mce-btn button {
 
 div.mce-note-insert-panel .mce-btn button i {
 	line-height: 20px;
+}
+
+
+/**
+ * Note Media Insert Panel
+ */
+div.mce-note-insert-panel.mce-note-media-insert-panel {
+	width: 100%;
+	min-height: 400px;
+	margin: auto;
+	background: #f6f6f6;
+	border: 2px dashed #ddd;
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;
+	-moz-flex-flow: row wrap;
+	-ms-flex-flow: row wrap;
+	-webkit-flex-flow: row wrap;
+	flex-flow: row wrap;
+	-moz-justify-content: space-around;
+	-ms-justify-content: space-around;
+	-webkit-justify-content: space-around;
+	justify-content: space-around;
+	-moz-align-content: flex-start;
+	-ms-align-content: flex-start;
+	-webkit-align-content: flex-start;
+	align-content: flex-start;
+	-ms-flex-pack: start;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	position: relative;
+}
+
+div.mce-note-insert-panel.mce-note-media-insert-panel .mce-container-body {
+	width: 100%;
+}
+
+div.mce-note-insert-panel.mce-note-media-insert-panel .mce-container-body .mce-toolbar-grp,
+div.mce-note-insert-panel.mce-note-media-insert-panel .mce-container-body .mce-container,
+div.mce-note-insert-panel.mce-note-media-insert-panel .mce-container-body .mce-container > div,
+div.mce-note-insert-panel.mce-note-media-insert-panel .mce-container-body .mce-container-body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+div.mce-note-insert-panel.mce-note-media-insert-panel:before,
+div.mce-note-insert-panel.mce-note-media-insert-panel:after {
+	display: none;
+}
+
+div.mce-note-insert-panel.mce-note-media-insert-panel .mce-panel {
+	background: transparent;
+	border: none;
+}
+
+div.mce-note-insert-panel.mce-note-media-insert-panel .mce-btn {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+div.mce-note-insert-panel.mce-note-media-insert-panel .mce-btn button {
+	height: 100px;
+	margin: -54px 0 0 -51px;
+	line-height: 64px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+}
+
+div.mce-note-insert-panel.mce-note-media-insert-panel .mce-btn button i {
+	line-height: 100px;
+}
+
+div.mce-note-insert-panel.mce-note-media-insert-panel .mce-ico {
+	width: 100px;
+	height: 100px;
+	font-size: 60px;
+	line-height: 100px;
 }

@@ -4,7 +4,7 @@
  *
  * @class Note_Customizer
  * @author Slocum Studio
- * @version 1.4.6
+ * @version 1.4.7
  * @since 1.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		/**
 		 * @var string
 		 */
-		public $version = '1.4.6';
+		public $version = '1.4.7';
 
 		/**
 		 * @var array
@@ -860,7 +860,10 @@ if ( ! class_exists( 'Note_Customizer' ) ) {
 		 * This function enqueues scripts within the Customizer.
 		 */
 		public function customize_controls_enqueue_scripts() {
-			// Note Customizer
+			// Note Customizer Stylesheet
+			wp_enqueue_style( 'note-customizer', Note::plugin_url() . '/assets/css/note-customizer.css', array( 'customize-controls' ), Note::$version );
+
+			// Note Customizer Script
 			wp_enqueue_script( 'note-customizer', Note::plugin_url() . '/assets/js/note-customizer.js', array( 'customize-widgets' ), Note::$version, true );
 
 			// Setup Note Widget localize data
